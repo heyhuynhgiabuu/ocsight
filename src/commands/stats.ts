@@ -20,7 +20,7 @@ export const statsCommand = new Command("stats")
     const spinner = ora("Loading OpenCode data...").start();
 
     try {
-      const data = await loadAllData();
+      const data = await loadAllData({ limit: 3000 }); // Limit for better performance
       spinner.text = "Calculating statistics...";
 
       const filteredSessions = filterSessions(data, options);

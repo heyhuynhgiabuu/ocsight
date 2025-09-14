@@ -12,13 +12,13 @@ bun install
 bun run build
 
 # Analyze OpenCode usage (auto-detects OpenCode directory)
-node dist/index.js analyze
+ocsight analyze
 
 # Or use npm start for dev mode
 bun run dev analyze
 
 # Test with real data
-node dist/index.js analyze --days 7
+ocsight analyze --days 7
 ```
 
 ## Features
@@ -40,45 +40,45 @@ node dist/index.js analyze --days 7
 
 ```bash
 # Analyze OpenCode usage (auto-detects ~/.local/share/opencode)
-node dist/index.js analyze
+ocsight analyze
 
 # Filter by time period
-node dist/index.js analyze --days 7
-node dist/index.js analyze --days 30
+ocsight analyze --days 7
+ocsight analyze --days 30
 
 # Filter by date range
-node dist/index.js analyze --start 2025-09-01 --end 2025-09-14
+ocsight analyze --start 2025-09-01 --end 2025-09-14
 
 # Filter by project or provider
-node dist/index.js analyze --project "my-project"
-node dist/index.js analyze --provider anthropic
+ocsight analyze --project "my-project"
+ocsight analyze --provider anthropic
 ```
 
 ### Detailed Statistics
 
 ```bash
 # Show detailed statistics
-node dist/index.js stats
+ocsight stats
 
 # Filter statistics by time period
-node dist/index.js stats --days 7
-node dist/index.js stats --start 2025-09-01
+ocsight stats --days 7
+ocsight stats --start 2025-09-01
 ```
 
 ### Export Data
 
 ```bash
 # Export as CSV (default)
-node dist/index.js export --days 7
+ocsight export --days 7
 
 # Export as JSON
-node dist/index.js export --format json --days 7
+ocsight export --format json --days 7
 
 # Specify output file
-node dist/index.js export --format csv --output my-usage.csv
+ocsight export --format csv --output my-usage.csv
 
 # Export all data
-node dist/index.js export --format json --output complete-data.json
+ocsight export --format json --output complete-data.json
 ```
 
 ## Installation
@@ -168,7 +168,7 @@ The CLI reads from OpenCode's actual storage structure:
 ### Basic Analysis
 
 ```bash
-$ node dist/index.js analyze --days 7
+$ ocsight analyze --days 7
 
 📊 OpenCode Ecosystem Analysis
 
@@ -190,7 +190,7 @@ Recent Activity (Last 7 Days):
 ### Export Data
 
 ```bash
-$ node dist/index.js export --format csv --days 7
+$ ocsight export --format csv --days 7
 ✔ Data exported to opencode-export-2025-09-14.csv
 
 $ head opencode-export-2025-09-14.csv

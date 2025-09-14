@@ -59,7 +59,7 @@ Model Context Protocol servers provide:
 - Tool integration points
 - Custom data processing
 - Enterprise integrations
-- **Perfect platform for ocusage integration**
+- **Perfect platform for ocsight integration**
 
 ## What ocsight Actually Does (Working)
 
@@ -524,10 +524,10 @@ export function computeUsageSummary({ days, provider }) {
 
 #### ✅ Core MCP Resources (Week 1)
 
-1. **`ocusage://metrics/summary`** - Global usage statistics
-2. **`ocusage://sessions/{id}`** - Individual session details
-3. **`ocusage://providers`** - Provider breakdown
-4. **`ocusage://providers/{provider}`** - Provider-specific stats
+1. **`ocsight://metrics/summary`** - Global usage statistics
+2. **`ocsight://sessions/{id}`** - Individual session details
+3. **`ocsight://providers`** - Provider breakdown
+4. **`ocsight://providers/{provider}`** - Provider-specific stats
 
 #### ✅ Core MCP Tools (Week 1)
 
@@ -554,9 +554,9 @@ npx @modelcontextprotocol/inspector stdio npx tsx src/mcp/server.ts
 // OpenCode MCP configuration
 {
   "mcpServers": {
-    "ocusage": {
-      "command": "npx",
-      "args": ["tsx", "/path/to/ocusage/src/mcp/server.ts"]
+    "ocsight": {
+      "command": "bun",
+      "args": ["run", "/path/to/ocsight/src/mcp/server.ts"]
     }
   }
 }

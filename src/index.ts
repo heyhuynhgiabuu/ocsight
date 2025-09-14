@@ -18,5 +18,10 @@ program.addCommand(analyzeCommand);
 program.addCommand(statsCommand);
 program.addCommand(exportCommand);
 
-// Parse command line arguments
-program.parse();
+// Parse command line arguments only when not in test environment
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== "test") {
+  program.parse();
+}
+
+// Export for testing
+export { program };

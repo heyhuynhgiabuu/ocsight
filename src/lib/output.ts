@@ -20,6 +20,108 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
     `  Total tokens: ${chalk.white(formatNumber(stats.totalTokens))}\n`,
   );
 
+  // Cost optimization insights
+  if (stats.costOptimization) {
+    const costOpt = stats.costOptimization;
+    lines.push(chalk.cyan("💰 Cost Optimization Insights:"));
+    lines.push(
+      `  Average cost per session: ${chalk.yellow(formatCostInDollars(costOpt.averageCostPerSession))}`,
+    );
+    lines.push(
+      `  Average tokens per session: ${chalk.white(formatNumber(Math.round(costOpt.averageTokensPerSession)))}`,
+    );
+    lines.push(
+      `  Most expensive provider: ${chalk.red(costOpt.mostExpensiveProvider || "N/A")}`,
+    );
+    lines.push(
+      `  Most expensive model: ${chalk.red(costOpt.mostExpensiveModel || "N/A")}`,
+    );
+
+    if (costOpt.expensiveSessions.length > 0) {
+      lines.push(
+        `  Top expensive sessions: ${costOpt.expensiveSessions.length} identified`,
+      );
+    }
+
+    if (costOpt.costSavingSuggestions.length > 0) {
+      lines.push(chalk.yellow("  💡 Cost saving suggestions:"));
+      costOpt.costSavingSuggestions.forEach((suggestion, index) => {
+        lines.push(`    ${index + 1}. ${suggestion}`);
+      });
+    }
+    lines.push("");
+  }
+
+  // Tool efficiency metrics
+  if (stats.toolEfficiency) {
+    const toolEff = stats.toolEfficiency;
+    lines.push(chalk.cyan("🔧 Tool Efficiency Metrics:"));
+
+    if (toolEff.mostUsedTools.length > 0) {
+      lines.push("  Most used tools:");
+      toolEff.mostUsedTools.slice(0, 5).forEach(({ name, count }) => {
+        const successRate = toolEff.toolSuccessRates[name] || 0;
+        const avgDuration = toolEff.averageToolDuration[name] || 0;
+        lines.push(
+          `    ${chalk.white(name)}: ${count} uses, ${(successRate * 100).toFixed(0)}% success, ${avgDuration}ms avg`,
+        );
+      });
+    }
+    lines.push("");
+  }
+
+  // Time patterns
+  if (stats.timePatterns) {
+    const timePat = stats.timePatterns;
+    lines.push(chalk.cyan("⏰ Usage Patterns:"));
+
+    if (timePat.peakHours.length > 0) {
+      lines.push("  Peak hours:");
+      timePat.peakHours.forEach(({ hour, count }) => {
+        lines.push(
+          `    ${hour.toString().padStart(2, "0")}:00 - ${count} sessions`,
+        );
+      });
+    }
+
+    if (timePat.peakDays.length > 0) {
+      lines.push("  Peak days:");
+      timePat.peakDays.forEach(({ day, count }) => {
+        lines.push(`    ${chalk.white(day)}: ${count} sessions`);
+      });
+    }
+    lines.push("");
+  }
+
+  // Project analysis
+  if (stats.projectAnalysis) {
+    const projectAnalysis = stats.projectAnalysis;
+    lines.push(chalk.cyan("📁 Project Analysis:"));
+
+    if (projectAnalysis.detectedProjects.length > 0) {
+      lines.push("  Detected projects:");
+      projectAnalysis.detectedProjects.slice(0, 5).forEach((project) => {
+        lines.push(
+          `    ${chalk.white(project.name)}: ${project.sessionCount} sessions, ${formatCostInDollars(project.totalCost)}`,
+        );
+      });
+    }
+
+    if (projectAnalysis.crossProjectComparison.mostActiveProject) {
+      lines.push("  Cross-project insights:");
+      lines.push(
+        `    Most active: ${chalk.white(projectAnalysis.crossProjectComparison.mostActiveProject)}`,
+      );
+      lines.push(
+        `    Most expensive: ${chalk.red(projectAnalysis.crossProjectComparison.mostExpensiveProject)}`,
+      );
+      lines.push(
+        `    Most tool-intensive: ${chalk.yellow(projectAnalysis.crossProjectComparison.mostToolIntensiveProject)}`,
+      );
+    }
+    lines.push("");
+  }
+
   // Provider breakdown
   lines.push(chalk.cyan("By Provider:"));
   Object.entries(stats.sessionsByProvider)

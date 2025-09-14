@@ -1,6 +1,6 @@
 {
   "name": "ocsight",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "OpenCode ecosystem observability platform - see everything happening in your OpenCode development",
   "main": "dist/index.js",
   "bin": {
@@ -11,7 +11,9 @@
     "dev": "bun run src/index.ts",
     "clean": "rm -rf dist",
     "start": "node dist/index.js",
-    "mcp": "bun run src/mcp/server.ts"
+    "mcp": "bun run src/mcp/server.ts",
+    "test": "NODE_ENV=test bun test",
+    "test:watch": "NODE_ENV=test bun test --watch"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",

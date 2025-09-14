@@ -20,7 +20,7 @@ export const analyzeCommand = new Command("analyze")
     const spinner = ora("Loading OpenCode data...").start();
 
     try {
-      const data = await loadAllData();
+      const data = await loadAllData({ limit: 3000 }); // Limit for better performance
       spinner.text = "Analyzing usage data...";
 
       const filteredSessions = filterSessions(data, options);
