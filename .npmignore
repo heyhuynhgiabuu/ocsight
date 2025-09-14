@@ -1,0 +1,30 @@
+# Source files
+src/
+test/
+*.ts
+
+# Development
+.serena/
+docs/
+AGENTS.md
+*.log
+
+# Build artifacts (keep dist/)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary
+*.tmp
+*.temp
+opencode-export-*.csv
+opencode-export-*.json
+opencode-export-*.markdown

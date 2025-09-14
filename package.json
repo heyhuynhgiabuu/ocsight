@@ -16,7 +16,12 @@
     "test:watch": "NODE_ENV=test bun test --watch",
     "export:markdown": "bun run src/index.ts export --format markdown",
     "export:csv": "bun run src/index.ts export --format csv",
-    "export:json": "bun run src/index.ts export --format json"
+    "export:json": "bun run src/index.ts export --format json",
+    "prepublishOnly": "bun run clean && bun run build && bun run test",
+    "postpublish": "git push --follow-tags",
+    "release:patch": "npm version patch && npm publish",
+    "release:minor": "npm version minor && npm publish",
+    "release:major": "npm version major && npm publish"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",

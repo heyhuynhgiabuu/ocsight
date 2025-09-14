@@ -118,4 +118,7 @@ Thumbs.db
 
 # Logs
 logs
-*.logdocs/
+*.log 
+
+# Documentation
+docs/

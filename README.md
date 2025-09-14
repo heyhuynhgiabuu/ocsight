@@ -91,7 +91,7 @@ npm install -g .
 
 ## MCP Server
 
-Start the MCP server for real-time analytics:
+Start MCP server for real-time analytics:
 
 ```bash
 # Start server
@@ -107,6 +107,21 @@ bun run src/mcp/server.ts
 - `get_tool_usage`: Tool usage statistics
 - `get_daily_stats`: Daily activity metrics
 - `analyze_project`: Project-specific analysis
+
+### Integration
+
+Add to OpenCode configuration:
+
+```json
+{
+  "mcpServers": {
+    "ocsight": {
+      "command": "npx",
+      "args": ["ocsight", "mcp"]
+    }
+  }
+}
+```
 
 ## Examples
 
