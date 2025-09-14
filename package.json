@@ -1,7 +1,7 @@
 {
   "name": "ocsight",
   "version": "0.1.0",
-  "description": "OpenCode ecosystem observability platform - see everything happening in your OpenCode development",
+  "description": "OpenCode observability platform with real-time analytics, MCP server, caching, streaming, and multi-format exports",
   "main": "dist/index.js",
   "bin": {
     "ocsight": "dist/index.js"
@@ -13,7 +13,10 @@
     "start": "node dist/index.js",
     "mcp": "bun run src/mcp/server.ts",
     "test": "NODE_ENV=test bun test",
-    "test:watch": "NODE_ENV=test bun test --watch"
+    "test:watch": "NODE_ENV=test bun test --watch",
+    "export:markdown": "bun run src/index.ts export --format markdown",
+    "export:csv": "bun run src/index.ts export --format csv",
+    "export:json": "bun run src/index.ts export --format json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",

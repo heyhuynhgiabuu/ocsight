@@ -1,139 +1,177 @@
 # ocsight
 
-OpenCode Ecosystem Observability Platform - See everything happening in your OpenCode development.
+OpenCode observability platform. See everything happening in your OpenCode development.
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-bun install
+# Install and build
+bun install && bun run build
 
-# Build CLI
-bun run build
-
-# Analyze OpenCode usage (auto-detects OpenCode directory)
+# Analyze usage
 ocsight analyze
 
-# Or use npm start for dev mode
-bun run dev analyze
-
-# Test with real data
-ocsight analyze --days 7
+# Export report
+ocsight export --format markdown --days 7
 ```
 
-## Features
+## What It Does
 
-- **Observability Platform**: Complete visibility into OpenCode ecosystem
-- **Real OpenCode Data**: Reads actual session and message storage
-- **MCP Server**: Real-time monitoring via Model Context Protocol
-- **Advanced Analytics**: Session patterns, provider insights, cost tracking
-- **Beautiful Output**: Colorful terminal with clear metrics
-- **High Performance**: Processes 17K+ messages in <2 seconds
-- **Multiple Export Formats**: JSON, CSV for enterprise integration
-- **Flexible Filtering**: By time, provider, model
-- **Auto-Detection**: Finds OpenCode data automatically
-- **Enterprise Ready**: Scalable architecture for teams
+- **Real Data**: Reads actual OpenCode session and message storage
+- **Performance**: Processes 17,400+ messages in <2 seconds
+- **Caching**: File-based caching with SHA256 validation
+- **Streaming**: Memory-efficient processing for large datasets
+- **Exports**: JSON, CSV, Markdown reports
+- **MCP Server**: Real-time analytics via Model Context Protocol
+- **Filtering**: By time, provider, model, project
 
 ## Commands
 
-### Basic Usage
+### Analysis
 
 ```bash
-# Analyze OpenCode usage (auto-detects ~/.local/share/opencode)
+# Basic analysis
 ocsight analyze
 
-# Filter by time period
+# Time-based filtering
 ocsight analyze --days 7
-ocsight analyze --days 30
-
-# Filter by date range
 ocsight analyze --start 2025-09-01 --end 2025-09-14
 
-# Filter by project or provider
-ocsight analyze --project "my-project"
+# Provider/project filtering
 ocsight analyze --provider anthropic
+ocsight analyze --project "my-project"
 ```
 
-### Detailed Statistics
+### Statistics
 
 ```bash
-# Show detailed statistics
+# Detailed stats
 ocsight stats
 
-# Filter statistics by time period
-ocsight stats --days 7
-ocsight stats --start 2025-09-01
+# Time-filtered stats
+ocsight stats --days 30
 ```
 
-### Export Data
+### Export
 
 ```bash
-# Export as CSV (default)
+# CSV export (default)
 ocsight export --days 7
 
-# Export as JSON
-ocsight export --format json --days 7
+# JSON export
+ocsight export --format json --output data.json
 
-# Specify output file
-ocsight export --format csv --output my-usage.csv
-
-# Export all data
-ocsight export --format json --output complete-data.json
+# Markdown reports
+ocsight export --format markdown --output report.md
 ```
 
 ## Installation
 
-### Global Installation
+### Prerequisites
+
+- Node.js >=18.0.0
+- Bun package manager
+- OpenCode installed with data in `~/.local/share/opencode/storage/`
+
+### Setup
 
 ```bash
-# Install dependencies and build
+# Clone and install
+git clone <repository>
+cd ocsight
 bun install
+
+# Build and run
 bun run build
-
-# Install globally
-npm install -g .
-
-# Then use directly
 ocsight analyze --days 7
+
+# Or install globally
+npm install -g .
 ```
 
-### Local Development
+## MCP Server
+
+Start the MCP server for real-time analytics:
 
 ```bash
-# Install dependencies
-bun install
+# Start server
+ocsight mcp
 
-# Run in development mode
-bun run dev analyze --days 7
-
-# Build for production
-bun run build
-
-# Run production build
-node dist/index.js analyze
+# Or direct execution
+bun run src/mcp/server.ts
 ```
 
-## OpenCode Data Structure
+### MCP Tools
 
-The CLI reads from OpenCode's actual storage structure:
+- `list_providers`: List all AI providers
+- `get_tool_usage`: Tool usage statistics
+- `get_daily_stats`: Daily activity metrics
+- `analyze_project`: Project-specific analysis
 
-**Location:** `~/.local/share/opencode/storage/`
+## Examples
 
-### Storage Structure
+### Basic Analysis Output
+
+```bash
+$ ocsight analyze --days 7
+
+📊 OpenCode Analysis
+
+Overview:
+  Sessions: 5
+  Messages: 1,000
+  Tools used: 0
+  Total cost: $0.00
+  Total tokens: 0
+
+By Provider:
+  unknown: 5 sessions, $0.00, 0 tokens
+
+Recent Activity:
+  2025-09-14: 1 sessions, $0.00
+  2025-09-13: 4 sessions, $0.00
+```
+
+### Markdown Export
+
+```bash
+$ ocsight export --format markdown --days 7
+✔ Data exported to opencode-export-2025-09-14.md
+
+$ cat opencode-export-2025-09-14.md
+# OpenCode Usage Report
+
+**Generated:** 2025-09-14 | **Period:** 7 days
+**Sessions:** 5 | **Messages:** 1,000 | **Tools:** 0
+
+## Summary
+- Total Cost: $0.00
+- Total Tokens: 0
+- Active Days: 2
+
+## Provider Statistics
+| Provider | Sessions | Messages | Cost | Tokens |
+|----------|----------|----------|------|--------|
+| unknown | 5 | 1,000 | $0.00 | 0 |
+
+## Daily Activity
+| Date | Sessions | Messages | Cost |
+|------|----------|----------|------|
+| 2025-09-14 | 1 | 200 | $0.00 |
+| 2025-09-13 | 4 | 800 | $0.00 |
+```
+
+## Data Structure
+
+OpenCode stores data in `~/.local/share/opencode/storage/`:
 
 ```
-~/.local/share/opencode/storage/
-├── session/
-│   └── <project-hash>/
-│       ├── ses_abc123.json  # Session metadata
-│       └── ses_def456.json
-└── message/
-    └── <session-id>/
-        ├── msg_xyz789.json  # Individual messages
-        └── msg_abc123.json
+storage/
+├── session/<project-hash>/ses_*.json    # Session metadata
+└── message/<session-id>/msg_*.json      # Individual messages
 ```
 
-### Session Metadata Format
+### Session Format
 
 ```json
 {
@@ -163,69 +201,100 @@ The CLI reads from OpenCode's actual storage structure:
 }
 ```
 
-## Examples
+## Architecture
 
-### Basic Analysis
-
-```bash
-$ ocsight analyze --days 7
-
-📊 OpenCode Ecosystem Analysis
-
-Overview:
-  Sessions: 5
-  Messages: 1,000
-  Tools used: 0
-  Total cost: $0.00
-  Total tokens: 0
-
-By Provider:
-  unknown: 5 sessions, $0.00, 0 tokens
-
-Recent Activity (Last 7 Days):
-  2025-09-14: 1 sessions, $0.00
-  2025-09-13: 4 sessions, $0.00
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   CLI Commands  │    │   MCP Server    │    │  Output Formats │
+│  (analyze, etc) │    │  (real-time)    │    │ (JSON,CSV,MD)   │
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          └──────────┬───────────┼──────────┬───────────┘
+                     │           │          │
+           ┌─────────▼─────────┐ │          │
+           │  Data Processing  │ │          │
+           │  (Core Engine)    │ │          │
+           └─────────┬─────────┘ │          │
+                     │           │          │
+        ┌────────────▼───────────┴──────────▼─────────────────┐
+        │              Data Layer                             │
+        │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+        │  │   Cache     │  │   Storage   │  │   Stream    │  │
+        │  │ (SHA256)    │  │ (OpenCode)  │  │ (Async)     │  │
+        │  └─────────────┘  └─────────────┘  └─────────────┘  │
+        └─────────────────────────────────────────────────────┘
+                              │
+                    ┌─────────▼─────────┐
+                    │  OpenCode Data    │
+                    │  ~/.local/share/  │
+                    │    opencode/      │
+                    └───────────────────┘
 ```
 
-### Export Data
+### Components
 
-```bash
-$ ocsight export --format csv --days 7
-✔ Data exported to opencode-export-2025-09-14.csv
+**CLI Interface**: Entry point for all commands (analyze, stats, export)
 
-$ head opencode-export-2025-09-14.csv
-Date,Session ID,Session Title,Provider,Model,Tokens Used,Cost (Cents),Tools Used,Duration (Minutes)
-2025-09-14,ses_6b75f1ac3ffeKDim6pVrdeRX9m,Continuing properly,unknown,unknown,0,0,,57
-2025-09-13,ses_6bb14678bffeGmfLLCBqIQICMZ,Migrating API endpoints,unknown,unknown,0,0,,1024
-```
+**MCP Server**: Real-time analytics server with tools:
+
+- `list_providers`, `get_tool_usage`, `get_daily_stats`, `analyze_project`
+
+**Data Processing Engine**: Core logic that:
+
+- Discovers sessions and messages
+- Applies caching and streaming
+- Calculates statistics
+- Filters by time, provider, project
+
+**Data Layer**:
+
+- **Cache**: File-based caching with SHA256 validation
+- **Storage**: Reads from OpenCode's `~/.local/share/opencode/storage/`
+- **Stream**: Async generators for memory-efficient processing
+
+**Output Formats**: JSON, CSV, Markdown reports
+
+### Data Flow
+
+1. **Input**: CLI command or MCP tool request
+2. **Discovery**: Scan OpenCode storage for sessions/messages
+3. **Cache Check**: Validate cached data, skip unchanged files
+4. **Processing**: Stream data through analysis pipeline
+5. **Analysis**: Calculate statistics, apply filters
+6. **Output**: Generate terminal display or export file
 
 ## Development
 
+```bash
+# Development
+bun run dev analyze --days 7
+
+# Build
+bun run build
+
+# Test
+bun test
+
+# MCP server
+bun run src/mcp/server.ts
+```
+
+### Tech Stack
+
 - **Runtime**: Bun + TypeScript
-- **CLI Framework**: Commander.js
-- **MCP Server**: Model Context Protocol for real-time monitoring
-- **Styling**: Chalk for colors + ora spinners
-- **Export**: csv-writer for CSV generation
-- **Total Lines**: ~800 (efficient, scalable architecture)
-
-## Architecture
-
-The CLI reconstructs OpenCode sessions by:
-
-1. **Session Discovery**: Finds session metadata files in `storage/session/`
-2. **Message Loading**: Loads corresponding messages from `storage/message/`
-3. **Data Reconstruction**: Combines metadata + messages into complete sessions
-4. **Analysis**: Calculates statistics and applies filters
-5. **Output**: Formats data for terminal display or export
+- **CLI**: Commander.js
+- **MCP**: Model Context Protocol SDK
+- **Styling**: Chalk + ora
+- **Export**: csv-writer + custom templates
+- **Validation**: Zod
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Test with real OpenCode data
-5. Submit a pull request
+3. Test with real OpenCode data
+4. Submit a pull request
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT
