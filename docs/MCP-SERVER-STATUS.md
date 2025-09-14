@@ -1,4 +1,4 @@
-# ocusage MCP Server - Implementation Complete
+# ocsight MCP Server - Implementation Complete
 
 ## 🚀 **STATUS: FULLY WORKING MCP SERVER**
 
@@ -12,19 +12,19 @@
 
 ## 📋 **Working MCP Resources**
 
-### 1. **`ocusage://metrics/summary`**
+### 1. **`ocsight://metrics/summary`**
 
 - **Global usage statistics** (totals, providers, costs, tokens)
 - **Real data** from actual OpenCode storage
 - **JSON format** for easy integration
 
-### 2. **`ocusage://sessions/{id}`**
+### 2. **`ocsight://sessions/{id}`**
 
 - **Individual session details** with full context
 - **Parameter completion** for session IDs
 - **Message-level data** when available
 
-### 3. **`ocusage://providers`**
+### 3. **`ocsight://providers`**
 
 - **Provider breakdown** with usage statistics
 - **Cost and token tracking** by provider
@@ -57,7 +57,7 @@
 ```typescript
 // ✅ WORKING: MCP Server with stdio transport
 const server = new McpServer({
-  name: "ocusage-mcp",
+  name: "ocsight-mcp",
   version: "0.1.0",
 });
 
@@ -101,9 +101,9 @@ $ npx @modelcontextprotocol/inspector stdio "bun run src/mcp/server.ts"
 ```json
 {
   "mcpServers": {
-    "ocusage": {
+    "ocsight": {
       "command": "bun",
-      "args": ["run", "/path/to/ocusage/src/mcp/server.ts"]
+      "args": ["run", "/path/to/ocsight/src/mcp/server.ts"]
     }
   }
 }
@@ -156,7 +156,7 @@ $ npx @modelcontextprotocol/inspector stdio "bun run src/mcp/server.ts"
 
 ## 🏆 **Strategic Victory**
 
-**We've successfully transformed ocusage from:**
+**We've successfully transformed ocsight from:**
 
 - ❌ _Simple CLI tool_ analyzing OpenCode usage
 - ✅ **Complete observability platform** via MCP protocol

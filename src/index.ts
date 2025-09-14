@@ -7,8 +7,10 @@ import { exportCommand } from "./commands/export.js";
 const program = new Command();
 
 program
-  .name("ocusage")
-  .description("OpenCode usage analyzer - track your AI coding sessions")
+  .name("ocsight")
+  .description(
+    "OpenCode ecosystem observability platform - see everything happening in your OpenCode development",
+  )
   .version("1.0.0");
 
 // Add all commands

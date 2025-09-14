@@ -1,10 +1,10 @@
 {
-  "name": "ocusage",
+  "name": "ocsight",
   "version": "1.0.0",
-  "description": "Simple CLI tool to analyze OpenCode usage from local JSON files",
+  "description": "OpenCode ecosystem observability platform - see everything happening in your OpenCode development",
   "main": "dist/index.js",
   "bin": {
-    "ocusage": "dist/index.js"
+    "ocsight": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

@@ -1,15 +1,15 @@
-# ocusage - OpenCode Ecosystem Observability Platform
+# ocsight - OpenCode Ecosystem Observability Platform
 
 ## Executive Summary
 
-**STRATEGIC PIVOT COMPLETE:** ocusage is NO LONGER a usage tracking CLI tool. We are building the **first and only observability platform** for OpenCode's rich ecosystem - plugins, agents, MCP servers, SDK integrations, and enterprise deployments.
+**STRATEGIC PIVOT COMPLETE:** ocsight is NO LONGER a usage tracking CLI tool. We are building the **first and only observability platform** for OpenCode's rich ecosystem - plugins, agents, MCP servers, SDK integrations, and enterprise deployments.
 
 **Why this matters:** ccusage owns Claude Code usage analytics (8k stars, viral). We own something ccusage can NEVER replicate: OpenCode's sophisticated ecosystem observability.
 
 ## Market Position: Why We Will Win
 
 **ccusage (Competitor):** Claude Code usage tracker, simple JSONL files, 8k stars, viral success
-**ocusage (Us):** OpenCode ecosystem observability platform - plugins, agents, real-time monitoring, enterprise features
+**ocsight (Us):** OpenCode ecosystem observability platform - plugins, agents, real-time monitoring, enterprise features
 
 **Strategic Advantage:** We target OpenCode's rich ecosystem that ccusage can NEVER access:
 
@@ -61,7 +61,7 @@ Model Context Protocol servers provide:
 - Enterprise integrations
 - **Perfect platform for ocusage integration**
 
-## What ocusage Actually Does (Working)
+## What ocsight Actually Does (Working)
 
 A CLI tool that:
 
@@ -170,16 +170,16 @@ Real structure discovered from `~/.local/share/opencode/storage/`:
 
 ```bash
 # Basic analysis (WORKING)
-ocusage analyze
-ocusage analyze --days 7
+ocsight analyze
+ocsight analyze --days 7
 
 # Detailed statistics (WORKING)
-ocusage stats
-ocusage stats --days 7
+ocsight stats
+ocsight stats --days 7
 
 # Export data (WORKING)
-ocusage export --format csv --output usage.csv
-ocusage export --format json --output usage.json
+ocsight export --format csv --output usage.csv
+ocsight export --format json --output usage.json
 ```
 
 ## Implementation Status (DONE)
@@ -200,7 +200,7 @@ ocusage export --format json --output usage.json
 ## Project Structure (ACTUAL)
 
 ```
-ocusage/
+ocsight/
 ├── src/
 │   ├── index.ts           # 21 lines - CLI entry
 │   ├── commands/
@@ -327,7 +327,7 @@ The working CLI proves we can read OpenCode data. Now we build the actual platfo
 
 ```typescript
 // What we have now
-ocusage analyze  // Reads ~/.local/share/opencode/storage/
+ocsight analyze  // Reads ~/.local/share/opencode/storage/
 ```
 
 ### Target State: Distributed Platform
@@ -411,7 +411,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 const server = new McpServer({
-  name: "ocusage-mcp",
+  name: "ocsight-mcp",
   version: "0.1.0",
 });
 
@@ -420,9 +420,9 @@ const server = new McpServer({
 
 #### ✅ **WORKING NOW** - Core MCP Resources
 
-1. **`ocusage://metrics/summary`** - Global usage statistics ✅
-2. **`ocusage://sessions/{id}`** - Individual session details ✅
-3. **`ocusage://providers`** - Provider breakdown ✅
+1. **`ocsight://metrics/summary`** - Global usage statistics ✅
+2. **`ocsight://sessions/{id}`** - Individual session details ✅
+3. **`ocsight://providers`** - Provider breakdown ✅
 
 #### ✅ **WORKING NOW** - Core MCP Tools
 
