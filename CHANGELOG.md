@@ -1,3 +1,12 @@
+## [0.5.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.5.0...v0.5.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* rename GITHUB_TOKEN secret to GH_TOKEN ([f147a34](https://github.com/heyhuynhgiabuu/ocsight/commit/f147a34f061df124519b6b5743a3eeac4b03a328))
+* use correct GH_TOKEN secret in release workflow ([899cb7e](https://github.com/heyhuynhgiabuu/ocsight/commit/899cb7ea176142e7aa91d925ae9900a733389db1))
+* use GH_TOKEN consistently in release workflow ([b8ffd99](https://github.com/heyhuynhgiabuu/ocsight/commit/b8ffd997d40b664087cbf6d7b9df51607c58a729))
+
 # [0.5.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.3...v0.5.0) (2025-09-15)
 
 
