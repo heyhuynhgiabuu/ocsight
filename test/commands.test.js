@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { program } from "../src/index.js";
+const { program } = require("../dist/index.js");
 
 test("program has correct name and description", () => {
   expect(program.name()).toBe("ocsight");
