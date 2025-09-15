@@ -48,13 +48,6 @@ jobs:
           zip release-artifacts/ocsight-linux-x64.zip ocsight-linux-x64
           zip release-artifacts/ocsight-linux-arm64.zip ocsight-linux-arm64
 
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release-artifacts/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Semantic Release
         run: bun run semantic-release
         env:
