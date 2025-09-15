@@ -47,6 +47,7 @@ ocsight export --format markdown --days 7
 - **Exports**: JSON, CSV, Markdown reports
 - **MCP Server**: Real-time analytics via Model Context Protocol
 - **Filtering**: By time, provider, model, project
+- **Cross-Platform**: Go binaries for macOS, Linux, and Windows
 
 ## Commands
 
