@@ -11,7 +11,7 @@ program
   .description(
     "OpenCode ecosystem observability platform - see everything happening in your OpenCode development",
   )
-  .version("0.1.3");
+  .version(require("../package.json").version);
 
 // Add all commands
 program.addCommand(analyzeCommand);

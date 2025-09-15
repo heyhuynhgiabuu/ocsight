@@ -1,0 +1,12 @@
+---
+export interface Props {
+  for?: string
+  class?: string
+}
+
+const { for: htmlFor = '', class: className = '' } = Astro.props
+---
+
+<label data-slot="label" for={htmlFor} class={className}>
+  <slot />
+</label>

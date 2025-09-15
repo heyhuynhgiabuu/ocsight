@@ -1,0 +1,28 @@
+---
+import Button from './Button.astro'
+import Input from './Input.astro'
+import Label from './Label.astro'
+---
+
+<div data-slot="card">
+  <h2>CLI Simulator</h2>
+  <form
+    hx-post="/api/cli-simulate"
+    hx-target="#cli-output"
+    hx-swap="innerHTML"
+  >
+    <div class="mb-4">
+      <Label for="command">Command</Label>
+      <Input
+        id="command"
+        name="command"
+        placeholder="ocsight analyze --help"
+        required
+      />
+    </div>
+    <Button type="submit" variant="primary">Run Command</Button>
+  </form>
+  <div id="cli-output" class="mt-6">
+    <pre class="text-sm bg-muted p-4 overflow-auto">$ <span class="text-muted-foreground">Ready to execute commands...</span></pre>
+  </div>
+</div>

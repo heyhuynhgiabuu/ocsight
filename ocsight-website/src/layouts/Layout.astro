@@ -1,0 +1,28 @@
+---
+import '../styles/tokens.css'
+import '../styles/brutalist.css'
+
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "ocsight - OpenCode Observability", description = "OpenCode observability platform. See everything happening in your OpenCode development." } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="generator" content={Astro.generator} />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfE0LToGk29OQ2PNswaobEwp4os" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen bg-background text-foreground">
+  <slot />
+</body>
+</html>

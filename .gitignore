@@ -8,8 +8,14 @@ package-lock.json
 
 # Build outputs
 dist/
+dist-cjs/
+dist-bundle/
 build/
 *.tsbuildinfo
+
+# Binaries
+ocsight-*
+index
 
 # Environment variables
 .env
@@ -124,4 +130,4 @@ logs
 docs/
 
 # Website (published separately)
-ocsight-website/
+# ocsight-website/

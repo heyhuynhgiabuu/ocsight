@@ -1,0 +1,35 @@
+---
+export interface Props {
+  variant?: 'default' | 'primary' | 'destructive'
+  disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
+  href?: string
+  size?: 'sm' | 'md' | 'lg'
+  class?: string
+}
+
+const { variant = 'default', disabled = false, type = 'button', href, size = 'md', class: className = '' } = Astro.props
+---
+
+{href ? (
+  <a
+    href={href}
+    data-slot="button"
+    data-variant={variant}
+    data-size={size}
+    class={className}
+  >
+    <slot />
+  </a>
+) : (
+  <button
+    data-slot="button"
+    data-variant={variant}
+    data-size={size}
+    type={type}
+    disabled={disabled}
+    class={className}
+  >
+    <slot />
+  </button>
+)}

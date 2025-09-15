@@ -2,6 +2,29 @@
 
 OpenCode observability platform. See everything happening in your OpenCode development.
 
+## Installation
+
+### Homebrew (Recommended)
+
+```bash
+# Add the tap
+brew tap heyhuynhgiabuu/tap
+
+# Install ocsight
+brew install ocsight
+```
+
+### Manual Installation
+
+```bash
+# Clone and build
+git clone https://github.com/heyhuynhgiabuu/ocsight.git
+cd ocsight
+bun install && bun run build
+
+# Or download pre-built binaries from releases
+```
+
 ## Quick Start
 
 ```bash
@@ -70,23 +93,33 @@ ocsight export --format markdown --output report.md
 ### Prerequisites
 
 - Node.js >=18.0.0 (ES modules support required)
-- Bun package manager (recommended)
 - OpenCode installed with data in `~/.local/share/opencode/storage/`
 
-### Setup
+### Option 1: Homebrew (Recommended)
+
+```bash
+# Install from homebrew tap
+brew install heyhuynhgiabuu/tap/ocsight
+```
+
+### Option 2: npm
+
+```bash
+# Install globally
+npm install -g ocsight
+```
+
+### Option 3: From Source
 
 ```bash
 # Clone and install
-git clone <repository>
+git clone https://github.com/heyhuynhgiabuu/ocsight.git
 cd ocsight
 bun install
 
 # Build and run
 bun run build
 ocsight analyze --days 7
-
-# Or install globally
-npm install -g .
 ```
 
 ## MCP Server

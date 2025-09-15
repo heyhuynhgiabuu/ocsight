@@ -1,0 +1,68 @@
+---
+export interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class={`tabs ${className || ''}`} data-tabs>
+  <div class="border-b border-border mb-6">
+    <div class="flex gap-1" data-tabs-list>
+      <slot name="tabs" />
+    </div>
+  </div>
+  <div data-tabs-content>
+    <slot name="content" />
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabsContainers = document.querySelectorAll('[data-tabs]');
+
+    tabsContainers.forEach(container => {
+      const tabButtons = container.querySelectorAll('[data-tab]');
+      const tabContents = container.querySelectorAll('[data-tab-content]');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const tabId = button.getAttribute('data-tab');
+
+          // Remove active class from all buttons and contents
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+
+          // Add active class to clicked button and corresponding content
+          button.classList.add('active');
+          const activeContent = container.querySelector(`[data-tab-content="${tabId}"]`);
+          if (activeContent) {
+            activeContent.classList.add('active');
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  .tabs [data-tab] {
+    @apply px-4 py-2 text-sm font-mono font-medium border-b-2 border-transparent cursor-pointer transition-colors;
+  }
+
+  .tabs [data-tab]:hover {
+    @apply text-primary;
+  }
+
+  .tabs [data-tab].active {
+    @apply border-primary text-primary;
+  }
+
+  .tabs [data-tab-content] {
+    @apply hidden;
+  }
+
+  .tabs [data-tab-content].active {
+    @apply block;
+  }
+</style>
