@@ -35,7 +35,7 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.4.0",
     "esbuild": "^0.25.9",
     "pkg": "^5.8.1",
     "semantic-release": "^24.2.8",
