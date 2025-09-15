@@ -4,14 +4,26 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     assignees:
       - "heyhuynhgiabuu"
+    ignore:
+      # Ignore major version updates for stable dependencies
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "semantic-release"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly" # Less frequent for actions
+    open-pull-requests-limit: 3
     assignees:
       - "heyhuynhgiabuu"
+    ignore:
+      # Only patch and minor updates for actions
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

@@ -7,7 +7,7 @@
 class Ocsight < Formula
   desc "OpenCode observability platform with real-time analytics, MCP server, caching, streaming, and multi-format exports"
   homepage "https://ocsight.dev"
-  version "0.2.0"
+  version "0.4.0"
 
   on_macos do
     if Hardware::CPU.intel?

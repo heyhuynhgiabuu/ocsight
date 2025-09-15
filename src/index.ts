@@ -24,4 +24,4 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== "test") {
 }
 
 // Export for testing
-export { program };
+module.exports = { program };
