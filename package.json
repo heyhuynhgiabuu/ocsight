@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "build:bundle": "node esbuild.config.cjs",
-    "build:bin": "pkg . --targets node18-macos-x64,node18-macos-arm64,node18-linux-x64,node18-linux-arm64 --output ocsight",
+    "build:bin": "pkg . --targets node18-macos-x64,node18-linux-x64 --output ocsight",
     "dev": "bun run src/index.ts",
     "clean": "rm -rf dist dist-cjs dist-bundle",
     "start": "node dist/index.js",
