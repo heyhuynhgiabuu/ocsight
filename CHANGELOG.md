@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.2.1...v0.3.0) (2025-09-15)
+
+
+### Features
+
+* trigger release test ([3e625b0](https://github.com/heyhuynhgiabuu/ocsight/commit/3e625b02756492b6ab04ccf9f500c7dd803b5125))
+
 ## [0.2.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.2.0...v0.2.1) (2025-09-15)
 
 
