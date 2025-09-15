@@ -1,6 +1,6 @@
 {
   "name": "ocsight",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "OpenCode observability platform with real-time analytics, MCP server, caching, streaming, and multi-format exports",
   "type": "commonjs",
   "main": "dist/index.js",

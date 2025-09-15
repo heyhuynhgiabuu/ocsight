@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.0...v0.4.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* resolve ESM module scope error and fix CI/CD pipeline ([beac489](https://github.com/heyhuynhgiabuu/ocsight/commit/beac489babf593212e5155f20918a3264c68db41))
+
 # [0.4.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.3.0...v0.4.0) (2025-09-15)
 
 
