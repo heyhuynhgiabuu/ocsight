@@ -1,3 +1,10 @@
+## [0.5.2](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.5.1...v0.5.2) (2025-09-15)
+
+
+### Bug Fixes
+
+* remove ARM64 binary targets to resolve pkg compilation issues ([d8e7be1](https://github.com/heyhuynhgiabuu/ocsight/commit/d8e7be1c68e05d280dd637af038c22c31919fa42))
+
 ## [0.5.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.5.0...v0.5.1) (2025-09-15)
 
 
