@@ -34,21 +34,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Build TypeScript
+        run: bun run build
+
       - name: Run tests
         run: bun test
-
-      - name: Build bundle
-        run: bun run build:bundle
-
-      - name: Build Linux binaries
-        run: npx pkg dist-bundle/index.js --targets node18-linux-x64,node18-linux-arm64 --output ocsight
-
-      - name: Create release archives
-        run: |
-          mkdir -p release-artifacts
-          zip release-artifacts/ocsight-linux-x64.zip ocsight-linux-x64
-          zip release-artifacts/ocsight-linux-arm64.zip ocsight-linux-arm64
-          ls -la release-artifacts/
 
       - name: Semantic Release
         run: bun run semantic-release

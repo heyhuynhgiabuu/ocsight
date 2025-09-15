@@ -4,15 +4,7 @@
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
-    [
-      "@semantic-release/github",
-      {
-        "assets": [
-          "release-artifacts/ocsight-linux-x64.zip",
-          "release-artifacts/ocsight-linux-arm64.zip"
-        ]
-      }
-    ],
+    "@semantic-release/github",
     [
       "@semantic-release/npm",
       {
