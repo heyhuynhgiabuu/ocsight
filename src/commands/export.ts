@@ -1,5 +1,4 @@
 import { Command } from "commander";
-import ora from "ora";
 import { writeFileSync } from "fs";
 import { createObjectCsvWriter } from "csv-writer";
 import { loadAllData } from "../lib/data.js";
@@ -22,11 +21,11 @@ export const exportCommand = new Command("export")
   .option("-f, --format <format>", "Export format (csv|json|markdown)", "csv")
   .option("-o, --output <file>", "Output file path")
   .action(async (options) => {
-    const spinner = ora("Loading OpenCode data...").start();
+    console.log("Loading OpenCode data...");
 
     try {
       const data = await loadAllData();
-      spinner.text = "Analyzing data...";
+      console.log("Analyzing data...");
 
       const filteredSessions = filterSessions(data, options);
       const statistics = calculateStatistics(filteredSessions);
@@ -36,7 +35,7 @@ export const exportCommand = new Command("export")
         options.output = `opencode-export-${timestamp}.${options.format}`;
       }
 
-      spinner.text = `Exporting to ${options.format.toUpperCase()}...`;
+      console.log(`Exporting to ${options.format.toUpperCase()}...`);
 
       if (options.format === "json") {
         await exportToJson(statistics, data, options.output);
@@ -46,9 +45,9 @@ export const exportCommand = new Command("export")
         await exportToMarkdown(statistics, filteredSessions, options.output);
       }
 
-      spinner.succeed(`Data exported to ${options.output}`);
+      console.log(`Data exported to ${options.output}`);
     } catch (error) {
-      spinner.fail("Export failed");
+      console.error("Export failed");
       console.error("Error:", error);
       process.exit(1);
     }

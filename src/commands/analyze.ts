@@ -17,19 +17,18 @@ export const analyzeCommand = new Command("analyze")
   .option("--project <project>", "Filter by project name")
   .option("--exclude-project <project>", "Exclude project name")
   .action(async (options: AnalyzeOptions) => {
-    const spinner = ora("Loading OpenCode data...").start();
+    console.log("Loading OpenCode data...");
 
     try {
       const data = await loadAllData({ limit: 3000 }); // Limit for better performance
-      spinner.text = "Analyzing usage data...";
+      console.log("Analyzing usage data...");
 
       const filteredSessions = filterSessions(data, options);
       const statistics = calculateStatistics(filteredSessions);
 
-      spinner.stop();
       console.log(formatAnalyzeOutput(statistics));
     } catch (error) {
-      spinner.fail("Failed to analyze data");
+      console.error("Failed to analyze data");
       console.error(error instanceof Error ? error.message : "Unknown error");
       process.exit(1);
     }

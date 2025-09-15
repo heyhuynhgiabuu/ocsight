@@ -5,23 +5,22 @@
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
     [
-      "@semantic-release/exec",
-      {
-        "prepareCmd": "bun run build:bin && zip ocsight-darwin-x64.zip ocsight-macos-x64 && zip ocsight-darwin-arm64.zip ocsight-macos-arm64 && zip ocsight-linux-x64.zip ocsight-linux-x64 && zip ocsight-linux-arm64.zip ocsight-linux-arm64"
-      }
-    ],
-    [
       "@semantic-release/github",
       {
         "assets": [
-          "ocsight-darwin-x64.zip",
-          "ocsight-darwin-arm64.zip",
-          "ocsight-linux-x64.zip",
-          "ocsight-linux-arm64.zip"
+          "release-artifacts/ocsight-darwin-x64.zip",
+          "release-artifacts/ocsight-darwin-arm64.zip",
+          "release-artifacts/ocsight-linux-x64.zip",
+          "release-artifacts/ocsight-linux-arm64.zip"
         ]
       }
     ],
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
     "@semantic-release/git"
   ]
 }
