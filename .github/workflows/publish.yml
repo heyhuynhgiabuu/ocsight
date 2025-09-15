@@ -1,4 +1,7 @@
-name: Publish to NPM
+# DISABLED: NPM publishing is handled by semantic-release in release.yml
+# This workflow is redundant and conflicts with automated releases
+
+name: Publish to NPM (DISABLED)
 
 on:
   release:
@@ -7,32 +10,8 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: false # Always skip this job
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build project
-        run: bun run build
-
-      - name: Run tests
-        run: bun test
-
-      - name: Publish to NPM
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Skipped
+        run: echo "NPM publishing handled by semantic-release"
