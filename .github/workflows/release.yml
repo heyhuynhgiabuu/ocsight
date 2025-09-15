@@ -40,14 +40,12 @@ jobs:
       - name: Build bundle
         run: bun run build:bundle
 
-      - name: Build cross-platform binaries
-        run: npx pkg dist-bundle/index.js --targets node18-macos-x64,node18-macos-arm64,node18-linux-x64,node18-linux-arm64 --output ocsight
+      - name: Build Linux binaries
+        run: npx pkg dist-bundle/index.js --targets node18-linux-x64,node18-linux-arm64 --output ocsight
 
       - name: Create release archives
         run: |
           mkdir -p release-artifacts
-          zip release-artifacts/ocsight-darwin-x64.zip ocsight-macos-x64
-          zip release-artifacts/ocsight-darwin-arm64.zip ocsight-macos-arm64
           zip release-artifacts/ocsight-linux-x64.zip ocsight-linux-x64
           zip release-artifacts/ocsight-linux-arm64.zip ocsight-linux-arm64
           ls -la release-artifacts/

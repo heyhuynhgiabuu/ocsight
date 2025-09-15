@@ -8,14 +8,17 @@
       "@semantic-release/github",
       {
         "assets": [
-          "release-artifacts/ocsight-darwin-x64.zip",
-          "release-artifacts/ocsight-darwin-arm64.zip",
           "release-artifacts/ocsight-linux-x64.zip",
           "release-artifacts/ocsight-linux-arm64.zip"
         ]
       }
     ],
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": true
+      }
+    ],
     "@semantic-release/git"
   ]
 }
