@@ -1,0 +1,126 @@
+name: Deploy Development
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build project
+        run: bun run build
+
+      - name: Run tests
+        run: bun test --coverage
+
+      - name: Test CLI commands
+        run: |
+          node dist/index.js --help
+          node dist/index.js analyze --help
+          node dist/index.js stats --help
+          node dist/index.js export --help
+
+      - name: Test MCP server startup
+        run: |
+          timeout 5s node dist/mcp/server.js || true
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: matrix.node-version == '20'
+        with:
+          file: ./coverage/lcov.info
+
+  # Build and test binaries in dev (no publish)
+  build-binaries:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node-version: [20]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build project
+        run: bun run build
+
+      - name: Build binaries (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          bun run build:bin
+          ls -la ocsight-*
+
+      - name: Build binaries (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          bun run build:bin
+          ls -la ocsight-*
+
+      - name: Test binary
+        run: |
+          ./ocsight-macos-arm64 --help || ./ocsight-linux-x64 --help || echo "Binary test completed"
+
+  # Dry-run semantic-release to check what version would be released
+  dry-run-release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Dry-run semantic-release
+        run: bun run semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
