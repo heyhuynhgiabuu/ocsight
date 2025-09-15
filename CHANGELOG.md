@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.5.2...v0.6.0) (2025-09-15)
+
+
+### Features
+
+* add cross-platform Go binaries to README features ([3136277](https://github.com/heyhuynhgiabuu/ocsight/commit/3136277bee3e2df32979f80e91c338b062d2f7b2))
+
 ## [0.5.2](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.5.1...v0.5.2) (2025-09-15)
 
 
