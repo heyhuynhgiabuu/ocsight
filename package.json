@@ -20,7 +20,7 @@
     "export:markdown": "bun run src/index.ts export --format markdown",
     "export:csv": "bun run src/index.ts export --format csv",
     "export:json": "bun run src/index.ts export --format json",
-    "prepublishOnly": "bun run clean && bun run build && bun run test",
+    "prepublishOnly": "bun run clean && bun run build && bun run build:bundle && bun run test",
     "postpublish": "git push --follow-tags",
     "semantic-release": "semantic-release"
   },
