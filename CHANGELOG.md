@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.1...v0.4.2) (2025-09-15)
+
+
+### Bug Fixes
+
+* include README.md in npm package and fix CI tests ([2cfae6b](https://github.com/heyhuynhgiabuu/ocsight/commit/2cfae6b9216cb4d5712b8d69d9b56ef5792a4327))
+
 ## [0.4.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.0...v0.4.1) (2025-09-15)
 
 
