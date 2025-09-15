@@ -1,0 +1,70 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getCollection } from 'astro:content'
+
+const docs = await getCollection('docs')
+const sortedDocs = docs.sort((a, b) => (a.data.order || 0) - (b.data.order || 0))
+
+const categories = [...new Set(sortedDocs.map(doc => doc.data.category || 'Other'))]
+const docsByCategory = categories.reduce((acc, category) => {
+  acc[category] = sortedDocs.filter(doc => doc.data.category === category)
+  return acc
+}, {} as Record<string, typeof docs>)
+---
+
+<Layout title="Documentation">
+  <div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar -->
+      <aside class="lg:col-span-1">
+        <nav class="sticky top-8 space-y-6">
+          {categories.map(category => (
+            <div>
+              <h3 class="font-mono text-sm font-semibold uppercase tracking-wider text-gray-600 mb-3">
+                {category}
+              </h3>
+              <ul class="space-y-2">
+                {docsByCategory[category].map(doc => (
+                  <li>
+                    <a 
+                      href={`/docs/${doc.slug}`}
+                      class="block px-3 py-2 text-sm font-mono rounded hover:bg-gray-100 transition-colors"
+                    >
+                      {doc.data.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="lg:col-span-3">
+        <div class="prose prose-sm max-w-none">
+          <h1 class="text-3xl font-mono font-bold mb-6">Documentation</h1>
+          
+          <div class="space-y-8">
+            {categories.map(category => (
+              <section>
+                <h2 class="text-2xl font-mono font-semibold mb-4">{category}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {docsByCategory[category].map(doc => (
+                    <a 
+                      href={`/docs/${doc.slug}`}
+                      class="block p-6 border border-gray-200 rounded hover:border-gray-400 transition-colors"
+                    >
+                      <h3 class="font-mono font-semibold mb-2">{doc.data.title}</h3>
+                      <p class="text-sm text-gray-600">{doc.data.description}</p>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</Layout>

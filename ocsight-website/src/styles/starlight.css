@@ -1,0 +1,116 @@
+/* Import brutalist design system */
+@import "./brutalist.css";
+
+/* Starlight theme overrides */
+:root {
+  --sl-color-accent: rgb(var(--color-primary));
+  --sl-color-text-accent: rgb(var(--color-primary));
+  --sl-color-bg-nav: rgb(var(--color-background));
+  --sl-color-text: rgb(var(--color-foreground));
+  --sl-color-text-muted: rgb(var(--color-muted-foreground));
+  --sl-color-bg: rgb(var(--color-background));
+  --sl-color-bg-sidebar: rgb(var(--color-muted));
+  --sl-color-border: rgb(var(--color-border));
+}
+
+/* Typography */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4 {
+  font-family: var(--font-family-mono);
+  font-weight: 600;
+}
+
+.sl-markdown-content p {
+  line-height: 1.6;
+}
+
+/* Code blocks */
+.sl-markdown-content pre {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  background-color: rgb(var(--color-muted));
+  border: var(--border-width) var(--border-style) rgb(var(--color-border));
+  border-radius: var(--border-radius);
+}
+
+/* Links */
+.sl-markdown-content a {
+  color: rgb(var(--color-primary));
+  text-decoration: none;
+}
+
+.sl-markdown-content a:hover {
+  text-decoration: underline;
+}
+
+/* Tables */
+.sl-markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--space-4) 0;
+}
+
+.sl-markdown-content th,
+.sl-markdown-content td {
+  border: var(--border-width) var(--border-style) rgb(var(--color-border));
+  padding: var(--space-2) var(--space-4);
+  text-align: left;
+}
+
+.sl-markdown-content th {
+  background-color: rgb(var(--color-muted));
+  font-family: var(--font-family-mono);
+  font-weight: 600;
+}
+
+/* Sidebar */
+.sl-sidebar {
+  border-right: var(--border-width) var(--border-style) rgb(var(--color-border));
+}
+
+.sl-sidebar-item {
+  font-family: var(--font-family-mono);
+}
+
+/* Navigation */
+.sl-nav-item a {
+  font-family: var(--font-family-mono);
+}
+
+/* Buttons */
+.sl-button {
+  font-family: var(--font-family-mono);
+  border-radius: var(--border-radius);
+  border: var(--border-width) var(--border-style) rgb(var(--color-border));
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+}
+
+.sl-button:hover {
+  background-color: rgb(var(--color-accent));
+}
+
+/* Search */
+.sl-search-input {
+  font-family: var(--font-family-mono);
+  border: var(--border-width) var(--border-style) rgb(var(--color-border));
+  border-radius: var(--border-radius);
+}
+
+/* Tabs */
+.sl-tab-list {
+  border-bottom: var(--border-width) var(--border-style)
+    rgb(var(--color-border));
+}
+
+.sl-tab {
+  font-family: var(--font-family-mono);
+  border-bottom: 2px solid transparent;
+}
+
+.sl-tab[aria-selected="true"] {
+  border-bottom-color: rgb(var(--color-primary));
+  color: rgb(var(--color-primary));
+}

@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+      - name: Build binaries
+        run: |
+          bun run build:bin
+          ls -la ocsight-*
+
+      - name: Create archives
+        run: |
+          zip ocsight-darwin-x64.zip ocsight-macos-x64
+          zip ocsight-darwin-arm64.zip ocsight-macos-arm64
+          zip ocsight-linux-x64.zip ocsight-linux-x64
+          zip ocsight-linux-arm64.zip ocsight-linux-arm64
+          ls -la *.zip
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ocsight-darwin-x64.zip
+            ocsight-darwin-arm64.zip
+            ocsight-linux-x64.zip
+            ocsight-linux-arm64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

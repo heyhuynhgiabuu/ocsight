@@ -1,0 +1,17 @@
+---
+export interface Props {
+  options: Array<{ value: string; label: string }>
+  placeholder?: string
+  disabled?: boolean
+  class?: string
+}
+
+const { options, placeholder = '', disabled = false, class: className = '' } = Astro.props
+---
+
+<select data-slot="select" disabled={disabled} class={className}>
+  {placeholder && <option value="">{placeholder}</option>}
+  {options.map((option) => (
+    <option value={option.value}>{option.label}</option>
+  ))}
+</select>

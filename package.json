@@ -1,16 +1,18 @@
 {
   "name": "ocsight",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "OpenCode observability platform with real-time analytics, MCP server, caching, streaming, and multi-format exports",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "ocsight": "dist/index.js"
+    "ocsight": "dist-bundle/index.js"
   },
   "scripts": {
     "build": "tsc",
+    "build:bundle": "node esbuild.config.cjs",
+    "build:bin": "bun run build:bundle && pkg dist-bundle/index.js --targets node18-macos-x64,node18-macos-arm64,node18-linux-x64,node18-linux-arm64 --output ocsight",
     "dev": "bun run src/index.ts",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist dist-cjs dist-bundle",
     "start": "node dist/index.js",
     "mcp": "bun run src/mcp/server.ts",
     "test": "NODE_ENV=test bun test",
@@ -34,6 +36,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "esbuild": "^0.25.9",
+    "pkg": "^5.8.1",
     "typescript": "^5.0.0"
   },
   "engines": {

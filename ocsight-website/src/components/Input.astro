@@ -1,0 +1,18 @@
+---
+export interface Props {
+  type?: 'text' | 'email' | 'password' | 'number'
+  placeholder?: string
+  disabled?: boolean
+  class?: string
+}
+
+const { type = 'text', placeholder = '', disabled = false, class: className = '' } = Astro.props
+---
+
+<input
+  data-slot="input"
+  type={type}
+  placeholder={placeholder}
+  disabled={disabled}
+  class={className}
+/>
