@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.3.0...v0.4.0) (2025-09-15)
+
+
+### Features
+
+* test npm automation token ([c13e40a](https://github.com/heyhuynhgiabuu/ocsight/commit/c13e40a7ccd430181628df53f0934652ee1a5b57))
+
 # [0.3.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.2.1...v0.3.0) (2025-09-15)
 
 
