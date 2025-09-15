@@ -214,9 +214,8 @@ func printVersion() {
 	fmt.Printf("ocsight %s (%s/%s)\n", getVersion(), runtime.GOOS, runtime.GOARCH)
 }
 
+var Version string = "dev"
+
 func getVersion() string {
-	if version := os.Getenv("OCSIGHT_VERSION"); version != "" {
-		return version
-	}
-	return "dev"
+	return Version
 }
