@@ -4,13 +4,10 @@
   "description": "OpenCode observability platform with real-time analytics, MCP server, caching, streaming, and multi-format exports",
   "type": "commonjs",
   "main": "dist/index.js",
-  "bin": {
-    "ocsight": "./dist/index.js"
-  },
   "scripts": {
     "build": "tsc",
     "build:bundle": "node esbuild.config.cjs",
-    "build:bin": "pkg . --targets node18-macos-x64,node18-linux-x64 --output ocsight",
+    "build:go": "./build.sh",
     "dev": "bun run src/index.ts",
     "clean": "rm -rf dist dist-cjs dist-bundle",
     "start": "node dist/index.js",

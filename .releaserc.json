@@ -7,7 +7,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "bun run build && bun run build:bin"
+        "prepareCmd": "bun run build && ./build.sh ${nextRelease.version}"
       }
     ],
     [
@@ -19,18 +19,13 @@
     [
       "@semantic-release/github",
       {
-        "assets": [
-          { "path": "ocsight-darwin-x64.zip" },
-          { "path": "ocsight-darwin-arm64.zip" },
-          { "path": "ocsight-linux-x64.zip" },
-          { "path": "ocsight-linux-arm64.zip" }
-        ]
+        "assets": [{ "path": "dist/*" }]
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "successCmd": "sed -i.bak 's/version \".*\"/version \"${nextRelease.version}\"/' homebrew-tap-files/Formula/ocsight.rb && rm -f homebrew-tap-files/Formula/ocsight.rb.bak && for bin in ocsight-macos-x64 ocsight-macos-arm64 ocsight-linux-x64 ocsight-linux-arm64; do if [ -f \\\"$bin\\\" ]; then zip \\\"ocsight-${bin//macos/darwin}.zip\\\" \\\"$bin\\\"; fi; done"
+        "successCmd": "sed -i.bak 's/version \".*\"/version \"${nextRelease.version}\"/' homebrew-tap-files/Formula/ocsight.rb && rm -f homebrew-tap-files/Formula/ocsight.rb.bak"
       }
     ],
     [
