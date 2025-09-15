@@ -1,3 +1,10 @@
+## [0.4.3](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.2...v0.4.3) (2025-09-15)
+
+
+### Bug Fixes
+
+* ignore major updates for commander and chalk ([d1ef946](https://github.com/heyhuynhgiabuu/ocsight/commit/d1ef946b07d04c59dc7079108b0876688079eeab))
+
 ## [0.4.2](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.1...v0.4.2) (2025-09-15)
 
 
