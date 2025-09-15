@@ -49,7 +49,7 @@ jobs:
           timeout 5s bun run mcp || true
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         if: matrix.node-version == '20'
         with:
           file: ./coverage/lcov.info
