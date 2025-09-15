@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.3...v0.5.0) (2025-09-15)
+
+
+### Features
+
+* add development branch workflow and improve CI/CD ([a7e00b9](https://github.com/heyhuynhgiabuu/ocsight/commit/a7e00b9cd50d9c129bd756c2889ec475dcf8b5e4))
+
 ## [0.4.3](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.4.2...v0.4.3) (2025-09-15)
 
 
