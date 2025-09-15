@@ -1,3 +1,17 @@
+## [0.2.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.2.0...v0.2.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* **ci:** support bun in workflows & configure npm auth for semantic-release ([ae438e1](https://github.com/heyhuynhgiabuu/ocsight/commit/ae438e1c15f8e61e2c04436265b04086674adb27))
+* include bundle build in prepublishOnly script ([ddf3315](https://github.com/heyhuynhgiabuu/ocsight/commit/ddf3315090ba297d1cfee80f77bbe80b867ac907))
+* re-enable NPM publishing in semantic-release ([283da01](https://github.com/heyhuynhgiabuu/ocsight/commit/283da01120a4da91bdb1c77b7f2295c7a5d07ac9))
+* remove npm cache and frozen-lockfile from CI workflows ([69a36a5](https://github.com/heyhuynhgiabuu/ocsight/commit/69a36a58d759bba8f77711192a33119f7d6e39f0))
+* remove NPM publishing from semantic-release ([a2346f8](https://github.com/heyhuynhgiabuu/ocsight/commit/a2346f8fcd72fafbfa6b33b9013c57577cc8d1a7))
+* simplify release workflow and fix NPM publishing ([e9de1b0](https://github.com/heyhuynhgiabuu/ocsight/commit/e9de1b0892e8180f292592b0f95362c9c308f145))
+* simplify release workflow and fix NPM publishing ([7edd8bd](https://github.com/heyhuynhgiabuu/ocsight/commit/7edd8bd5b3e70bbeae31dd20e0cd34309700abf2))
+* simplify release workflow to minimum viable ([6e88352](https://github.com/heyhuynhgiabuu/ocsight/commit/6e88352ae2bc7cf53258718746e43d1cb4f5b475))
+
 # [0.2.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.1.4...v0.2.0) (2025-09-15)
 
 
