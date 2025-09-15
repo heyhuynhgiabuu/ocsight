@@ -1,4 +1,4 @@
-import { UsageStatistics } from "../types";
+import { UsageStatistics } from "../types/index.js";
 
 export function generateDailySummary(stats: UsageStatistics): string {
   const today = new Date().toISOString().split("T")[0];

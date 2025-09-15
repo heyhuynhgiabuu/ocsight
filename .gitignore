@@ -122,3 +122,6 @@ logs
 
 # Documentation
 docs/
+
+# Website (published separately)
+ocsight-website/

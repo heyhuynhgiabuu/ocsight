@@ -1,9 +1,9 @@
 import { Command } from "commander";
 import ora from "ora";
-import { AnalyzeOptions } from "../types";
-import { loadAllData } from "../lib/data";
-import { filterSessions, calculateStatistics } from "../lib/analysis";
-import { formatAnalyzeOutput } from "../lib/output";
+import { AnalyzeOptions } from "../types/index.js";
+import { loadAllData } from "../lib/data.js";
+import { filterSessions, calculateStatistics } from "../lib/analysis.js";
+import { formatAnalyzeOutput } from "../lib/output.js";
 
 export const analyzeCommand = new Command("analyze")
   .description("Analyze OpenCode usage data")

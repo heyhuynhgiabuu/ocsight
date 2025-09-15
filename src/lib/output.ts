@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { UsageStatistics } from "../types";
-import { formatCostInDollars, formatNumber, getTopTools } from "./analysis";
+import { UsageStatistics } from "../types/index.js";
+import { formatCostInDollars, formatNumber, getTopTools } from "./analysis.js";
 
 export function formatAnalyzeOutput(stats: UsageStatistics): string {
   const lines: string[] = [];

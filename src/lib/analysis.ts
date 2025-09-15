@@ -5,7 +5,7 @@ import {
   ToolUsage,
   UsageStatistics,
   AnalyzeOptions,
-} from "../types";
+} from "../types/index.js";
 
 export function filterSessions(
   data: OpenCodeData,

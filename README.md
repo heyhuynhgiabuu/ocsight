@@ -69,8 +69,8 @@ ocsight export --format markdown --output report.md
 
 ### Prerequisites
 
-- Node.js >=18.0.0
-- Bun package manager
+- Node.js >=18.0.0 (ES modules support required)
+- Bun package manager (recommended)
 - OpenCode installed with data in `~/.local/share/opencode/storage/`
 
 ### Setup
@@ -296,10 +296,10 @@ bun run src/mcp/server.ts
 
 ### Tech Stack
 
-- **Runtime**: Bun + TypeScript
+- **Runtime**: Bun + TypeScript (ES modules)
 - **CLI**: Commander.js
 - **MCP**: Model Context Protocol SDK
-- **Styling**: Chalk + ora
+- **Styling**: Chalk + ora (v8+ ES module)
 - **Export**: csv-writer + custom templates
 - **Validation**: Zod
 

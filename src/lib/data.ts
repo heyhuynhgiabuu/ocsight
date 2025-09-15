@@ -7,7 +7,7 @@ import {
   OpenCodeSession,
   OpenCodeMessage,
   ToolUsage,
-} from "../types";
+} from "../types/index.js";
 
 export function getDefaultOpenCodePath(): string {
   const platform = process.platform;

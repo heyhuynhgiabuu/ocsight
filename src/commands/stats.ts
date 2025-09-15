@@ -1,9 +1,9 @@
 import { Command } from "commander";
 import ora from "ora";
-import { AnalyzeOptions } from "../types";
-import { loadAllData } from "../lib/data";
-import { filterSessions, calculateStatistics } from "../lib/analysis";
-import { formatStatsOutput } from "../lib/output";
+import { AnalyzeOptions } from "../types/index.js";
+import { loadAllData } from "../lib/data.js";
+import { filterSessions, calculateStatistics } from "../lib/analysis.js";
+import { formatStatsOutput } from "../lib/output.js";
 
 export const statsCommand = new Command("stats")
   .description("Show detailed statistics about OpenCode usage")

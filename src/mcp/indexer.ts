@@ -1,6 +1,6 @@
-import { loadAllData } from "../lib/data";
-import { calculateStatistics } from "../lib/analysis";
-import { OpenCodeSession, UsageStatistics } from "../types";
+import { loadAllData } from "../lib/data.js";
+import { calculateStatistics } from "../lib/analysis.js";
+import { OpenCodeSession, UsageStatistics } from "../types/index.js";
 
 interface Cache {
   sessionsById: Map<string, OpenCodeSession>;

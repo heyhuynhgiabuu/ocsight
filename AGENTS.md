@@ -38,3 +38,11 @@ Plugins hook into OpenCode events using TypeScript modules in `.opencode/plugin`
 - Error handling: throw meaningful errors that guide agents
 - Minimal state: avoid complex state management in plugins
 - Performance: tools should be fast, agents are impatient
+
+## UI DESIGN RULE
+
+- Clean, minimal brutalist design inspired by opencode.ai and shadcn/ui
+- Simple color schemes with lots of white space and clear typography
+- Focus on functionality over decoration - no unnecessary visual elements
+- Geometric simplicity with structured layouts and content-first approach
+- High-signal, low-noise interfaces that prioritize clarity and usability

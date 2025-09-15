@@ -11,7 +11,7 @@ import {
   computeUsageSummary,
   getSessionsArray,
   listProviders,
-} from "./indexer";
+} from "./indexer.js";
 
 async function main() {
   const server = new McpServer({
