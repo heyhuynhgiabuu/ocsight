@@ -35,19 +35,6 @@ jobs:
       - name: Run tests
         run: bun test
 
-      - name: Build binaries
-        run: |
-          bun run build:bin
-          ls -la ocsight-*
-
-      - name: Create archives
-        run: |
-          zip ocsight-darwin-x64.zip ocsight-macos-x64
-          zip ocsight-darwin-arm64.zip ocsight-macos-arm64
-          zip ocsight-linux-x64.zip ocsight-linux-x64
-          zip ocsight-linux-arm64.zip ocsight-linux-arm64
-          ls -la *.zip
-
       - name: Semantic Release
         run: bun run semantic-release
         env:
