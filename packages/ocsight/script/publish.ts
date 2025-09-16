@@ -163,13 +163,14 @@ if (!dry) {
   if (otp) {
     publishArgs.push("--otp", otp);
   }
+  const currentDir = process.cwd();
   try {
-    const currentDir = process.cwd();
     process.chdir(`./dist/${pkg.name}`);
     await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`.trim();
-    process.chdir(currentDir);
   } catch (error) {
     console.log(`CLI package already published or failed, continuing...`);
+  } finally {
+    process.chdir(currentDir);
   }
 }
 
@@ -190,8 +191,8 @@ if (!snapshot) {
       const currentDir = process.cwd();
       process.chdir(distPath);
       const zipName = key.replace("@heyhuynhgiabuu/", "");
-      console.log(`Creating zip file: ${zipName}.zip in root directory`);
-      await $`zip -r ${currentDir}/${zipName}.zip *`;
+      console.log(`Creating zip file: ./dist/${zipName}.zip`);
+      await $`zip -r ${currentDir}/dist/${zipName}.zip *`;
       process.chdir(currentDir);
       console.log(`Successfully created ${zipName}.zip`);
     } catch (error) {
@@ -201,22 +202,22 @@ if (!snapshot) {
       await $`ls -la dist/`.nothrow();
     }
   }
-
   // Calculate SHA values
-  const arm64Sha = await $`sha256sum ./ocsight-linux-arm64.zip | cut -d' ' -f1`
-    .text()
-    .then((x) => x.trim());
-  const x64Sha = await $`sha256sum ./ocsight-linux-x64.zip | cut -d' ' -f1`
-    .text()
-    .then((x) => x.trim());
-  const macX64Sha = await $`sha256sum ./ocsight-darwin-x64.zip | cut -d' ' -f1`
-    .text()
-    .then((x) => x.trim());
-  const macArm64Sha =
-    await $`sha256sum ./ocsight-darwin-arm64.zip | cut -d' ' -f1`
+  const arm64Sha =
+    await $`sha256sum ./dist/ocsight-linux-arm64.zip | cut -d' ' -f1`
       .text()
       .then((x) => x.trim());
-
+  const x64Sha = await $`sha256sum ./dist/ocsight-linux-x64.zip | cut -d' ' -f1`
+    .text()
+    .then((x) => x.trim());
+  const macX64Sha =
+    await $`sha256sum ./dist/ocsight-darwin-x64.zip | cut -d' ' -f1`
+      .text()
+      .then((x) => x.trim());
+  const macArm64Sha =
+    await $`sha256sum ./dist/ocsight-darwin-arm64.zip | cut -d' ' -f1`
+      .text()
+      .then((x) => x.trim());
   // Homebrew formula
   const homebrewFormula = [
     "# typed: false",
