@@ -12,7 +12,7 @@ export default defineConfig({
       title: 'ocsight',
       description: 'OpenCode observability platform - see everything happening in your OpenCode development',
       logo: {
-        src: './src/logo.svg',
+        src: './public/logo.svg',
         alt: 'ocsight logo'
       },
       social: [
@@ -20,14 +20,12 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: 'Intro',
-          link: '/docs/'
-        },
-        {
           label: 'Getting Started',
           items: [
+            { label: 'Introduction', link: '/docs/introduction' },
             { label: 'Installation', link: '/docs/installation' },
-            { label: 'Quick Start', link: '/docs/quick-start' }
+            { label: 'Quick Start', link: '/docs/quick-start' },
+            { label: 'Getting Started', link: '/docs/getting-started' }
           ]
         },
         {
@@ -45,9 +43,22 @@ export default defineConfig({
             { label: 'MCP Tools', link: '/docs/api/mcp-tools' },
             { label: 'Data Format', link: '/docs/api/data-format' }
           ]
+        },
+        {
+          label: 'Additional Resources',
+          items: [
+            { label: 'Architecture', link: '/docs/architecture' },
+            { label: 'Usage', link: '/docs/usage' },
+            { label: 'MCP Integration', link: '/docs/mcp' }
+          ]
         }
       ],
-      customCss: ['./src/styles/starlight.css']
+      tableOfContents: {
+        minHeadingLevel: 2,
+        maxHeadingLevel: 4
+      },
+      customCss: ['./src/styles/starlight.css'],
+      pagefind: true
     }),
     mdx(),
     htmx(),

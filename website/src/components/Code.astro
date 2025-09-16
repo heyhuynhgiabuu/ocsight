@@ -1,0 +1,10 @@
+---
+export interface Props {
+  code: string;
+  lang?: string;
+}
+
+const { code, lang = 'javascript' } = Astro.props;
+---
+
+<pre class="bg-muted p-4 rounded overflow-x-auto text-sm font-mono"><code class={`language-${lang}`}>{code}</code></pre>

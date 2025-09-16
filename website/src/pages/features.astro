@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CustomHeader from '../components/CustomHeader.astro';
+import CustomFooter from '../components/CustomFooter.astro';
+import Card from '../components/Card.astro';
+import Code from '../components/Code.astro';
+import Button from '../components/Button.astro';
+
+const pageTitle = 'Features';
+const pageDescription = 'Explore the powerful capabilities that make ocsight the best choice for OpenCode observability.';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <div class="min-h-screen bg-background text-foreground">
+    <CustomHeader />
+
+    <main class="container mx-auto px-4 py-16 md:py-24">
+      {/* Hero Section */}
+      <section class="text-center mb-20">
+        <h1 class="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          Everything You Need to Observe OpenCode
+        </h1>
+        <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+          ocsight is packed with features designed for modern OpenCode development, 
+          ensuring you can monitor and debug your AI agents with confidence.
+        </p>
+      </section>
+
+      {/* Main Features Grid */}
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+        <Card title="Real-time Observability" icon="📊">
+          <p class="text-muted-foreground">
+            Monitor your OpenCode agents in real-time with comprehensive metrics 
+            and logging capabilities built specifically for AI development workflows.
+          </p>
+        </Card>
+
+        <Card title="Agent Performance Tracking" icon="⚡">
+          <p class="text-muted-foreground">
+            Track execution times, success rates, and resource usage across all 
+            your OpenCode agents to optimize performance and identify bottlenecks.
+          </p>
+        </Card>
+
+        <Card title="Multi-Agent Coordination" icon="🤝">
+          <p class="text-muted-foreground">
+            Observe and debug complex multi-agent workflows with detailed 
+            interaction tracing and state management visualization.
+          </p>
+        </Card>
+
+        <Card title="Tool Execution Monitoring" icon="🔧">
+          <p class="text-muted-foreground">
+            Get deep insights into tool usage patterns, execution times, and 
+            success rates across your entire OpenCode ecosystem.
+          </p>
+        </Card>
+
+        <Card title="Error Detection & Alerting" icon="🚨">
+          <p class="text-muted-foreground">
+            Automatically detect anomalies and errors in your agent workflows 
+            with intelligent alerting and diagnostic capabilities.
+          </p>
+        </Card>
+
+        <Card title="Developer Experience" icon="🛠️">
+          <p class="text-muted-foreground">
+            Built with developers in mind, featuring intuitive CLI tools, 
+            clean APIs, and seamless integration with your existing workflow.
+          </p>
+        </Card>
+      </section>
+
+      {/* Code Example Section */}
+      <section class="mb-20">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold text-foreground mb-2">Simple and Intuitive API</h2>
+          <p class="text-muted-foreground">
+            See how easy it is to get started with ocsight.
+          </p>
+        </div>
+        <div data-slot="card" class="p-1">
+          <Code code={`# Install ocsight
+curl -sSL https://install.ocsight.dev | sh
+
+# Start monitoring your OpenCode project
+ocsight analyze --project ./my-project
+
+# View real-time metrics
+ocsight stats --live`} lang="bash" />
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section class="text-center">
+        <h2 class="text-3xl font-bold text-foreground mb-4">
+          Ready to get started?
+        </h2>
+        <p class="text-lg text-muted-foreground mb-6">
+          Join thousands of developers monitoring their OpenCode agents with ocsight.
+        </p>
+        <Button href="/docs" variant="primary" size="lg">
+          View Documentation
+        </Button>
+      </section>
+    </main>
+
+    <CustomFooter />
+  </div>
+</Layout>

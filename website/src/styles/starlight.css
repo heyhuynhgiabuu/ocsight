@@ -3,6 +3,7 @@
 
 /* Starlight theme overrides */
 :root {
+  /* Core colors */
   --sl-color-accent: rgb(var(--color-primary));
   --sl-color-text-accent: rgb(var(--color-primary));
   --sl-color-bg-nav: rgb(var(--color-background));
@@ -11,6 +12,41 @@
   --sl-color-bg: rgb(var(--color-background));
   --sl-color-bg-sidebar: rgb(var(--color-muted));
   --sl-color-border: rgb(var(--color-border));
+
+  /* Additional color mappings */
+  --sl-color-bg-inline-code: rgb(var(--color-muted));
+  --sl-color-text-code: rgb(var(--color-foreground));
+  --sl-color-bg-code: rgb(var(--color-muted));
+  --sl-color-text-code-inline: rgb(var(--color-foreground));
+  --sl-color-bg-hover: rgb(var(--color-accent));
+  --sl-color-text-nav: rgb(var(--color-foreground));
+  --sl-color-text-sidebar: rgb(var(--color-foreground));
+  --sl-color-text-sidebar-hover: rgb(var(--color-primary));
+  --sl-color-bg-sidebar-item-hover: rgb(var(--color-accent));
+
+  /* Typography */
+  --sl-font: var(--font-family-mono);
+  --sl-font-mono: var(--font-family-mono);
+  --sl-line-height: var(--line-height-normal);
+  --sl-line-height-headings: var(--line-height-tight);
+
+  /* Spacing */
+  --sl-space-xs: var(--space-1);
+  --sl-space-sm: var(--space-2);
+  --sl-space-md: var(--space-4);
+  --sl-space-lg: var(--space-6);
+  --sl-space-xl: var(--space-8);
+
+  /* Border */
+  --sl-border-radius: var(--border-radius);
+  --sl-border-width: var(--border-width);
+  --sl-border-color: rgb(var(--color-border));
+
+  /* Shadow */
+  --sl-shadow-sm: var(--shadow-sm);
+  --sl-shadow: var(--shadow);
+  --sl-shadow-md: var(--shadow-md);
+  --sl-shadow-lg: var(--shadow-lg);
 }
 
 /* Typography */

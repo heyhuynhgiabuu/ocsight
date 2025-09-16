@@ -154,6 +154,11 @@ func getScriptPath() string {
 		os.Exit(1)
 	}
 
+	// Resolve symlinks
+	if resolved, err := filepath.EvalSymlinks(execPath); err == nil {
+		execPath = resolved
+	}
+
 	// Try multiple paths for JavaScript entry point
 	paths := []string{
 		filepath.Join(filepath.Dir(execPath), "lib", "index.js"),

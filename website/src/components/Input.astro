@@ -4,9 +4,12 @@ export interface Props {
   placeholder?: string
   disabled?: boolean
   class?: string
+  id?: string
+  name?: string
+  required?: boolean
 }
 
-const { type = 'text', placeholder = '', disabled = false, class: className = '' } = Astro.props
+const { type = 'text', placeholder = '', disabled = false, class: className = '', id, name, required } = Astro.props
 ---
 
 <input
@@ -15,4 +18,7 @@ const { type = 'text', placeholder = '', disabled = false, class: className = ''
   placeholder={placeholder}
   disabled={disabled}
   class={className}
+  id={id}
+  name={name}
+  required={required}
 />

@@ -1,0 +1,15 @@
+---
+export interface Props {
+  title: string;
+  icon: string;
+  class?: string;
+}
+
+const { title, icon, class: className = '' } = Astro.props;
+---
+
+<div data-slot="card" class={`flex flex-col items-center text-center transition-all hover:shadow-lg ${className}`}>
+  <span class="text-4xl mb-4">{icon}</span>
+  <h3 class="text-xl font-semibold text-foreground mb-2">{title}</h3>
+  <slot />
+</div>

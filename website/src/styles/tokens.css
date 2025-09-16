@@ -1,26 +1,19 @@
 :root {
-  /* Colors - opencode inspired */
+  /* Clean color palette - opencode.ai/docs inspired */
   --color-background: 255 255 255;
-  --color-foreground: 15 23 42;
-  --color-muted: 241 245 249;
-  --color-muted-foreground: 100 116 139;
-  --color-primary: 15 23 42;
+  --color-foreground: 26 26 26;
+  --color-muted: 245 245 245;
+  --color-muted-foreground: 102 102 102;
+  --color-primary: 0 102 204;
   --color-primary-foreground: 255 255 255;
-  --color-secondary: 241 245 249;
-  --color-secondary-foreground: 15 23 42;
-  --color-border: 226 232 240;
-  --color-accent: 241 245 249;
-  --color-accent-foreground: 15 23 42;
-  --color-destructive: 239 68 68;
-  --color-destructive-foreground: 255 255 255;
+  --color-border: 229 229 229;
+  --color-accent: 245 245 245;
+  --color-accent-foreground: 26 26 26;
 
-  /* Typography */
+  /* Typography - clean monospace */
   --font-family-mono:
-    "IBM Plex Mono", "Fira Code", "SF Mono", Monaco, "Cascadia Code",
-    "Roboto Mono", Consolas, "Courier New", monospace;
-  --font-family-sans:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -30,17 +23,8 @@
   --font-size-3xl: 1.875rem;
   --font-size-4xl: 2.25rem;
   --font-size-5xl: 3rem;
-  --line-height-tight: 1.25;
-  --line-height-snug: 1.375;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  --line-height-loose: 2;
-  --letter-spacing-tighter: -0.025em;
-  --letter-spacing-tight: -0.015em;
-  --letter-spacing-normal: 0;
-  --letter-spacing-wide: 0.025em;
-  --letter-spacing-wider: 0.05em;
-  --letter-spacing-widest: 0.1em;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.6;
 
   /* Spacing - brutalist */
   --space-px: 1px;
@@ -119,15 +103,13 @@
 }
 
 [data-theme="dark"] {
-  --color-background: 2 6 23;
-  --color-foreground: 248 250 252;
-  --color-muted: 15 23 42;
-  --color-muted-foreground: 148 163 184;
-  --color-primary: 248 250 252;
-  --color-primary-foreground: 2 6 23;
-  --color-secondary: 30 41 59;
-  --color-secondary-foreground: 248 250 252;
-  --color-border: 30 41 59;
-  --color-accent: 30 41 59;
-  --color-accent-foreground: 248 250 252;
+  --color-background: 10 10 10;
+  --color-foreground: 245 245 245;
+  --color-muted: 26 26 26;
+  --color-muted-foreground: 153 153 153;
+  --color-primary: 77 166 255;
+  --color-primary-foreground: 255 255 255;
+  --color-border: 51 51 51;
+  --color-accent: 26 26 26;
+  --color-accent-foreground: 245 245 245;
 }
