@@ -137,6 +137,14 @@ func runNodeCommand(args []string) {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
+	// Set NODE_PATH to find node_modules
+	execPath, _ := os.Executable()
+	if resolved, err := filepath.EvalSymlinks(execPath); err == nil {
+		execPath = resolved
+	}
+	nodeModulesPath := filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight", "node_modules")
+	cmd.Env = append(os.Environ(), "NODE_PATH="+nodeModulesPath)
+
 	err := cmd.Run()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
