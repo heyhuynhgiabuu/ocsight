@@ -1,3 +1,11 @@
+## [0.6.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.6.0...v0.6.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* update Go binary to find JS files in lib/ocsight for Homebrew ([3045c92](https://github.com/heyhuynhgiabuu/ocsight/commit/3045c922626c74befb9badc0fc30244b7cdfbeb8))
+* update Go binary to find JS files in lib/ocsight/lib for Homebrew ([ffa5084](https://github.com/heyhuynhgiabuu/ocsight/commit/ffa508473c07150485c0b1e3d526a322388d4500))
+
 # [0.6.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.5.2...v0.6.0) (2025-09-15)
 
 
