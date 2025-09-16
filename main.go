@@ -159,6 +159,7 @@ func getScriptPath() string {
 		filepath.Join(filepath.Dir(execPath), "lib", "index.js"),
 		filepath.Join(filepath.Dir(execPath), "src", "index.js"),
 		filepath.Join(filepath.Dir(execPath), "..", "lib", "index.js"),
+		filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight", "index.js"),
 		filepath.Join(filepath.Dir(execPath), "..", "src", "index.js"),
 		filepath.Join(filepath.Dir(execPath), "index.js"),
 	}
@@ -172,6 +173,7 @@ func getScriptPath() string {
 	// If no JavaScript file found, try to find any .js file
 	jsPaths := []string{
 		filepath.Join(filepath.Dir(execPath), "lib"),
+		filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight"),
 		filepath.Join(filepath.Dir(execPath), "..", "lib"),
 		filepath.Join(filepath.Dir(execPath)),
 	}
