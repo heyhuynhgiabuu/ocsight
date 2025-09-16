@@ -12,10 +12,17 @@ dist-cjs/
 dist-bundle/
 build/
 *.tsbuildinfo
+main-package/
+test-brew/
 
 # Binaries
 ocsight-*
+ocsight
 index
+test-*
+
+# Bun build cache files
+*.bun-build
 
 # Environment variables
 .env
@@ -131,3 +138,8 @@ docs/
 
 # Website (published separately)
 # ocsight-website/
+
+# Script files generated during build
+script/bump-version.js
+script/release.js
+script/release.ts
