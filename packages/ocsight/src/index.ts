@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { analyzeCommand } from "./commands/analyze.js";
-import { statsCommand } from "./commands/stats.js";
-import { exportCommand } from "./commands/export.js";
+import { analyzeCommand } from "./commands/analyze.ts";
+import { statsCommand } from "./commands/stats.ts";
+import { exportCommand } from "./commands/export.ts";
 
 declare const OCSIGHT_VERSION: string;
 

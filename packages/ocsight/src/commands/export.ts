@@ -1,13 +1,13 @@
 import { Command } from "commander";
 import { writeFileSync } from "fs";
 import { createObjectCsvWriter } from "csv-writer";
-import { loadAllData } from "../lib/data.js";
-import { filterSessions, calculateStatistics } from "../lib/analysis.js";
+import { loadAllData } from "../lib/data.ts";
+import { filterSessions, calculateStatistics } from "../lib/analysis.ts";
 import {
   OpenCodeData,
   UsageStatistics,
   OpenCodeSession,
-} from "../types/index.js";
+} from "../types/index.ts";
 
 export const exportCommand = new Command("export")
   .description("Export OpenCode usage data to CSV or JSON")

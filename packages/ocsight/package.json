@@ -1,18 +1,24 @@
 {
   "name": "ocsight",
-  "version": "0.6.5",
+  "version": "0.7.2",
   "description": "OpenCode ecosystem observability platform",
   "bin": {
     "ocsight": "ocsight"
   },
   "optionalDependencies": {
-    "ocsight-darwin-arm64": "0.6.5",
-    "ocsight-darwin-x64": "0.6.5",
-    "ocsight-linux-arm64": "0.6.5",
-    "ocsight-linux-x64": "0.6.5"
+    "@heyhuynhgiabuu/ocsight-darwin-arm64": "0.7.1",
+    "@heyhuynhgiabuu/ocsight-darwin-x64": "0.7.1",
+    "@heyhuynhgiabuu/ocsight-linux-arm64": "0.7.1",
+    "@heyhuynhgiabuu/ocsight-linux-x64": "0.7.1"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "bun@1.2.21"
+  "packageManager": "bun@1.2.21",
+  "scripts": {
+    "release": "node ../../script/bump-version.js",
+    "release:patch": "node ../../script/bump-version.js patch",
+    "release:minor": "node ../../script/bump-version.js minor",
+    "release:major": "node ../../script/bump-version.js major"
+  }
 }

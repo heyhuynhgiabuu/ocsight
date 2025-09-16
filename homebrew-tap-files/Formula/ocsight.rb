@@ -1,41 +1,45 @@
 class Ocsight < Formula
   desc "OpenCode ecosystem observability platform"
   homepage "https://github.com/heyhuynhgiabuu/ocsight"
-  url "https://github.com/heyhuynhgiabuu/ocsight/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "8b2c56258d79b6000d2b7cb06db14687d79791be6bcb35c16dc949ce5d687231"
-  license "MIT"
+  version "0.7.1"
 
-  depends_on "go" => :build
-  depends_on "node" => :build
+  on_macos do
+    if Hardware::CPU.intel?
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-darwin-x64.zip"
+      sha256 "8df951e3e4e25bf85f308e59c866d6a42a3bbd3c27d8048f6b38b008c9721d38"
 
-  def install
-    # Install Node.js dependencies
-    system "npm", "install"
+      def install
+        bin.install "ocsight"
+      end
+    end
+    if Hardware::CPU.arm?
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-darwin-arm64.zip"
+      sha256 "685a62f4949bbde3a0e2520914fa4751747072b555e705a9ebd4685c042fc45b"
 
-    # Build TypeScript
-    system "npm", "run", "build"
+      def install
+        bin.install "ocsight"
+      end
+    end
+  end
 
-    # Build Go binary for the current platform
-    system "go", "build", "-ldflags", "-X main.Version=v#{version}", "-o", "ocsight", "."
-
-    # Install binary
-    bin.install "ocsight"
-
-    # Install JavaScript files and dependencies that the Go binary needs
-    puts "Installing JS files: #{Dir['dist/lib/**/*'].length} files"
-    (lib/"ocsight").install Dir["dist/lib/**/*"]
-    (lib/"ocsight").install "dist/index.js"
-    (lib/"ocsight").install "package.json"
-    (lib/"ocsight").install "node_modules"
+  on_linux do
+    if Hardware::CPU.intel? and Hardware::CPU.is_64_bit?
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-linux-x64.zip"
+      sha256 "71e59c0cb39f9e9c3cfb84c66b321919753d5b6828e351ca4d08da602c308237"
+      def install
+        bin.install "ocsight"
+      end
+    end
+    if Hardware::CPU.arm? and Hardware::CPU.is_64_bit?
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-linux-arm64.zip"
+      sha256 "068bd1abf8b66a22790a29d84d7237a9260d7963c52d648a966852892d8b2616"
+      def install
+        bin.install "ocsight"
+      end
+    end
   end
 
   test do
-    assert_match "ocsight", shell_output("#{bin}/ocsight --version")
     assert_match "OpenCode ecosystem observability platform", shell_output("#{bin}/ocsight --help")
-  end
-
-  livecheck do
-    url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 end

@@ -1,8 +1,8 @@
 import { Command } from "commander";
-import { AnalyzeOptions } from "../types/index.js";
-import { loadAllData } from "../lib/data.js";
-import { filterSessions, calculateStatistics } from "../lib/analysis.js";
-import { formatStatsOutput } from "../lib/output.js";
+import { AnalyzeOptions } from "../types/index.ts";
+import { loadAllData } from "../lib/data.ts";
+import { filterSessions, calculateStatistics } from "../lib/analysis.ts";
+import { formatStatsOutput } from "../lib/output.ts";
 
 export const statsCommand = new Command("stats")
   .description("Show detailed statistics about OpenCode usage")
