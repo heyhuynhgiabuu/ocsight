@@ -1,8 +1,8 @@
 class Ocsight < Formula
   desc "OpenCode ecosystem observability platform"
   homepage "https://github.com/heyhuynhgiabuu/ocsight"
-  url "https://github.com/heyhuynhgiabuu/ocsight/archive/refs/tags/v0.6.0.tar.gz"
-  sha256 "869b2e2410bf342cde2f75c2d05ea1b1be560ab92de0c5033b884f6b9abf9d25"
+  url "https://github.com/heyhuynhgiabuu/ocsight/archive/refs/tags/v0.6.2.tar.gz"
+  sha256 "dc66d047a8cdcb4e7ee41ba22c98bf2ebd7cd2d731102323dd4ec00ecf7c858f"
   license "MIT"
 
   depends_on "go" => :build
@@ -21,9 +21,11 @@ class Ocsight < Formula
     # Install binary
     bin.install "ocsight"
 
-    # Install JavaScript files that the Go binary needs
+    # Install JavaScript files and dependencies that the Go binary needs
     (lib/"ocsight").install Dir["dist/lib/*"]
     (lib/"ocsight").install "dist/index.js"
+    (lib/"ocsight").install "package.json"
+    (lib/"ocsight").install "node_modules"
   end
 
   test do
