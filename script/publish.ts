@@ -34,7 +34,17 @@ await import(`../packages/ocsight/script/publish.ts`);
 console.log("\n=== release ===\n");
 
 if (!snapshot) {
-  await $`git commit -am "release: v${version}"`;
+  // Check if there are any changes to commit
+  const { exitCode: statusCode } =
+    await $`git diff --cached --exit-code`.nothrow();
+  const { exitCode: workingTreeCode } = await $`git diff --exit-code`.nothrow();
+
+  if (statusCode !== 0 || workingTreeCode !== 0) {
+    await $`git commit -am "release: v${version}"`;
+  } else {
+    console.log("No changes to commit, skipping commit step");
+  }
+
   await $`git tag v${version}`;
   await $`git fetch origin`;
   await $`git cherry-pick HEAD..origin/dev`.nothrow();
