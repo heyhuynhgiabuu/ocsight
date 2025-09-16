@@ -1,3 +1,16 @@
+# [0.7.0](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.6.2...v0.7.0) (2025-09-16)
+
+
+### Bug Fixes
+
+* install JS files recursively for Homebrew ([34d3281](https://github.com/heyhuynhgiabuu/ocsight/commit/34d3281ace90c48c3fd815b12740e37f5f41942e))
+* install node_modules and set NODE_PATH for Homebrew ([9c4b4ee](https://github.com/heyhuynhgiabuu/ocsight/commit/9c4b4ee971d9ead144cf55c248371cc3574601ab))
+
+
+### Features
+
+* implement binary distribution for npm/homebrew ([6c162bb](https://github.com/heyhuynhgiabuu/ocsight/commit/6c162bb3c8365c9a047e7fe0eb46ca1cc069d3b1))
+
 ## [0.6.2](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.6.1...v0.6.2) (2025-09-16)
 
 
