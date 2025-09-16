@@ -1,3 +1,10 @@
+## [0.6.2](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.6.1...v0.6.2) (2025-09-16)
+
+
+### Bug Fixes
+
+* complete Homebrew installation support ([f7c3c23](https://github.com/heyhuynhgiabuu/ocsight/commit/f7c3c232f75d02c5819dbcc4daaf8b99bfb06a5e))
+
 ## [0.6.1](https://github.com/heyhuynhgiabuu/ocsight/compare/v0.6.0...v0.6.1) (2025-09-16)
 
 
