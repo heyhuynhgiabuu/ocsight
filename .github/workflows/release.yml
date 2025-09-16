@@ -1,0 +1,56 @@
+name: release
+run-name: "${{ format('release {0}', inputs.bump) }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Bump major, minor, or patch"
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - name: Cache ~/.bun
+        id: cache-bun
+        uses: actions/cache@v3
+        with:
+          path: ~/.bun
+          key: ${{ runner.os }}-bun-1-2-21-${{ hashFiles('packages/ocsight/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-1-2-21-
+
+      - name: Install dependencies
+        run: bun install
+        working-directory: packages/ocsight
+
+      - name: Release
+        run: |
+          ./script/publish.ts
+        working-directory: packages/ocsight
+        env:
+          OCSIGHT_BUMP: ${{ inputs.bump }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
