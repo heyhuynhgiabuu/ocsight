@@ -12,7 +12,6 @@ dist-cjs/
 dist-bundle/
 build/
 *.tsbuildinfo
-main-package/
 test-brew/
 
 # Binaries
