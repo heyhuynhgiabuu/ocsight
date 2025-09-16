@@ -1,22 +1,29 @@
 class Ocsight < Formula
   desc "OpenCode ecosystem observability platform"
-  homepage "https://github.com/killerkidbo/ocsight"
-  url "https://github.com/killerkidbo/ocsight/archive/refs/tags/v0.5.2.tar.gz"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  homepage "https://github.com/heyhuynhgiabuu/ocsight"
+  url "https://github.com/heyhuynhgiabuu/ocsight/archive/refs/tags/v0.6.0.tar.gz"
+  sha256 "5b29db9566f2dffaebf7c3517ee22d5ceb91c5886e908dc852861d75eadbf109"
   license "MIT"
 
   depends_on "go" => :build
   depends_on "node" => :build
 
   def install
-    # Build Go binary
-    system "go", "build", *std_go_args(ldflags: "-s -w")
-    
-    # Copy JavaScript files
-    libexec.install Dir["lib/*"]
-    
-    # Update binary to find JavaScript files
-    bin.install_symlink "ocsight" => "ocsight"
+    # Install Node.js dependencies
+    system "npm", "install"
+
+    # Build TypeScript
+    system "npm", "run", "build"
+
+    # Build Go binary for the current platform
+    system "go", "build", "-ldflags", "-X main.Version=v#{version}", "-o", "ocsight", "."
+
+    # Install binary
+    bin.install "ocsight"
+
+    # Install JavaScript files that the Go binary needs
+    (lib/"ocsight").mkpath
+    cp_r Dir["dist/lib/**/*"], lib/"ocsight"
   end
 
   test do
