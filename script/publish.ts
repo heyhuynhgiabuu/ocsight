@@ -5,6 +5,7 @@ import { $ } from "bun";
 console.log("=== publishing ===\n");
 
 const snapshot = process.env["OCSIGHT_SNAPSHOT"] === "true";
+const dry = process.env["OCSIGHT_DRY"] === "true";
 const version = process.env["OCSIGHT_VERSION"] || "0.7.2";
 process.env["OCSIGHT_VERSION"] = version;
 console.log("version:", version);
@@ -29,7 +30,7 @@ await import(`${process.cwd()}/packages/ocsight/script/publish.ts`);
 
 console.log("\n=== release ===\n");
 
-if (!snapshot) {
+if (!snapshot && !dry) {
   // Check if there are any changes to commit
   const { exitCode: statusCode } =
     await $`git diff --cached --exit-code`.nothrow();
