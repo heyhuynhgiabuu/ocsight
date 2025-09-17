@@ -20,8 +20,13 @@ esbuild
     // Remove the problematic module.exports line at the end
     content = content.replace(/0 && \(module\.exports = \{[^}]*\}\);/g, '');
     
-    // Write back and add shebang
-    fs.writeFileSync("dist-bundle/index.js", "#!/usr/bin/env node\n" + content);
+    // Add shebang only if it doesn't already exist
+    if (!content.startsWith("#!/usr/bin/env node")) {
+      content = "#!/usr/bin/env node\n" + content;
+    }
+    
+    // Write back the content
+    fs.writeFileSync("dist-bundle/index.js", content);
     
     // Make executable
     fs.chmodSync("dist-bundle/index.js", "755");
