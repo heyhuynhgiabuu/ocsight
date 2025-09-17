@@ -2,14 +2,10 @@
 
 import { $ } from "bun";
 
-if (process.versions.bun !== "1.2.19") {
-  throw new Error("This script requires bun@1.2.19");
-}
-
 console.log("=== publishing ===\n");
 
 const snapshot = process.env["OCSIGHT_SNAPSHOT"] === "true";
-const version = process.env["OCSIGHT_VERSION"] || "0.7.1";
+const version = process.env["OCSIGHT_VERSION"] || "0.7.2";
 process.env["OCSIGHT_VERSION"] = version;
 console.log("version:", version);
 
@@ -17,8 +13,8 @@ const pkgjsons = await Array.fromAsync(
   new Bun.Glob("**/package.json").scan({
     absolute: true,
   }),
-).then((arr) =>
-  arr.filter((x) => !x.includes("node_modules") && !x.includes("dist")),
+).then((arr: string[]) =>
+  arr.filter((x: string) => !x.includes("node_modules") && !x.includes("dist")),
 );
 
 for (const file of pkgjsons) {
@@ -29,7 +25,7 @@ for (const file of pkgjsons) {
 }
 
 console.log("\n=== ocsight ===\n");
-await import(`../packages/ocsight/script/publish.ts`);
+await import(`./packages/ocsight/script/publish.ts`);
 
 console.log("\n=== release ===\n");
 
@@ -87,5 +83,12 @@ if (!snapshot) {
       })
       .join("\n") || "No notable changes";
 
-  await $`gh release create v${version} --title "v${version}" --notes ${notes} ./packages/ocsight/dist/*.zip`;
+  const zipFiles = [
+    "./packages/ocsight/dist/ocsight-linux-arm64.zip",
+    "./packages/ocsight/dist/ocsight-linux-x64.zip",
+    "./packages/ocsight/dist/ocsight-darwin-x64.zip",
+    "./packages/ocsight/dist/ocsight-darwin-arm64.zip",
+  ].join(" ");
+
+  await $`gh release create v${version} --title "v${version}" --notes ${notes} ${zipFiles}`;
 }

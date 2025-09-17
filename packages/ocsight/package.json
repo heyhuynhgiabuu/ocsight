@@ -2,23 +2,45 @@
   "name": "ocsight",
   "version": "0.7.2",
   "description": "OpenCode ecosystem observability platform",
+  "main": "dist/index.js",
   "bin": {
-    "ocsight": "ocsight"
+    "ocsight": "dist/index.js"
   },
-  "optionalDependencies": {
-    "@heyhuynhgiabuu/ocsight-darwin-arm64": "0.7.1",
-    "@heyhuynhgiabuu/ocsight-darwin-x64": "0.7.1",
-    "@heyhuynhgiabuu/ocsight-linux-arm64": "0.7.1",
-    "@heyhuynhgiabuu/ocsight-linux-x64": "0.7.1"
+  "scripts": {
+    "build": "bun run build.ts",
+    "dev": "bun run src/index.ts",
+    "test": "bun test"
   },
+  "keywords": [
+    "opencode",
+    "observability",
+    "analytics",
+    "cli",
+    "mcp"
+  ],
+  "author": "heyhuynhgiabuu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heyhuynhgiabuu/ocsight.git"
+  },
+  "bugs": {
+    "url": "https://github.com/heyhuynhgiabuu/ocsight/issues"
+  },
+  "homepage": "https://github.com/heyhuynhgiabuu/ocsight#readme",
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "bun@1.2.21",
-  "scripts": {
-    "release": "node ../../script/bump-version.js",
-    "release:patch": "node ../../script/bump-version.js patch",
-    "release:minor": "node ../../script/bump-version.js minor",
-    "release:major": "node ../../script/bump-version.js major"
+  "devDependencies": {
+    "@types/bun": "^1.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.0",
+    "csv-writer": "^1.6.0",
+    "zod": "^3.22.0"
   }
 }
