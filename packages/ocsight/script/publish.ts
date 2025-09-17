@@ -29,7 +29,194 @@ for (const file of pkgjsons) {
 }
 
 console.log("\n=== ocsight ===\n");
-// Main publishing logic starts here
+
+const dir = new URL("..", import.meta.url).pathname;
+process.chdir(dir);
+
+import pkg from "../package.json";
+
+const dry = process.env["OCSIGHT_DRY"] === "true";
+
+// Store original directory for proper path resolution
+const originalDir = process.cwd();
+
+console.log(`publishing ${version}`);
+
+const targets = [
+  ["linux", "arm64"],
+  ["linux", "x64"],
+  ["darwin", "x64"],
+  ["darwin", "arm64"],
+];
+
+await $`rm -rf dist`;
+
+const optionalDependencies: Record<string, string> = {};
+const npmTag = snapshot ? "snapshot" : "latest";
+
+for (const [os, arch] of targets) {
+  console.log(`building ${os}-${arch}`);
+  const name = `@heyhuynhgiabuu/${pkg.name}-${os}-${arch}`;
+  await $`mkdir -p dist/${name}`;
+
+  // Build TypeScript to single binary using Bun
+  console.log(`Building for ${os}-${arch} to dist/${name}/ocsight`);
+
+  if (dry) {
+    console.log(`Dry run: creating dummy binary for ${os}-${arch}`);
+    // Create a dummy executable file for testing
+    await $`echo "#!/bin/bash\necho 'ocsight ${version} (dummy)'" > dist/${name}/ocsight && chmod +x dist/${name}/ocsight`;
+  } else {
+    console.log(`Compiling with target: bun-${os}-${arch}`);
+    const sourcePath = `${originalDir}/src/index.ts`;
+    console.log(`Building from: ${sourcePath}`);
+    await $`bun build --define OCSIGHT_VERSION="'${version}'" --compile --target=bun-${os}-${arch} --outfile=dist/${name}/ocsight ${sourcePath}`;
+  }
+  console.log(`Built dist/${name}/ocsight`);
+  await $`ls -la dist/${name}/ocsight`.nothrow();
+  console.log(`Binary exists at: ${process.cwd()}/dist/${name}/ocsight`);
+
+  // Run smoke test if on current platform and not dry run
+  if (
+    !dry &&
+    process.platform === (os === "windows" ? "win32" : os) &&
+    (process.arch === arch || (process.arch === "x64" && arch === "x64"))
+  ) {
+    console.log(`smoke test: running dist/${name}/ocsight --version`);
+    await $`./dist/${name}/ocsight --version`;
+  }
+
+  // @ts-ignore
+  await Bun.file(`dist/${name}/package.json`).write(
+    JSON.stringify(
+      {
+        name,
+        version,
+        os: [os === "windows" ? "win32" : os],
+        cpu: [arch],
+      },
+      null,
+      2,
+    ),
+  );
+
+  if (!dry) {
+    const otp = process.env["NPM_OTP"];
+    try {
+      const currentDir = process.cwd();
+      process.chdir(`dist/${name}`);
+      console.log(`Publishing ${name} with OTP...`);
+      await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`.trim();
+      console.log(`✅ Successfully published ${name}`);
+      process.chdir(currentDir);
+    } catch (error) {
+      console.log(`❌ Failed to publish ${name}: ${error}`);
+      process.chdir(originalDir);
+      // Don't continue with other packages if npm publish fails due to auth issues
+      if (error.toString().includes('EOTP') || error.toString().includes('E401')) {
+        throw error;
+      }
+    }
+  }
+  optionalDependencies[name] = version;
+}
+
+await $`mkdir -p ./dist/${pkg.name}`;
+// Copy the current platform's binary to the CLI package
+const currentPlatform = `${process.platform}-${process.arch}`;
+const platformMap: Record<string, string> = {
+  "darwin-arm64": "@heyhuynhgiabuu/ocsight-darwin-arm64",
+  "darwin-x64": "@heyhuynhgiabuu/ocsight-darwin-x64",
+  "linux-arm64": "@heyhuynhgiabuu/ocsight-linux-arm64",
+  "linux-x64": "@heyhuynhgiabuu/ocsight-linux-x64",
+  "win32-x64": "@heyhuynhgiabuu/ocsight-darwin-x64", // fallback for windows
+};
+const sourceDir =
+  platformMap[currentPlatform] || "@heyhuynhgiabuu/ocsight-darwin-arm64";
+console.log(`Attempting to copy from: dist/${sourceDir}/ocsight`);
+
+const sourceFile = `dist/${sourceDir}/ocsight`;
+console.log(`Checking if source file exists: ${sourceFile}`);
+try {
+  await $`ls -la ${sourceFile}`.nothrow();
+  console.log(`Source file found, copying...`);
+  await $`cp ${sourceFile} ./dist/${pkg.name}/ocsight`;
+} catch {
+  console.log(`Source file not found, looking for alternative locations...`);
+
+  // Try to find the binary by searching the dist directory
+  console.log(`Searching for binary in dist directory...`);
+  const { stdout } =
+    await $`find dist -name "ocsight" -type f | grep ${currentPlatform} | tail -1`;
+  const foundBinary = stdout.trim();
+  if (foundBinary) {
+    console.log(`Found binary at: ${foundBinary}`);
+    await $`cp ${foundBinary} ./dist/${pkg.name}/ocsight`;
+  } else {
+    throw new Error(`Could not find binary for platform ${currentPlatform}`);
+  }
+}
+// @ts-ignore
+await Bun.file(`./dist/${pkg.name}/package.json`).write(
+  JSON.stringify(
+    {
+      name: "@heyhuynhgiabuu/" + pkg.name + "-cli",
+      bin: {
+        [pkg.name]: `ocsight`,
+      },
+      version,
+      optionalDependencies,
+    },
+    null,
+    2,
+  ),
+);
+if (!dry) {
+  const otp = process.env["NPM_OTP"];
+  try {
+    const currentDir = process.cwd();
+    process.chdir(`./dist/${pkg.name}`);
+    console.log(`Publishing CLI package @heyhuynhgiabuu/${pkg.name}-cli with OTP...`);
+    await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`.trim();
+    console.log(`✅ Successfully published CLI package`);
+    process.chdir(currentDir);
+  } catch (error) {
+    console.log(`❌ Failed to publish CLI package: ${error}`);
+    process.chdir(originalDir);
+    if (error.toString().includes('EOTP') || error.toString().includes('E401')) {
+      throw error;
+    }
+  }
+}
+
+if (!snapshot) {
+  for (const key of Object.keys(optionalDependencies)) {
+    console.log(
+      `Zipping dist/${key} to ${key.replace("@heyhuynhgiabuu/", "")}.zip`,
+    );
+
+    const distPath = `dist/${key}`;
+    console.log(`Checking directory: ${distPath}`);
+
+    try {
+      await $`ls -la ${distPath}`;
+      console.log(`Directory found, proceeding with zip...`);
+
+      const currentDir = process.cwd();
+      process.chdir(distPath);
+      const zipName = key.replace("@heyhuynhgiabuu/", "");
+      console.log(`Creating zip file: ./dist/${zipName}.zip`);
+      await $`zip -r ${currentDir}/dist/${zipName}.zip *`;
+      process.chdir(currentDir);
+      console.log(`Successfully created ${zipName}.zip`);
+    } catch (error) {
+      console.log(`Failed to zip ${key}: ${error}`);
+      console.log(`Current working directory: ${process.cwd()}`);
+      console.log(`Available directories in dist:`);
+      await $`ls -la dist/`.nothrow();
+    }
+  }
+}
 
 console.log("\n=== release ===\n");
 
