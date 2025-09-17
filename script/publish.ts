@@ -29,6 +29,7 @@ console.log("\n=== ocsight ===\n");
 await import(`${process.cwd()}/packages/ocsight/script/publish.ts`);
 
 console.log("\n=== release ===\n");
+console.log("snapshot:", snapshot, "dry:", dry);
 
 if (!snapshot && !dry) {
   // Check if there are any changes to commit
