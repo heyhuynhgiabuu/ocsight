@@ -2,7 +2,20 @@
 
 set -e
 
-echo "Installing ocsight..."
+# Store original directory
+ORIG_DIR="$PWD"
+
+# Check if running as test mode
+if [ "$1" = "--test" ]; then
+    echo "Testing install script with local packages..."
+    VERSION="local"
+    ZIP_URL="file://$ORIG_DIR/ocsight-darwin-arm64.zip"
+    INSTALL_DIR="$ORIG_DIR/test-install"
+    mkdir -p "$INSTALL_DIR"
+    echo "Test mode enabled"
+else
+    echo "Installing ocsight..."
+fi
 
 # Detect platform
 OS="$(uname -s)"
@@ -35,17 +48,26 @@ case $ARCH in
 esac
 
 # Get latest version
-VERSION=$(curl -s https://api.github.com/repos/heyhuynhgiabuu/ocsight/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-if [ -z "$VERSION" ]; then
-    echo "Failed to get latest version"
-    exit 1
+if [ "$VERSION" != "local" ]; then
+    VERSION=$(curl -s https://api.github.com/repos/heyhuynhgiabuu/ocsight/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ -z "$VERSION" ]; then
+        echo "Failed to get latest version"
+        exit 1
+    fi
 fi
 
 echo "Installing ocsight $VERSION for $PLATFORM/$ARCH..."
 
 # Download and install
-ZIP_URL="https://github.com/heyhuynhgiabuu/ocsight/releases/download/$VERSION/ocsight-$PLATFORM-$ARCH.zip"
-INSTALL_DIR="$HOME/.local/bin"
+if [ "$VERSION" = "local" ]; then
+    ZIP_URL="file://$PWD/ocsight-$PLATFORM-$ARCH.zip"
+else
+    ZIP_URL="https://github.com/heyhuynhgiabuu/ocsight/releases/download/$VERSION/ocsight-$PLATFORM-$ARCH.zip"
+fi
+
+if [ "$VERSION" != "local" ]; then
+    INSTALL_DIR="$HOME/.local/bin"
+fi
 TEMP_DIR=$(mktemp -d)
 
 # Create install directory
@@ -53,12 +75,21 @@ mkdir -p "$INSTALL_DIR"
 
 # Download zip file
 echo "Downloading from $ZIP_URL..."
-curl -L -o "$TEMP_DIR/ocsight.zip" "$ZIP_URL"
+if [ "$VERSION" = "local" ]; then
+    cp "ocsight-$PLATFORM-$ARCH.zip" "$TEMP_DIR/ocsight.zip"
+else
+    curl -L -o "$TEMP_DIR/ocsight.zip" "$ZIP_URL"
+fi
 
 # Verify checksum if available
 echo "Verifying integrity..."
 cd "$TEMP_DIR"
-curl -s "https://github.com/heyhuynhgiabuu/ocsight/releases/download/$VERSION/checksums.txt" -o checksums.txt
+if [ "$VERSION" = "local" ]; then
+    CHECKSUMS_FILE="$ORIG_DIR/dist/checksums.txt"
+    cp "$CHECKSUMS_FILE" checksums.txt
+else
+    curl -L -s "https://github.com/heyhuynhgiabuu/ocsight/releases/download/$VERSION/checksums.txt" -o checksums.txt
+fi
 if command -v sha256sum >/dev/null 2>&1; then
     EXPECTED_SHA=$(grep "ocsight-$PLATFORM-$ARCH.zip" checksums.txt | cut -d' ' -f1)
     ACTUAL_SHA=$(sha256sum ocsight.zip | cut -d' ' -f1)
@@ -66,12 +97,15 @@ if command -v sha256sum >/dev/null 2>&1; then
         echo "Checksum verification failed!"
         echo "Expected: $EXPECTED_SHA"
         echo "Actual: $ACTUAL_SHA"
+        echo "This may indicate a corrupted download or tampered package."
+        echo "Please try downloading again or report this issue."
         rm -rf "$TEMP_DIR"
         exit 1
     fi
     echo "Checksum verified successfully"
 else
     echo "sha256sum not available, skipping checksum verification"
+    echo "WARNING: Installing without integrity verification is not recommended"
 fi
 
 # Extract zip

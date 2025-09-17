@@ -1,14 +1,14 @@
 class Ocsight < Formula
   desc "OpenCode ecosystem observability platform"
   homepage "https://github.com/heyhuynhgiabuu/ocsight"
-  version "0.7.1"
+  version "0.7.3"
 
   depends_on "node"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-darwin-x64.zip"
-      sha256 "8df951e3e4e25bf85f308e59c866d6a42a3bbd3c27d8048f6b38b008c9721d38"
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-darwin-x64.zip"
+      sha256 "be685031f298997b326c425472647780a207a173e91e8da8cc230d193eda28c0"
 
       def install
         libexec.install "ocsight"
@@ -17,8 +17,8 @@ class Ocsight < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-darwin-arm64.zip"
-      sha256 "685a62f4949bbde3a0e2520914fa4751747072b555e705a9ebd4685c042fc45b"
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-darwin-arm64.zip"
+      sha256 "6d02a715bc0b11b2b68ac76b5875c96840b164f9bc8d825681cde37a672344fe"
 
       def install
         libexec.install "ocsight"
@@ -30,8 +30,8 @@ class Ocsight < Formula
 
   on_linux do
     if Hardware::CPU.intel? and Hardware::CPU.is_64_bit?
-      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-linux-x64.zip"
-      sha256 "71e59c0cb39f9e9c3cfb84c66b321919753d5b6828e351ca4d08da602c308237"
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-linux-x64.zip"
+      sha256 "d19893b1e7589105115181083668bbe183224e04c8e10201d1a3a96ff301cd89"
       def install
         libexec.install "ocsight"
         libexec.install "bundle.js"
@@ -39,8 +39,8 @@ class Ocsight < Formula
       end
     end
     if Hardware::CPU.arm? and Hardware::CPU.is_64_bit?
-      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.1/ocsight-linux-arm64.zip"
-      sha256 "068bd1ab8b66a22790a29d84d7237a9260d7963c52d648a966852892d8b2616"
+      url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-linux-arm64.zip"
+      sha256 "277d2f3fa4cf22a8a3a44749bb0c153084e88d0133da48728805bdcfc520c001"
       def install
         libexec.install "ocsight"
         libexec.install "bundle.js"
