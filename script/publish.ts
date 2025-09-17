@@ -97,9 +97,15 @@ if (!snapshot && !dry) {
     "dist/checksums.txt",
   ].join(" ");
 
-  run(
-    `gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
-  );
+  if (process.argv.includes("--dry-run")) {
+    console.log(
+      `[DRY RUN] Would create release: gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
+    );
+  } else {
+    run(
+      `gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
+    );
+  }
 }
 
 export {};
