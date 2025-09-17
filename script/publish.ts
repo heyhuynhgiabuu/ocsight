@@ -84,10 +84,10 @@ if (!snapshot) {
       .join("\n") || "No notable changes";
 
   const zipFiles = [
-    "./packages/ocsight/dist/ocsight-linux-arm64.zip",
-    "./packages/ocsight/dist/ocsight-linux-x64.zip",
-    "./packages/ocsight/dist/ocsight-darwin-x64.zip",
-    "./packages/ocsight/dist/ocsight-darwin-arm64.zip",
+    "packages/ocsight/dist/ocsight-linux-arm64.zip",
+    "packages/ocsight/dist/ocsight-linux-x64.zip",
+    "packages/ocsight/dist/ocsight-darwin-x64.zip",
+    "packages/ocsight/dist/ocsight-darwin-arm64.zip",
   ].join(" ");
 
   await $`gh release create v${version} --title "v${version}" --notes ${notes} ${zipFiles}`;
