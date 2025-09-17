@@ -4,11 +4,28 @@ import { analyzeCommand } from "./commands/analyze.js";
 import { statsCommand } from "./commands/stats.js";
 import { exportCommand } from "./commands/export.js";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-const packageJson = JSON.parse(
-  readFileSync(join(process.cwd(), "package.json"), "utf8"),
-);
+// Declare the injected version variable for bundled builds
+declare const __PACKAGE_VERSION__: string;
+
+// Get version from multiple sources in order of preference
+let version = "0.7.3"; // fallback
+try {
+  // 1. Try injected version (for bundled version)
+  if (typeof __PACKAGE_VERSION__ !== "undefined") {
+    version = __PACKAGE_VERSION__;
+  } else {
+    // 2. Try reading from installed package (for ESM/npm)
+    const moduleDir = dirname(fileURLToPath(import.meta.url));
+    const packageJsonPath = join(moduleDir, "..", "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+    version = packageJson.version;
+  }
+} catch {
+  // Keep the fallback version
+}
 
 const program = new Command();
 
@@ -17,7 +34,7 @@ program
   .description(
     "OpenCode ecosystem observability platform - see everything happening in your OpenCode development",
   )
-  .version(packageJson.version);
+  .version(version);
 
 // Add all commands
 program.addCommand(analyzeCommand);

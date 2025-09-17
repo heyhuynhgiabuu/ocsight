@@ -6,20 +6,20 @@ class Ocsight < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-darwin-arm64.zip"
-      sha256 "e58d58dae76dcbd650da35e0bf35e5e59113168deab07c384d8107c54707e9c2"
+      sha256 "30f123b32e319ad32b9929017fd76ac54210cdc70f5b1364b093f4b29c6df8f4"
     else
       url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-darwin-x64.zip"
-      sha256 "bb7298162af7d4a32a14d6abafce39ef2ec494eb226772461e408d1afb8645a3"
+      sha256 "5f944a4bc3395d84e9768ec95c9f2abe64672397761d22a3cba282d54260a6b6"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-linux-arm64.zip"
-      sha256 "782ad98e72f112700208ceeb6f316b34dd36df7f92cca010c90febef235eb0a0"
+      sha256 "63bdd5320e0d940e7b81c664856c80a2d54ce84025efbe7d192b1ad65e7b15f1"
     else
       url "https://github.com/heyhuynhgiabuu/ocsight/releases/download/v0.7.3/ocsight-linux-x64.zip"
-      sha256 "e3d443e757a50776afc199125d8469eaf4f48e9586c8c333506b79a130880db6"
+      sha256 "fd15d563feaa3614cc8e61caa49bc1dc9f16f81151094055cfa2743cc30b7351"
     end
   end
 

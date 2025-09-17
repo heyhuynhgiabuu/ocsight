@@ -1,6 +1,9 @@
 const esbuild = require("esbuild");
 const fs = require("fs");
 
+// Read the package.json to get the version
+const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+
 esbuild
   .build({
     entryPoints: ["src/index.ts"],
@@ -12,6 +15,9 @@ esbuild
     minify: false,
     sourcemap: false,
     target: "node18",
+    define: {
+      "__PACKAGE_VERSION__": JSON.stringify(packageJson.version),
+    },
   })
   .then(() => {
     // Read the generated file

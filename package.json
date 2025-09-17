@@ -2,9 +2,9 @@
   "name": "ocsight",
   "version": "0.7.3",
   "description": "OpenCode ecosystem observability platform",
-  "main": "dist/index.js",
+  "main": "dist/lib/index.js",
   "bin": {
-    "ocsight": "dist/index.js"
+    "ocsight": "dist/lib/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
