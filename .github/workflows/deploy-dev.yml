@@ -81,18 +81,18 @@ jobs:
       - name: Build binaries (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          bun run build:bin
+          ./build.sh
           ls -la ocsight-*
 
       - name: Build binaries (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          bun run build:bin
+          ./build.sh
           ls -la ocsight-*
 
       - name: Test binary
         run: |
-          ./ocsight-macos-arm64 --help || ./ocsight-linux-x64 --help || echo "Binary test completed"
+          ./ocsight-darwin-arm64 --help || ./ocsight-linux-x64 --help || echo "Binary test completed"
 
   # Dry-run semantic-release to check what version would be released
   dry-run-release:

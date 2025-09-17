@@ -220,7 +220,7 @@ if (!snapshot) {
 
 console.log("\n=== release ===\n");
 
-if (!snapshot) {
+if (!snapshot && !dry) {
   // Check if there are any changes to commit
   const { exitCode: statusCode } =
     await $`git diff --cached --exit-code`.nothrow();

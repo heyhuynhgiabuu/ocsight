@@ -16,50 +16,66 @@ build() {
         suffix=".exe"
     fi
     
+    # Convert amd64 to x64 for consistency with package managers
+    local zip_arch=$arch
+    if [ "$arch" = "amd64" ]; then
+        zip_arch="x64"
+    fi
+    
     echo "Building for $os/$arch..."
     
     GOOS=$os GOARCH=$arch go build \
         -ldflags="-X 'main.Version=$VERSION'" \
         -o "dist/ocsight-$os-$arch$suffix" \
         .
+    
+    # Create zip package
+    echo "Creating zip package for $os/$zip_arch..."
+    local pkg_dir="dist/pkg/ocsight-$os-$zip_arch"
+    mkdir -p "$pkg_dir"
+    
+    # Copy binary as "ocsight" (without platform suffix)
+    cp "dist/ocsight-$os-$arch$suffix" "$pkg_dir/ocsight$suffix"
+    
+    # Also copy as bundle.js for Homebrew compatibility
+    cp dist-bundle/index.js "$pkg_dir/bundle.js"
+    
+    # Copy bundled JavaScript
+    mkdir -p "$pkg_dir/lib"
+    cp dist-bundle/index.js "$pkg_dir/lib/index.js"
+    
+    # Create zip
+    cd dist/pkg
+    zip -r "../ocsight-$os-$zip_arch.zip" "ocsight-$os-$zip_arch"
+    cd ../..
 }
 
 # Clean dist directory
-rm -rf dist
-mkdir -p dist
+rm -rf dist dist-bundle
+mkdir -p dist dist-bundle dist/pkg
 
-# Build binaries
+# Build TypeScript and bundle JavaScript
+echo "Building TypeScript and bundling JavaScript..."
+bun run prepack
+
+# Build binaries and create zips
 build darwin amd64
 build darwin arm64
 build linux amd64
 build linux arm64
 build windows amd64
 
-# Build TypeScript and copy JavaScript files to dist/lib
-echo "Building TypeScript..."
-bun run build
-
-echo "Copying JavaScript files..."
-mkdir -p dist/lib
-
-# Copy all JavaScript files from dist to dist/lib
-cp -r dist/*.js dist/lib/ 2>/dev/null || echo "Warning: No JavaScript files found in dist/"
-
-# Copy all directories from dist to dist/lib
-for dir in commands lib mcp types; do
-    if [ -d "dist/$dir" ]; then
-        cp -r "dist/$dir" "dist/lib/" 2>/dev/null || echo "Warning: Failed to copy $dir directory"
-    fi
-done
-
-# Copy package.json to dist/lib so JavaScript can find it
-cp package.json dist/lib/
-
-# Create checksums
+# Create checksums for zip files
 echo "Creating checksums..."
 cd dist
-sha256sum ocsight-* > checksums.txt
+sha256sum -- *.zip > checksums.txt
 cd ..
 
-echo "Build complete! Binaries available in dist/"
+# Clean up temporary directories
+rm -rf dist/pkg
+
+echo "Build complete! Packages available in dist/"
 echo "Version: $VERSION"
+echo ""
+echo "Packages created:"
+ls -la dist/*.zip

@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
 func main() {
@@ -137,14 +136,6 @@ func runNodeCommand(args []string) {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
-	// Set NODE_PATH to find node_modules
-	execPath, _ := os.Executable()
-	if resolved, err := filepath.EvalSymlinks(execPath); err == nil {
-		execPath = resolved
-	}
-	nodeModulesPath := filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight", "node_modules")
-	cmd.Env = append(os.Environ(), "NODE_PATH="+nodeModulesPath)
-
 	err := cmd.Run()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
@@ -167,14 +158,10 @@ func getScriptPath() string {
 		execPath = resolved
 	}
 
-	// Try multiple paths for JavaScript entry point
+	// Try bundled JS first (for self-contained distribution)
 	paths := []string{
 		filepath.Join(filepath.Dir(execPath), "lib", "index.js"),
-		filepath.Join(filepath.Dir(execPath), "src", "index.js"),
-		filepath.Join(filepath.Dir(execPath), "..", "lib", "index.js"),
-		filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight", "lib", "index.js"),
-		filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight", "index.js"),
-		filepath.Join(filepath.Dir(execPath), "..", "src", "index.js"),
+		filepath.Join(filepath.Dir(execPath), "..", "libexec", "index.js"),
 		filepath.Join(filepath.Dir(execPath), "index.js"),
 	}
 
@@ -184,22 +171,16 @@ func getScriptPath() string {
 		}
 	}
 
-	// If no JavaScript file found, try to find any .js file
-	jsPaths := []string{
-		filepath.Join(filepath.Dir(execPath), "lib"),
-		filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight", "lib"),
-		filepath.Join(filepath.Dir(execPath), "..", "lib", "ocsight"),
-		filepath.Join(filepath.Dir(execPath), "..", "lib"),
-		filepath.Join(filepath.Dir(execPath)),
+	// Fallback to development paths
+	devPaths := []string{
+		filepath.Join(filepath.Dir(execPath), "src", "index.js"),
+		filepath.Join(filepath.Dir(execPath), "..", "src", "index.js"),
+		filepath.Join(filepath.Dir(execPath), "..", "lib", "index.js"),
 	}
 
-	for _, dir := range jsPaths {
-		if files, err := os.ReadDir(dir); err == nil {
-			for _, file := range files {
-				if !file.IsDir() && strings.HasSuffix(file.Name(), ".js") {
-					return filepath.Join(dir, file.Name())
-				}
-			}
+	for _, path := range devPaths {
+		if _, err := os.Stat(path); err == nil {
+			return path
 		}
 	}
 

@@ -1,68 +1,71 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
-import { $ } from "bun";
+import { execSync } from "child_process";
+import { readFileSync, writeFileSync } from "fs";
+import { join } from "path";
 
 console.log("=== publishing ===\n");
 
 const snapshot = process.env["OCSIGHT_SNAPSHOT"] === "true";
 const dry = process.env["OCSIGHT_DRY"] === "true";
-const version = process.env["OCSIGHT_VERSION"] || "0.7.2";
+const version =
+  process.env["OCSIGHT_VERSION"] ||
+  JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")).version;
 process.env["OCSIGHT_VERSION"] = version;
 console.log("version:", version);
 
-const pkgjsons = await Array.fromAsync(
-  new Bun.Glob("**/package.json").scan({
-    absolute: true,
-  }),
-).then((arr: string[]) =>
-  arr.filter((x: string) => !x.includes("node_modules") && !x.includes("dist")),
-);
-
-for (const file of pkgjsons) {
-  let pkg = await Bun.file(file).text();
-  pkg = pkg.replaceAll(/"version": "[^"]+"/g, `"version": "${version}"`);
-  console.log("updated:", file);
-  await Bun.file(file).write(pkg);
+function run(cmd: string, cwd?: string): string {
+  return execSync(cmd, { cwd, encoding: "utf8" }).trim();
 }
 
-console.log("\n=== ocsight ===\n");
-await import(`${process.cwd()}/packages/ocsight/script/publish.ts`);
+async function fetchJson(url: string, options?: any): Promise<any> {
+  const { default: fetch } = await import("node-fetch");
+  const response = await fetch(url, options);
+  return response.json();
+}
+
+// Update package.json version
+const pkgPath = join(process.cwd(), "package.json");
+const pkgContent = readFileSync(pkgPath, "utf8");
+const updatedPkg = pkgContent.replace(
+  new RegExp(`"version": "[^"]+"`, "g"),
+  `"version": "${version}"`,
+);
+writeFileSync(pkgPath, updatedPkg);
+console.log("updated: package.json");
+
+console.log("\n=== building ===\n");
+run("bun run prepack");
+run(`./build.sh`);
 
 console.log("\n=== release ===\n");
-console.log("snapshot:", snapshot, "dry:", dry);
 
 if (!snapshot && !dry) {
   // Check if there are any changes to commit
-  const { exitCode: statusCode } =
-    await $`git diff --cached --exit-code`.nothrow();
-  const { exitCode: workingTreeCode } = await $`git diff --exit-code`.nothrow();
-
-  if (statusCode !== 0 || workingTreeCode !== 0) {
-    await $`git commit -am "release: v${version}"`;
-  } else {
-    console.log("No changes to commit, skipping commit step");
+  try {
+    run("git diff --cached --exit-code");
+    run("git diff --exit-code");
+  } catch (e) {
+    run(`git commit -am "release: v${version}"`);
   }
 
-  await $`git tag v${version}`;
-  await $`git fetch origin`;
-  await $`git cherry-pick HEAD..origin/dev`.nothrow();
-  await $`git push origin HEAD --tags --no-verify --force`;
+  run(`git tag -f v${version}`);
+  run("git fetch origin");
+  try {
+    run("git cherry-pick HEAD..origin/develop");
+  } catch (e) {
+    console.log("No changes to cherry-pick from origin/develop");
+  }
+  run("git push origin HEAD --tags --no-verify --force");
 
-  const previous = await fetch(
+  const previous = await fetchJson(
     "https://api.github.com/repos/heyhuynhgiabuu/ocsight/releases/latest",
-  )
-    .then((res) => {
-      if (!res.ok) throw new Error(res.statusText);
-      return res.json();
-    })
-    .then((data) => data.tag_name);
+  ).then((data: any) => data.tag_name);
 
   console.log("finding commits between", previous, "and", "HEAD");
-  const commits = await fetch(
+  const commits = await fetchJson(
     `https://api.github.com/repos/heyhuynhgiabuu/ocsight/compare/${previous}...HEAD`,
-  )
-    .then((res) => res.json())
-    .then((data) => data.commits || []);
+  ).then((data: any) => data.commits || []);
 
   const raw = commits.map(
     (commit: any) => `- ${commit.commit.message.split("\n").join(" ")}`,
@@ -86,11 +89,17 @@ if (!snapshot && !dry) {
       .join("\n") || "No notable changes";
 
   const zipFiles = [
-    "packages/ocsight/dist/ocsight-linux-arm64.zip",
-    "packages/ocsight/dist/ocsight-linux-x64.zip",
-    "packages/ocsight/dist/ocsight-darwin-x64.zip",
-    "packages/ocsight/dist/ocsight-darwin-arm64.zip",
+    "dist/ocsight-linux-arm64.zip",
+    "dist/ocsight-linux-x64.zip",
+    "dist/ocsight-darwin-x64.zip",
+    "dist/ocsight-darwin-arm64.zip",
+    "dist/ocsight-windows-x64.zip",
+    "dist/checksums.txt",
   ].join(" ");
 
-  await $`gh release create v${version} --title "v${version}" --notes ${notes} ${zipFiles}`;
+  run(
+    `gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
+  );
 }
+
+export {};
