@@ -11,7 +11,7 @@ import { fileURLToPath } from "url";
 declare const __PACKAGE_VERSION__: string;
 
 // Get version from multiple sources in order of preference
-let version = "0.7.3"; // fallback
+let version = "0.7.4"; // fallback
 try {
   // 1. Try injected version (for bundled version)
   if (typeof __PACKAGE_VERSION__ !== "undefined") {
