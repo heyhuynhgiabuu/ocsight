@@ -25,7 +25,7 @@ for (const file of pkgjsons) {
 }
 
 console.log("\n=== ocsight ===\n");
-await import(`./packages/ocsight/script/publish.ts`);
+await import(`${process.cwd()}/packages/ocsight/script/publish.ts`);
 
 console.log("\n=== release ===\n");
 

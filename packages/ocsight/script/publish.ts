@@ -106,7 +106,7 @@ for (const [os, arch] of targets) {
       const currentDir = process.cwd();
       process.chdir(`dist/${name}`);
       console.log(`Publishing ${name} with OTP...`);
-      await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`.trim();
+      await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`;
       console.log(`✅ Successfully published ${name}`);
       process.chdir(currentDir);
     } catch (error) {
@@ -177,7 +177,7 @@ if (!dry) {
     const currentDir = process.cwd();
     process.chdir(`./dist/${pkg.name}`);
     console.log(`Publishing CLI package @heyhuynhgiabuu/${pkg.name}-cli with OTP...`);
-    await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`.trim();
+    await $`npm publish --access public --tag ${npmTag} ${otp ? `--otp ${otp}` : ""}`;
     console.log(`✅ Successfully published CLI package`);
     process.chdir(currentDir);
   } catch (error) {
@@ -232,7 +232,7 @@ if (!snapshot) {
     console.log("No changes to commit, skipping commit step");
   }
 
-  await $`git tag v${version}`;
+  await $`git tag -f v${version}`;
   await $`git fetch origin`;
   await $`git cherry-pick HEAD..origin/dev`.nothrow();
   await $`git push origin HEAD --tags --no-verify --force`;
