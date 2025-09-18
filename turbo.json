@@ -4,6 +4,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "lib/**"]
     },
+    "bundle": {
+      "dependsOn": ["build"],
+      "outputs": ["dist-bundle/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -12,7 +16,7 @@
       "dependsOn": ["build"]
     },
     "package": {
-      "dependsOn": ["build"],
+      "dependsOn": ["bundle"],
       "outputs": ["dist-bundle/**"]
     },
     "clean": {

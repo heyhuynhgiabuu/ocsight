@@ -39,11 +39,16 @@ build() {
     # Copy binary as "ocsight" (without platform suffix)
     cp "dist/ocsight-$os-$arch$suffix" "$pkg_dir/ocsight$suffix"
     
+    # Bundle the CLI with dependencies
+    echo "Bundling CLI dependencies..."
+    (cd packages/cli && bun run bundle)
+
     # Copy bundled JavaScript from CLI package
     mkdir -p "$pkg_dir/lib"
-    cp packages/cli/dist/index.js "$pkg_dir/bundle.js"
-    cp packages/cli/dist/index.js "$pkg_dir/lib/index.js"
-    cp -r packages/cli/dist/lib/*.js "$pkg_dir/lib/"
+    cp packages/cli/dist/index.cjs "$pkg_dir/bundle.cjs"
+    cp packages/cli/dist/index.cjs "$pkg_dir/lib/index.cjs"
+    chmod +x "$pkg_dir/bundle.cjs"
+    chmod +x "$pkg_dir/lib/index.cjs"
     
     # Create zip
     cd dist/pkg
@@ -62,8 +67,15 @@ bun run build
 # Create bundle directory for CLI
 echo "Creating JavaScript bundle..."
 mkdir -p dist-bundle/lib
-cp packages/cli/dist/index.js dist-bundle/index.js
-cp -r packages/cli/dist/lib/*.js dist-bundle/lib/
+
+# Bundle the CLI with dependencies
+echo "Bundling CLI dependencies..."
+cd packages/cli
+bun run bundle
+cd ../..
+
+cp packages/cli/dist/index.cjs dist-bundle/index.cjs
+cp packages/cli/dist/index.cjs dist-bundle/lib/bundle.cjs
 
 # Build binaries and create zips
 build darwin amd64
