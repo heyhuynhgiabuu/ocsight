@@ -6,7 +6,7 @@
     },
     "bundle": {
       "dependsOn": ["build"],
-      "outputs": ["dist-bundle/**"]
+      "outputs": ["dist-bundle/**", "lib/**"]
     },
     "dev": {
       "cache": false,
