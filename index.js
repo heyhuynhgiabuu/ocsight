@@ -2,4 +2,4 @@
 
 // Main entry point for ocsight
 // Delegates to the CLI package
-require("@heyhuynhgiabuu/ocsight-cli");
+import("@heyhuynhgiabuu/ocsight-cli");
