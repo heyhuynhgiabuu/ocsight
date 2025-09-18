@@ -52,7 +52,7 @@ jobs:
         run: ./build.sh
 
       - name: Release
-        run: bun run script/publish.ts
+        run: bun run scripts/publish.ts
         env:
           OCSIGHT_BUMP: ${{ inputs.bump }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

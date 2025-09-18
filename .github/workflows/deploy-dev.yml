@@ -36,14 +36,15 @@ jobs:
 
       - name: Test CLI commands
         run: |
-          node dist/index.js --help
-          node dist/index.js analyze --help
-          node dist/index.js stats --help
-          node dist/index.js export --help
+          node index.js --help
+          node index.js analyze --help
+          node index.js stats --help
+          node index.js export --help
 
       - name: Test MCP server startup
         run: |
-          timeout 5s node dist/mcp/server.js || true
+          cd packages/mcp && bun run build
+          timeout 5s node dist/server.js || true
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
