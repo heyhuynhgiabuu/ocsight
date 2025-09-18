@@ -104,11 +104,20 @@ if (!snapshot && !dry) {
 
   if (process.argv.includes("--dry-run")) {
     console.log(
-      `[DRY RUN] Would publish npm package and create release: gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
+      `[DRY RUN] Would publish npm packages and create release: gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
     );
   } else {
-    // Publish npm package first
-    console.log("📦 Publishing npm package...");
+    // Publish workspace packages first
+    console.log("📦 Publishing workspace packages...");
+    run(
+      `npm publish packages/cli --access public --otp=${process.env.NPM_OTP || ""}`,
+    );
+    run(
+      `npm publish packages/mcp --access public --otp=${process.env.NPM_OTP || ""}`,
+    );
+
+    // Publish main npm package
+    console.log("📦 Publishing main npm package...");
     run(`npm publish --access public --otp=${process.env.NPM_OTP || ""}`);
 
     // Create GitHub release
