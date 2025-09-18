@@ -24,10 +24,12 @@ build() {
     
     echo "Building for $os/$arch..."
     
+    cd packages/distribution/go
     GOOS=$os GOARCH=$arch go build \
         -ldflags="-X 'main.Version=$VERSION'" \
-        -o "dist/ocsight-$os-$arch$suffix" \
+        -o "../../../dist/ocsight-$os-$arch$suffix" \
         .
+    cd ../../..
     
     # Create zip package
     echo "Creating zip package for $os/$zip_arch..."
@@ -37,12 +39,11 @@ build() {
     # Copy binary as "ocsight" (without platform suffix)
     cp "dist/ocsight-$os-$arch$suffix" "$pkg_dir/ocsight$suffix"
     
-    # Also copy as bundle.js for Homebrew compatibility
-    cp dist-bundle/index.js "$pkg_dir/bundle.js"
-    
-    # Copy bundled JavaScript
+    # Copy bundled JavaScript from CLI package
     mkdir -p "$pkg_dir/lib"
-    cp dist-bundle/index.js "$pkg_dir/lib/index.js"
+    cp packages/cli/dist/index.js "$pkg_dir/bundle.js"
+    cp packages/cli/dist/index.js "$pkg_dir/lib/index.js"
+    cp -r packages/cli/dist/lib/*.js "$pkg_dir/lib/"
     
     # Create zip
     cd dist/pkg
@@ -54,9 +55,15 @@ build() {
 rm -rf dist dist-bundle
 mkdir -p dist dist-bundle dist/pkg
 
-# Build TypeScript and bundle JavaScript
-echo "Building TypeScript and bundling JavaScript..."
-bun run prepack
+# Build TypeScript packages first
+echo "Building TypeScript packages..."
+bun run build
+
+# Create bundle directory for CLI
+echo "Creating JavaScript bundle..."
+mkdir -p dist-bundle/lib
+cp packages/cli/dist/index.js dist-bundle/index.js
+cp -r packages/cli/dist/lib/*.js dist-bundle/lib/
 
 # Build binaries and create zips
 build darwin amd64

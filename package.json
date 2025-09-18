@@ -1,20 +1,22 @@
 {
   "name": "ocsight",
-  "version": "0.7.4",
+  "version": "0.7.6",
   "description": "OpenCode ecosystem observability platform",
-  "main": "dist/lib/index.js",
+  "main": "index.js",
   "bin": {
-    "ocsight": "dist/lib/index.js"
+    "ocsight": "index.js"
   },
+  "packageManager": "bun@1.2.19",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "bundle": "node esbuild.config.cjs",
-    "prepack": "bun run build && bun run bundle && mkdir -p dist/lib && cp dist-bundle/index.js dist/lib/index.js",
-    "dev": "bun run src/index.ts",
-    "test": "bun test",
-    "release:patch": "bun run script/publish.ts",
-    "release:minor": "bun run script/publish.ts",
-    "release:major": "bun run script/publish.ts"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "package": "turbo package",
+    "clean": "turbo clean",
+    "prepack": "turbo build"
   },
   "keywords": [
     "opencode",
@@ -25,22 +27,20 @@
   ],
   "author": "OpenCode",
   "license": "MIT",
-  "dependencies": {
-    "commander": "^11.0.0",
-    "node-fetch": "^3.3.2"
-  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
   "devDependencies": {
     "@types/node": "^20.0.0",
     "bun-types": "latest",
-    "esbuild": "^0.19.0",
+    "turbo": "^2.0.0",
     "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "files": [
-    "dist/**/*",
-    "README.md",
-    "LICENSE"
-  ]
+  "dependencies": {
+    "@heyhuynhgiabuu/ocsight-cli": "^0.7.6"
+  }
 }

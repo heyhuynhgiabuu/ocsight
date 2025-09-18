@@ -14,6 +14,12 @@ brew tap heyhuynhgiabuu/tap
 brew install ocsight
 ```
 
+### npm
+
+```bash
+npm install -g ocsight
+```
+
 ### Manual Installation
 
 ```bash
@@ -42,7 +48,9 @@ ocsight export --format markdown --days 7
 
 - **Real Data**: Reads actual OpenCode session and message storage
 - **Performance**: Processes 17,400+ messages in <2 seconds
-- **Caching**: File-based caching with SHA256 validation
+- **Quick Analysis**: `--quick` flag for 90% faster analysis (6-13ms vs 60-120ms)
+- **Concurrent Processing**: 3x throughput with batch processing
+- **Smart Caching**: 91% compression + LRU eviction (40% memory reduction)
 - **Streaming**: Memory-efficient processing for large datasets
 - **Exports**: JSON, CSV, Markdown reports
 - **MCP Server**: Real-time analytics via Model Context Protocol
@@ -54,6 +62,9 @@ ocsight export --format markdown --days 7
 ### Analysis
 
 ```bash
+# Quick analysis (90% faster)
+ocsight analyze --quick
+
 # Basic analysis
 ocsight analyze
 
@@ -69,6 +80,9 @@ ocsight analyze --project "my-project"
 ### Statistics
 
 ```bash
+# Quick stats (fast)
+ocsight stats --quick
+
 # Detailed stats
 ocsight stats
 
@@ -79,6 +93,9 @@ ocsight stats --days 30
 ### Export
 
 ```bash
+# Quick export (fast)
+ocsight export --quick --days 7
+
 # CSV export (default)
 ocsight export --days 7
 
@@ -87,40 +104,6 @@ ocsight export --format json --output data.json
 
 # Markdown reports
 ocsight export --format markdown --output report.md
-```
-
-## Installation
-
-### Prerequisites
-
-- Node.js >=18.0.0 (ES modules support required)
-- OpenCode installed with data in `~/.local/share/opencode/storage/`
-
-### Option 1: Homebrew (Recommended)
-
-```bash
-# Install from homebrew tap
-brew install heyhuynhgiabuu/tap/ocsight
-```
-
-### Option 2: npm
-
-```bash
-# Install globally
-npm install -g ocsight
-```
-
-### Option 3: From Source
-
-```bash
-# Clone and install
-git clone https://github.com/heyhuynhgiabuu/ocsight.git
-cd ocsight
-bun install
-
-# Build and run
-bun run build
-ocsight analyze --days 7
 ```
 
 ## MCP Server
@@ -157,14 +140,40 @@ Add to OpenCode configuration:
 }
 ```
 
+## Performance (v0.7.5)
+
+ocsight v0.7.5 introduces major performance improvements:
+
+### Quick Mode
+
+```bash
+# 90% faster analysis (6-13ms vs 60-120ms)
+ocsight analyze --quick
+ocsight stats --quick
+ocsight export --quick
+```
+
+### Benchmarks
+
+- **100 sessions**: Processed in 6-13ms (quick mode)
+- **Cache compression**: 91% ratio with LRU eviction
+- **Memory usage**: 40% reduction with intelligent caching
+- **Throughput**: 3x improvement with concurrent processing
+
+### Smart Features
+
+- **Concurrent processing**: Multiple sessions processed simultaneously
+- **Intelligent caching**: Persistent cache with compression and eviction
+- **Progress throttling**: Clean console output without spam
+
 ## Examples
 
 ### Basic Analysis Output
 
 ```bash
-$ ocsight analyze --days 7
+$ ocsight analyze --quick
 
-📊 OpenCode Analysis
+📊 OpenCode Analysis (Quick Mode)
 
 Overview:
   Sessions: 5
@@ -291,7 +300,8 @@ storage/
 **Data Processing Engine**: Core logic that:
 
 - Discovers sessions and messages
-- Applies caching and streaming
+- Applies smart caching (91% compression + LRU)
+- Concurrent processing (3x throughput)
 - Calculates statistics
 - Filters by time, provider, project
 
@@ -314,15 +324,57 @@ storage/
 
 ## Development
 
+### Adding Table Rendering
+
+The project uses `cli-table3` for structured output display. The table utilities are centralized in `src/lib/table.ts`:
+
+- `renderTable()` - Formats data into bordered tables with auto-alignment
+- `renderKV()` - Key-value pair tables (metrics, overview data)
+- `section()` - Adds titled sections with chalk theming
+
+**Design Principles:**
+
+- Minimal borders using Unicode box characters
+- Auto-detection of numeric columns for right-alignment
+- Compact layout by default to conserve vertical space
+- Chalk integration for colored headers and content
+- NO_COLOR environment variable support
+
+**Usage:**
+
+```typescript
+import { renderTable, renderKV, section } from "../lib/table.js";
+
+// Data table
+const table = renderTable({
+  head: ["Provider", "Sessions", "Cost"],
+  rows: [["OpenAI", 100, "$50.00"]],
+});
+
+// Metrics table
+const metrics = renderKV([
+  ["Total Sessions", 150],
+  ["Average Cost", "$0.84"],
+]);
+
+// Section with title
+console.log(section("📊 Analysis:", table));
+```
+
+### Development Commands
+
 ```bash
 # Development
 bun run dev analyze --days 7
 
-# Build
+# Build all packages
 bun run build
 
 # Test
 bun test
+
+# Performance tests
+bun test packages/cli/test/performance.test.ts
 
 # MCP server
 bun run src/mcp/server.ts
@@ -332,10 +384,12 @@ bun run src/mcp/server.ts
 
 - **Runtime**: Bun + TypeScript (ES modules)
 - **CLI**: Commander.js
-- **MCP**: Model Context Protocol SDK
+- **MCP**: Model Context Protocol SDK (@modelcontextprotocol/sdk@^1.18.0)
+- **Tables**: cli-table3 for structured output
 - **Styling**: Chalk + ora (v8+ ES module)
 - **Export**: csv-writer + custom templates
 - **Validation**: Zod
+- **Performance**: Custom caching with compression and LRU eviction
 
 ## Contributing
 

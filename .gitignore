@@ -107,6 +107,7 @@ out/
 *.db
 *.sqlite
 *.sqlite3
+opencode-export-*.json
 
 # MCP server specific
 .mcp/

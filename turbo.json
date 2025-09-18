@@ -1,0 +1,22 @@
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "lib/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "package": {
+      "dependsOn": ["build"],
+      "outputs": ["dist-bundle/**"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
