@@ -41,6 +41,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@heyhuynhgiabuu/ocsight-cli": "^0.7.6"
+    "@heyhuynhgiabuu/ocsight-cli": "^0.7.6",
+    "@modelcontextprotocol/sdk": "^1.18.0"
   }
 }

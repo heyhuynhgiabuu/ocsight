@@ -1,7 +1,4 @@
-import {
-  McpServer,
-  ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp";
+import { McpServer } from "@modelcontextprotocol/sdk";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
 import { z } from "zod";
 import {
@@ -22,7 +19,7 @@ async function main() {
   // Build index on startup
   await buildIndex();
 
-  // Expose aggregated data as MCP resources
+  // List resources handler
   server.registerResource(
     "metrics-summary",
     "ocsight://metrics/summary",
@@ -46,7 +43,7 @@ async function main() {
 
   server.registerResource(
     "session-detail",
-    new ResourceTemplate("ocsight://sessions/{id}", { list: undefined }),
+    "ocsight://sessions/{id}",
     {
       title: "Session detail",
       description: "Detailed session by ID",
@@ -98,12 +95,14 @@ async function main() {
   );
 
   // Expose analytical queries as MCP tools
-  server.tool(
+  server.registerTool(
     "usage_summary",
-    "Aggregate usage with optional day and provider filters",
     {
-      days: z.number().min(1).max(365).optional(),
-      provider: z.string().optional(),
+      title: "Aggregate usage with optional day and provider filters",
+      inputSchema: {
+        days: z.number().min(1).max(365).optional(),
+        provider: z.string().optional(),
+      },
     },
     async ({ days, provider }) => {
       const data = computeUsageSummary({ days, provider });
@@ -111,12 +110,14 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "top_sessions",
-    "Get highest usage sessions sorted by tokens or cost",
     {
-      limit: z.number().min(1).max(100).default(10),
-      sort: z.enum(["tokens", "cost"]).default("tokens"),
+      title: "Get highest usage sessions sorted by tokens or cost",
+      inputSchema: {
+        limit: z.number().min(1).max(100).default(10),
+        sort: z.enum(["tokens", "cost"]).default("tokens"),
+      },
     },
     async ({ limit = 10, sort = "tokens" }) => {
       const sessions = getSessionsArray();
@@ -140,10 +141,12 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "refresh_index",
-    "Force rebuild of the usage data index",
-    {},
+    {
+      title: "Force rebuild of the usage data index",
+      inputSchema: {},
+    },
     async () => {
       const start = Date.now();
       await buildIndex();
@@ -166,10 +169,12 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "list_providers",
-    "Get list of all available providers in the data",
-    {},
+    {
+      title: "Get list of all available providers in the data",
+      inputSchema: {},
+    },
     async () => {
       const providers = listProviders();
       return {
@@ -186,13 +191,15 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "get_tool_usage",
-    "Get tool usage statistics with optional filtering",
     {
-      days: z.number().min(1).max(365).optional(),
-      provider: z.string().optional(),
-      limit: z.number().min(1).max(50).default(20),
+      title: "Get tool usage statistics with optional filtering",
+      inputSchema: {
+        days: z.number().min(1).max(365).optional(),
+        provider: z.string().optional(),
+        limit: z.number().min(1).max(50).default(20),
+      },
     },
     async ({ days, provider, limit = 20 }) => {
       const stats = computeUsageSummary({ days, provider });
@@ -222,11 +229,13 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "get_daily_stats",
-    "Get daily usage statistics for a time period",
     {
-      days: z.number().min(1).max(90).default(30),
+      title: "Get daily usage statistics for a time period",
+      inputSchema: {
+        days: z.number().min(1).max(90).default(30),
+      },
     },
     async ({ days = 30 }) => {
       const stats = computeUsageSummary({ days });
