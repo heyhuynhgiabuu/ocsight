@@ -41,7 +41,7 @@ build() {
     
     # Bundle the CLI with dependencies
     echo "Bundling CLI dependencies..."
-    (cd packages/cli && bun run bundle)
+    (cd packages/cli && bun run bundle-cli)
 
     # Copy bundled JavaScript from CLI package
     mkdir -p "$pkg_dir/lib"
@@ -68,11 +68,9 @@ bun run build
 echo "Creating JavaScript bundle..."
 mkdir -p dist-bundle/lib
 
-# Bundle the CLI with dependencies
-echo "Bundling CLI dependencies..."
-cd packages/cli
-bun run bundle-cli
-cd ../..
+    # Bundle the CLI with dependencies
+    echo "Bundling CLI dependencies..."
+    (cd packages/cli && bun run bundle-cli)
 
 cp packages/cli/dist/index.cjs dist-bundle/index.cjs
 cp packages/cli/dist/index.cjs dist-bundle/lib/bundle.cjs
