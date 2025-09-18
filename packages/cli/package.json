@@ -1,6 +1,6 @@
 {
   "name": "@heyhuynhgiabuu/ocsight-cli",
-  "version": "0.7.10",
+  "version": "0.7.11",
   "description": "OpenCode ecosystem observability CLI",
   "type": "module",
   "main": "dist/index.js",
