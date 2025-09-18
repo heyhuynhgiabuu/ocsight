@@ -34,6 +34,9 @@ jobs:
       - name: Build project
         run: bun run build
 
+      - name: Bundle CLI
+        run: bun run bundle-cli
+
       - name: Run tests
         run: bun test --coverage
 

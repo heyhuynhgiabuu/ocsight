@@ -6,7 +6,7 @@
     },
     "bundle-cli": {
       "dependsOn": ["build"],
-      "outputs": ["dist-bundle/**", "lib/**"]
+      "outputs": ["dist-bundle/**", "lib/**", "packages/cli/dist/**"]
     },
     "dev": {
       "cache": false,
@@ -16,7 +16,7 @@
       "dependsOn": ["build"]
     },
     "package": {
-      "dependsOn": ["bundle"],
+      "dependsOn": ["bundle-cli"],
       "outputs": ["dist-bundle/**"]
     },
     "clean": {
