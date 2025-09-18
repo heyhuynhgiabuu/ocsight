@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { execSync } from "child_process";
-import { readFileSync, writeFileSync } from "fs";
-import { join } from "path";
-import { createHash } from "crypto";
+const { execSync } = require("child_process");
+const { readFileSync, writeFileSync } = require("fs");
+const { join } = require("path");
+const { createHash } = require("crypto");
 
 async function updateHomebrew(version) {
   console.log(`🍺 Updating Homebrew formula to v${version}...`);
@@ -104,15 +104,15 @@ async function updateHomebrew(version) {
 }
 
 // Export for use in publish.ts
-export { updateHomebrew };
+module.exports = { updateHomebrew };
 
 // Allow direct execution
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (require.main === module) {
   const version = process.argv[2] || process.env.OCSIGHT_VERSION;
   if (!version) {
-    console.error("Usage: node scripts/update-homebrew.js <version>");
+    console.error("Usage: node scripts/update-homebrew.cjs <version>");
     console.error(
-      "   or: OCSIGHT_VERSION=x.x.x node scripts/update-homebrew.js",
+      "   or: OCSIGHT_VERSION=x.x.x node scripts/update-homebrew.cjs",
     );
     process.exit(1);
   }
