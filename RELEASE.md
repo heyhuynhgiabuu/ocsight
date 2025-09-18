@@ -19,13 +19,13 @@ This project uses manual release scripts for better control over the release pro
 
 ```bash
 # Patch release (1.0.0 → 1.0.1)
-NPM_OTP=123456 node scripts/bump-version.js patch
+NPM_OTP=123456 node scripts/bump-version.cjs patch
 
 # Minor release (1.0.0 → 1.1.0)
-NPM_OTP=123456 node scripts/bump-version.js minor
+NPM_OTP=123456 node scripts/bump-version.cjs minor
 
 # Major release (1.0.0 → 2.0.0)
-NPM_OTP=123456 node scripts/bump-version.js major
+NPM_OTP=123456 node scripts/bump-version.cjs major
 ```
 
 ### What the Scripts Do
@@ -107,7 +107,7 @@ git tag v1.2.3 <commit-hash>
 git push origin v1.2.3
 
 # Manual Homebrew update
-OCSIGHT_VERSION=1.2.3 node scripts/update-homebrew.js
+OCSIGHT_VERSION=1.2.3 node scripts/update-homebrew.cjs
 ```
 
 ### Build Failures

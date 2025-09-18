@@ -25,7 +25,7 @@ async function fetchJson(url: string, options?: any): Promise<any> {
 }
 
 async function updateHomebrew(version: string) {
-  const { updateHomebrew } = await import("./update-homebrew.js");
+  const { updateHomebrew } = await import("./update-homebrew.cjs");
   await updateHomebrew(version);
 }
 
