@@ -10,7 +10,7 @@ async function main() {
 
   if (!version) {
     console.error(
-      "Usage: node script/bump-version.js <major|minor|patch|version>",
+      "Usage: node scripts/bump-version.js <major|minor|patch|version>",
     );
     process.exit(1);
   }
@@ -54,10 +54,7 @@ async function main() {
           // Fallback to local package.json if npm command fails
           try {
             const localPackage = JSON.parse(
-              fs.readFileSync(
-                path.join(projectRoot, "packages/ocsight/package.json"),
-                "utf8",
-              ),
+              fs.readFileSync(path.join(projectRoot, "package.json"), "utf8"),
             );
             resolve(localPackage.version);
           } catch (error) {
@@ -70,10 +67,7 @@ async function main() {
         // Fallback to local package.json if spawn fails
         try {
           const localPackage = JSON.parse(
-            fs.readFileSync(
-              path.join(projectRoot, "packages/ocsight/package.json"),
-              "utf8",
-            ),
+            fs.readFileSync(path.join(projectRoot, "package.json"), "utf8"),
           );
           resolve(localPackage.version);
         } catch (err) {
@@ -106,24 +100,27 @@ async function main() {
 
   // Update package files
   const packageFiles = [
-    "test-brew/package.json",
-    "packages/ocsight/package.json", 
-    "website/package.json",
+    "package.json",
+    "packages/cli/package.json",
+    "packages/mcp/package.json",
+    "packages/web/package.json",
   ];
 
   for (const file of packageFiles) {
     const filePath = path.join(projectRoot, file);
-    const pkg = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    pkg.version = newVersion;
-    fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2));
-    console.log(`Updated ${file}`);
+    if (fs.existsSync(filePath)) {
+      const pkg = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      pkg.version = newVersion;
+      fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2) + "\n");
+      console.log(`Updated ${file}`);
+    }
   }
 
   // Run publish script
   console.log("📦 Running publish script...");
   const publishProcess = spawn(
     "bun",
-    [path.join(projectRoot, "script/publish.ts")],
+    [path.join(projectRoot, "scripts/publish.ts")],
     {
       env: {
         ...process.env,

@@ -47,7 +47,7 @@ jobs:
       - name: Test MCP server startup
         run: |
           cd packages/mcp && bun run build
-          timeout 5s node dist/server.js || true
+          timeout 5s bun run dist/server.js || true
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
