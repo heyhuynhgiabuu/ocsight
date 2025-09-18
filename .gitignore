@@ -23,6 +23,9 @@ test-*
 # Bun build cache files
 *.bun-build
 
+# Turbo cache
+.turbo/
+
 # Environment variables
 .env
 .env.local
