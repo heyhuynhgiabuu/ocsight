@@ -77,6 +77,10 @@ cd ../..
 cp packages/cli/dist/index.cjs dist-bundle/index.cjs
 cp packages/cli/dist/index.cjs dist-bundle/lib/bundle.cjs
 
+# Copy bundled CLI to root lib directory for npm package
+mkdir -p lib
+cp packages/cli/dist/index.cjs lib/bundle.cjs
+
 # Build binaries and create zips
 build darwin amd64
 build darwin arm64

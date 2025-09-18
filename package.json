@@ -30,6 +30,7 @@
   "license": "MIT",
   "files": [
     "index.js",
+    "lib/",
     "README.md"
   ],
   "devDependencies": {
