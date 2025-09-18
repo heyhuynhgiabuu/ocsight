@@ -2,6 +2,7 @@
   "name": "ocsight",
   "version": "0.7.6",
   "description": "OpenCode ecosystem observability platform",
+  "type": "module",
   "main": "index.js",
   "bin": {
     "ocsight": "index.js"

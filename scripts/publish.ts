@@ -24,6 +24,11 @@ async function fetchJson(url: string, options?: any): Promise<any> {
   return response.json();
 }
 
+async function updateHomebrew(version: string) {
+  const { updateHomebrew } = await import("./update-homebrew.js");
+  await updateHomebrew(version);
+}
+
 // Update package.json version
 const pkgPath = join(process.cwd(), "package.json");
 const pkgContent = readFileSync(pkgPath, "utf8");
@@ -110,6 +115,10 @@ if (!snapshot && !dry) {
     run(
       `gh release create v${version} --title "v${version}" --notes "${notes}" ${zipFiles}`,
     );
+
+    // Update Homebrew formula
+    console.log("🍺 Updating Homebrew formula...");
+    await updateHomebrew(version);
   }
 }
 

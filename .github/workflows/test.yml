@@ -39,6 +39,9 @@ jobs:
 
       - name: Test CLI commands
         run: |
+          # Ensure CLI is built and executable
+          chmod +x index.js
+          node index.js --version
           node index.js --help
           node index.js analyze --help
           node index.js stats --help
