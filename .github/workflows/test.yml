@@ -14,6 +14,9 @@ jobs:
         node-version: [18, 20]
 
     steps:
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -47,7 +50,7 @@ jobs:
           timeout 5s node dist/server.js || true
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: matrix.node-version == '20'
         with:
           file: ./coverage/lcov.info

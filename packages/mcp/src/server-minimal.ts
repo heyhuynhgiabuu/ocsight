@@ -1,5 +1,5 @@
-import { McpServer } from "@modelcontextprotocol/sdk";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
 const server = new McpServer({
@@ -12,7 +12,7 @@ server.registerTool(
   {
     title: "Echo Tool",
     description: "Echo back the provided message",
-    inputSchema: { message: "string" },
+    inputSchema: { message: z.string() },
   },
   async ({ message }) => {
     return { content: [{ type: "text", text: `Echo: ${message}` }] };

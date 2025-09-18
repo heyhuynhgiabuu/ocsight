@@ -12,7 +12,7 @@ server.registerTool(
   {
     title: "Echo Tool",
     description: "Echo back the provided message",
-    inputSchema: { message: "string" },
+    inputSchema: { message: z.string() },
   },
   async ({ message }) => {
     return { content: [{ type: "text", text: `Echo: ${message}` }] };
