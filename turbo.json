@@ -4,7 +4,7 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "lib/**"]
     },
-    "bundle": {
+    "bundle-cli": {
       "dependsOn": ["build"],
       "outputs": ["dist-bundle/**", "lib/**"]
     },

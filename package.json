@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "bundle-cli": "turbo bundle-cli",
     "test": "turbo test",
     "package": "turbo package",
     "clean": "turbo clean",

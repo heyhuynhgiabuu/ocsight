@@ -71,7 +71,7 @@ mkdir -p dist-bundle/lib
 # Bundle the CLI with dependencies
 echo "Bundling CLI dependencies..."
 cd packages/cli
-bun run bundle
+bun run bundle-cli
 cd ../..
 
 cp packages/cli/dist/index.cjs dist-bundle/index.cjs
