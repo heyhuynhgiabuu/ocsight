@@ -15,6 +15,11 @@
 
 Tools must be designed for agents, not humans. Build few high-impact tools that match natural workflows, return only high-signal context, and optimize for token efficiency. More tools ≠ better outcomes.
 
+## DEVELOPMENT ENVIRONMENT
+
+- Use **Bun** as the primary package manager and runtime for development (not npm)
+- All scripts and development workflows are optimized for Bun's performance
+
 ## OPENCODE INTEGRATION
 
 Plugins hook into OpenCode events using TypeScript modules in `.opencode/plugin` directory. Export async functions that receive context ({ project, client, $, directory, worktree }) and return hooks for events like "session.created", "tool.execute.after", etc.

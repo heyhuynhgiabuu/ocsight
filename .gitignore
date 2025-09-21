@@ -137,7 +137,7 @@ logs
 *.log 
 
 # Documentation
-docs/
+# docs/
 
 # Website (published separately)
 # ocsight-website/

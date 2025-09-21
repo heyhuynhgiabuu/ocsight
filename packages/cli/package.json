@@ -35,7 +35,7 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^18.0.0",
     "bun-types": "latest",
     "typescript": "^5.0.0"
   },

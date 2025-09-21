@@ -23,7 +23,7 @@ class Ocsight < Formula
     end
   end
 
-  depends_on "node"
+  depends_on "node" => ">=18"
 
   def install
     libexec.install Dir["*"]
