@@ -10,23 +10,81 @@
         "description": {
           "type": "string"
         },
-        "order": {
-          "type": "number"
+        "template": {
+          "type": "string",
+          "enum": [
+            "splash",
+            "default"
+          ]
         },
-        "category": {
-          "type": "string"
+        "hero": {
+          "type": "object",
+          "properties": {
+            "tagline": {
+              "type": "string"
+            },
+            "actions": {
+              "type": "array"
+            }
+          },
+          "additionalProperties": false
         },
-        "draft": {
-          "type": "boolean",
-          "default": false
+        "editUrl": {
+          "type": "boolean"
+        },
+        "lastUpdated": {
+          "type": "boolean"
+        },
+        "prev": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "link": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "link": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
         },
         "$schema": {
           "type": "string"
         }
       },
       "required": [
-        "title",
-        "description"
+        "title"
       ],
       "additionalProperties": false
     }

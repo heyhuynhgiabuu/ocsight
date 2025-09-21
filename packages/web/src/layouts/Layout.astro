@@ -1,6 +1,10 @@
 ---
 import '../styles/tokens.css'
 import '../styles/brutalist.css'
+import CustomHeader from '../components/base/CustomHeader.astro'
+import CustomFooter from '../components/base/CustomFooter.astro'
+import SkipLink from '../components/base/SkipLink.astro'
+import SEO from '../components/base/SEO.astro'
 
 export interface Props {
   title?: string;
@@ -8,22 +12,45 @@ export interface Props {
 }
 
 const { title = "ocsight - OpenCode Observability", description = "OpenCode observability platform. See everything happening in your OpenCode development." } = Astro.props;
+// Canonical URL generation - available for future use
+// const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 ---
 
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-<head>
+  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="generator" content={Astro.generator} />
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <meta name="theme-color" content="#000000" />
-  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <SEO title={title} description={description} />
+  <script is:inline>
+    const doc = document;
+    const root = doc.documentElement;
+    const store = globalThis?.localStorage;
+    const pref = globalThis?.matchMedia?.('(prefers-color-scheme: dark)');
+    const saved = store?.getItem('theme');
+    const mode = saved === 'light' || saved === 'dark' ? saved : pref?.matches ? 'dark' : 'light';
+    if (mode) {
+      root.setAttribute('data-theme', mode);
+    }
+  </script>
 </head>
-<body class="min-h-screen bg-background text-foreground font-mono antialiased">
+  <body class="min-h-screen bg-background text-foreground font-mono antialiased">
+  <SkipLink />
+
   <div class="relative flex min-h-screen flex-col">
-    <slot />
+    <slot name="header">
+      <CustomHeader />
+    </slot>
+
+    <main id="main-content" role="main">
+      <slot />
+    </main>
+
+    <slot name="footer"> 
+      <CustomFooter />
+    </slot>
   </div>
 </body>
 </html>

@@ -1,14 +1,28 @@
 :root {
-  /* Clean color palette - opencode.ai/docs inspired */
-  --color-background: 255 255 255;
-  --color-foreground: 26 26 26;
-  --color-muted: 245 245 245;
-  --color-muted-foreground: 102 102 102;
-  --color-primary: 0 102 204;
+  /* Enhanced brutalist color palette - ocsight design system */
+  --ocsight-primary: 0 0 0;
+  --ocsight-secondary: 102 102 102;
+  --ocsight-accent: 255 107 107;
+  --ocsight-background: 255 255 255;
+  --ocsight-surface: 248 249 250;
+  --ocsight-text: 33 37 41;
+  --ocsight-border: 222 226 230;
+
+  /* Legacy color variables for compatibility */
+  --color-background: var(--ocsight-background);
+  --color-foreground: var(--ocsight-text);
+  --color-muted: var(--ocsight-surface);
+  --color-muted-foreground: var(--ocsight-secondary);
+  --color-primary: var(--ocsight-primary);
   --color-primary-foreground: 255 255 255;
-  --color-border: 229 229 229;
-  --color-accent: 245 245 245;
-  --color-accent-foreground: 26 26 26;
+  --color-border: var(--ocsight-border);
+  --color-accent: var(--ocsight-accent);
+  --color-accent-foreground: var(--ocsight-text);
+  --color-secondary: var(--ocsight-surface);
+  --color-secondary-foreground: var(--ocsight-text);
+  --color-destructive: 239 68 68;
+  --color-destructive-foreground: 255 255 255;
+  --color-overlay: 15 15 15 / 0.65;
 
   /* Typography - clean monospace */
   --font-family-mono:
@@ -25,6 +39,7 @@
   --font-size-5xl: 3rem;
   --line-height-tight: 1.2;
   --line-height-normal: 1.6;
+  --line-height-relaxed: 1.75;
 
   /* Spacing - brutalist */
   --space-px: 1px;
@@ -77,6 +92,8 @@
   --border-style: solid;
   --border-color: rgb(var(--color-border));
   --border-radius: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
 
   /* Shadow - minimal */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -100,16 +117,45 @@
   /* Transitions */
   --transition-duration: 150ms;
   --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Enhanced spacing for brutalist design */
+  --space-72: 18rem;
+  --space-80: 20rem;
+  --space-96: 24rem;
+
+  /* Enhanced typography scale */
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+
+  /* Enhanced border widths for brutalist emphasis */
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+
+  /* Enhanced shadows for depth */
+  --shadow-brutal: 0 4px 0 0 rgb(0 0 0 / 0.1);
+  --shadow-brutal-dark: 0 4px 0 0 rgb(255 255 255 / 0.1);
 }
 
 [data-theme="dark"] {
-  --color-background: 10 10 10;
-  --color-foreground: 245 245 245;
-  --color-muted: 26 26 26;
-  --color-muted-foreground: 153 153 153;
-  --color-primary: 77 166 255;
-  --color-primary-foreground: 255 255 255;
-  --color-border: 51 51 51;
-  --color-accent: 26 26 26;
-  --color-accent-foreground: 245 245 245;
+  --ocsight-background: 26 26 26;
+  --ocsight-surface: 45 45 45;
+  --ocsight-text: 255 255 255;
+  --ocsight-border: 64 64 64;
+
+  /* Legacy color variables for compatibility */
+  --color-background: var(--ocsight-background);
+  --color-foreground: var(--ocsight-text);
+  --color-muted: var(--ocsight-surface);
+  --color-muted-foreground: 163 163 163;
+  --color-primary: 255 255 255;
+  --color-primary-foreground: 15 15 15;
+  --color-border: var(--ocsight-border);
+  --color-accent: var(--ocsight-surface);
+  --color-accent-foreground: var(--ocsight-text);
+  --color-secondary: var(--ocsight-surface);
+  --color-secondary-foreground: 245 245 245;
+  --color-destructive: 248 113 113;
+  --color-destructive-foreground: 15 15 15;
+  --color-overlay: 250 250 250 / 0.65;
 }

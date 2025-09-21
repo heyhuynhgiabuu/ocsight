@@ -6,10 +6,12 @@ export interface Props {
 }
 
 const { title, icon, class: className = '' } = Astro.props;
+
+const base = 'flex flex-col gap-3 rounded-sm border border-border bg-background px-6 py-8 text-left shadow-brutal transition-transform hover:-translate-y-1 hover:shadow-md';
 ---
 
-<div data-slot="card" class={`flex flex-col items-center text-center transition-all hover:shadow-lg ${className}`}>
-  <span class="text-4xl mb-4">{icon}</span>
-  <h3 class="text-xl font-semibold text-foreground mb-2">{title}</h3>
-  <slot />
+<div data-slot="card" class={`${base} ${className}`}>
+  <span class="text-3xl">{icon}</span>
+  <h3 class="text-xl font-semibold text-foreground">{title}</h3>
+  <div class="text-muted-foreground"><slot /></div>
 </div>

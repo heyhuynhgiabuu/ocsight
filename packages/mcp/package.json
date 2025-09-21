@@ -1,6 +1,6 @@
 {
   "name": "@heyhuynhgiabuu/ocsight-mcp",
-  "version": "0.7.13",
+  "version": "0.7.14",
   "description": "OpenCode observability MCP server",
   "main": "dist/server.js",
   "scripts": {

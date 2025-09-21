@@ -22,7 +22,7 @@ import Label from './Label.astro'
     </div>
     <Button type="submit" variant="primary">Run Command</Button>
   </form>
-  <div id="cli-output" class="mt-6">
+  <div id="cli-output" class="mt-6" aria-live="polite">
     <pre class="text-sm bg-muted p-4 overflow-auto">$ <span class="text-muted-foreground">Ready to execute commands...</span></pre>
   </div>
 </div>

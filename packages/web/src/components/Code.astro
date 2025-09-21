@@ -2,9 +2,204 @@
 export interface Props {
   code: string;
   lang?: string;
+  title?: string;
+  highlightLines?: number[];
+  showLineNumbers?: boolean;
+  copyable?: boolean;
+  collapsible?: boolean;
 }
 
-const { code, lang = 'javascript' } = Astro.props;
+const { 
+  code, 
+  lang = 'javascript', 
+  title,
+  highlightLines = [],
+  showLineNumbers = true,
+  copyable = true,
+  collapsible = false 
+} = Astro.props;
 ---
 
-<pre class="bg-muted p-4 rounded overflow-x-auto text-sm font-mono"><code class={`language-${lang}`}>{code}</code></pre>
+<div class="code-block-container" data-slot="code-block">
+  {title && (
+    <div class="code-block-header">
+      <span class="code-block-title">{title}</span>
+      {collapsible && (
+        <button class="code-block-toggle" aria-label="Toggle code" aria-expanded="true">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
+    </div>
+  )}
+  
+  <div class="code-block-content relative">
+    <pre 
+      class="code-block-pre bg-muted p-4 rounded overflow-x-auto text-sm font-mono border"
+      data-language={lang}
+      data-line-numbers={showLineNumbers}
+      data-highlight-lines={highlightLines.join(',')}
+    ><code class={`language-${lang}`}>{code}</code></pre>
+    
+    {copyable && (
+      <button 
+        class="code-copy-button absolute top-2 right-2 p-2 rounded bg-background border border-border hover:bg-muted transition-colors"
+        data-copy-text={code}
+        aria-label="Copy code"
+        title="Copy to clipboard"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      </button>
+    )}
+  </div>
+</div>
+
+<style>
+  .code-block-container {
+    @apply mb-6;
+  }
+  
+  .code-block-header {
+    @apply flex items-center justify-between px-4 py-2 bg-muted border-b border-border rounded-t;
+  }
+  
+  .code-block-title {
+    @apply font-mono text-sm font-medium text-foreground;
+  }
+  
+  .code-block-content {
+    @apply relative;
+  }
+  
+  .code-block-pre {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    margin: 0;
+    background-color: rgb(var(--color-muted));
+    border: var(--border-width) var(--border-style) rgb(var(--color-border));
+    border-radius: var(--border-radius);
+    padding: var(--space-4);
+    overflow-x: auto;
+  }
+  
+  .code-block-pre code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    background: transparent;
+    color: rgb(var(--color-foreground));
+    padding: 0;
+  }
+  
+  /* Line highlighting */
+  .code-block-pre[data-highlight-lines] .line-highlight {
+    background-color: rgba(var(--color-primary), 0.1);
+    border-left: 3px solid rgb(var(--color-primary));
+    margin-left: calc(-1 * var(--space-4));
+    padding-left: calc(var(--space-4) - 3px);
+  }
+  
+  .code-copy-button {
+    @apply opacity-70 hover:opacity-100 transition-opacity;
+  }
+  
+  .code-copy-button.copied {
+    @apply opacity-100;
+  }
+  
+  /* Collapsible state */
+  .code-block-container.collapsed .code-block-content {
+    @apply hidden;
+  }
+  
+  .code-block-container.collapsed .code-block-toggle svg {
+    transform: rotate(-90deg);
+  }
+</style>
+
+<script>
+  // Copy functionality with feedback
+  document.querySelectorAll('.code-copy-button').forEach(button => {
+    button.addEventListener('click', async () => {
+      const text = button.dataset.copyText;
+      if (!text) return;
+      
+      try {
+        await navigator.clipboard.writeText(text);
+        button.classList.add('copied');
+        
+        // Show feedback
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        button.setAttribute('aria-label', 'Copied!');
+        
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.classList.remove('copied');
+          button.setAttribute('aria-label', 'Copy code');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          button.classList.add('copied');
+          const originalHTML = button.innerHTML;
+          button.innerHTML = '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+          
+          setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('copied');
+          }, 2000);
+        } catch (fallbackErr) {
+          console.error('Fallback copy failed:', fallbackErr);
+        }
+        
+        document.body.removeChild(textArea);
+      }
+    });
+  });
+  
+  // Collapsible functionality
+  document.querySelectorAll('.code-block-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const container = button.closest('.code-block-container');
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+      
+      container.classList.toggle('collapsed');
+      button.setAttribute('aria-expanded', (!isExpanded).toString());
+      
+      // Update icon
+      const svg = button.querySelector('svg');
+      if (svg) {
+        if (isExpanded) {
+          svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>';
+        } else {
+          svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>';
+        }
+      }
+    });
+  });
+  
+  // Keyboard navigation
+  document.querySelectorAll('.code-copy-button, .code-block-toggle').forEach(button => {
+    button.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        button.click();
+      }
+    });
+  });
+</script>
