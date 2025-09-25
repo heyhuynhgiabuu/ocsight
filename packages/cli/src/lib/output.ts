@@ -7,7 +7,7 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
   const lines: string[] = [];
 
   // Header
-  lines.push(chalk.bold("\n📊 OpenCode Usage Analysis\n"));
+  lines.push(chalk.bold("\nOpenCode Usage Analysis\n"));
 
   // Overview
   const overviewTable = renderKV([
@@ -38,10 +38,10 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
         `${costOpt.expensiveSessions.length} identified`,
       ],
     ]);
-    lines.push(section("💰 Cost Optimization Insights:", costTable));
+    lines.push(section("Cost Optimization Insights:", costTable));
 
     if (costOpt.costSavingSuggestions.length > 0) {
-      lines.push(chalk.yellow("💡 Cost saving suggestions:"));
+      lines.push(chalk.yellow("Cost saving suggestions:"));
       costOpt.costSavingSuggestions.forEach((suggestion, index) => {
         lines.push(`  ${index + 1}. ${suggestion}`);
       });
@@ -71,7 +71,7 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
         head: ["Tool", "Uses", "Success%", "Avg ms"],
         rows: toolRows,
       });
-      lines.push(section("🔧 Tool Efficiency Metrics:", toolTable));
+      lines.push(section("Tool Efficiency Metrics:", toolTable));
     }
   }
 
@@ -117,7 +117,7 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
         head: ["Project", "Sessions", "Total Cost"],
         rows: projectRows,
       });
-      lines.push(section("📁 Project Analysis:", projectsTable));
+      lines.push(section("Project Analysis:", projectsTable));
     }
 
     if (projectAnalysis.crossProjectComparison.mostActiveProject) {
@@ -139,7 +139,7 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
     }
   }
 
-  // Provider breakdown
+  // Provider breakdown with totals
   const providerRows = Object.entries(stats.sessionsByProvider)
     .sort(([, a], [, b]) => b - a)
     .map(([provider, sessions]) => {
@@ -153,9 +153,21 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
       ];
     });
 
+  const providerTotals = [
+    "TOTALS",
+    stats.totalSessions,
+    formatCostInDollars(stats.totalCostCents),
+    formatNumber(stats.totalTokens)
+  ];
+
   const providerTable = renderTable({
     head: ["Provider", "Sessions", "Cost", "Tokens"],
     rows: providerRows,
+    totals: providerTotals,
+    summary: [
+      ["Average per session", `$${(stats.totalCostCents / 100 / stats.totalSessions).toFixed(4)}`],
+      ["Providers used", Object.keys(stats.sessionsByProvider).length]
+    ]
   });
   lines.push(section("By Provider:", providerTable));
 
@@ -197,7 +209,7 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
 export function formatStatsOutput(stats: UsageStatistics): string {
   const lines: string[] = [];
 
-  lines.push(chalk.bold("\n📈 Detailed Statistics\n"));
+  lines.push(chalk.bold("\nDetailed Statistics\n"));
 
   // Sessions by provider
   const sessionRows = Object.entries(stats.sessionsByProvider)
@@ -283,10 +295,12 @@ export function formatStatsOutput(stats: UsageStatistics): string {
   return lines.join("\n");
 }
 
+const PROGRESS_BAR_WIDTH = 40;
+
 export function formatProgressBar(
   current: number,
   total: number,
-  width = 40,
+  width = PROGRESS_BAR_WIDTH,
 ): string {
   const percentage = Math.floor((current / total) * 100);
   const filled = Math.floor((current / total) * width);

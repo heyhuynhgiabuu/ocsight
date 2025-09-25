@@ -37,8 +37,11 @@ bun install && bun run build
 # Install and build
 bun install && bun run build
 
+# Live monitoring
+ocsight live
+
 # Analyze usage
-ocsight analyze
+ocsight analyze --quick
 
 # Export report
 ocsight export --format markdown --days 7
@@ -46,18 +49,31 @@ ocsight export --format markdown --days 7
 
 ## What It Does
 
+- **Live Monitoring**: Real-time dashboard with cost quota tracking
+- **Models Database**: 1000+ AI models with current pricing from models.dev
 - **Real Data**: Reads actual OpenCode session and message storage
 - **Performance**: Processes 17,400+ messages in <2 seconds
 - **Quick Analysis**: `--quick` flag for 90% faster analysis (6-13ms vs 60-120ms)
-- **Concurrent Processing**: 3x throughput with batch processing
 - **Smart Caching**: 91% compression + LRU eviction (40% memory reduction)
-- **Streaming**: Memory-efficient processing for large datasets
 - **Exports**: JSON, CSV, Markdown reports
 - **MCP Server**: Real-time analytics via Model Context Protocol
 - **Filtering**: By time, provider, model, project
 - **Cross-Platform**: Go binaries for macOS, Linux, and Windows
 
 ## Commands
+
+### Live Monitoring
+
+```bash
+# Start live dashboard
+ocsight live
+
+# Custom refresh rate and quota
+ocsight live --refresh 10 --quota 25.00 --quota-period monthly
+
+# Monitor specific session
+ocsight live --session ses_1234
+```
 
 ### Analysis
 
@@ -104,6 +120,35 @@ ocsight export --format json --output data.json
 
 # Markdown reports
 ocsight export --format markdown --output report.md
+```
+
+### Models Database
+
+```bash
+# Browse available models
+ocsight models list --provider openai --limit 10
+
+# Model details with cost calculation
+ocsight models show "anthropic/claude-3.5-sonnet" --calculate "10000,5000"
+
+# Compare two models
+ocsight models compare "openai/gpt-4o" "anthropic/claude-3.5-sonnet"
+
+# List providers
+ocsight models providers
+```
+
+### Configuration
+
+```bash
+# Initialize configuration
+ocsight config init
+
+# Show current settings
+ocsight config show
+
+# Validate configuration
+ocsight config doctor
 ```
 
 ## MCP Server
@@ -167,6 +212,33 @@ ocsight export --quick
 - **Progress throttling**: Clean console output without spam
 
 ## Examples
+
+### Live Monitoring Dashboard
+
+```bash
+$ ocsight live --quota 25.00
+
+OpenCode Live Dashboard
+Updated: 3:41:44 AM
+
+Current Session
+  Session ID: ses_67df
+  Total Tokens: 36.3M
+  Total Cost: $19.20
+  Cache Hit Rate: 95.9%
+
+Model: anthropic/claude-sonnet-4-20250514
+
+Daily Cost Quota
+[██████████████████████████████] 100.0% $19.20 / $10.00
+
+Context Window
+[█████████████████░░░░░░░░░░░░░] 57.3% 114,520 / 200,000 tokens
+
+Activity
+Rate: 17,980 tokens/min
+Last activity: 9.5s ago (89,904 tokens)
+```
 
 ### Basic Analysis Output
 
@@ -384,6 +456,7 @@ bun run src/mcp/server.ts
 
 - **Runtime**: Bun + TypeScript (ES modules)
 - **CLI**: Commander.js
+- **Models**: models.dev API for 1000+ AI models with real-time pricing
 - **MCP**: Model Context Protocol SDK (@modelcontextprotocol/sdk@^1.18.0)
 - **Tables**: cli-table3 for structured output
 - **Styling**: Chalk + ora (v8+ ES module)

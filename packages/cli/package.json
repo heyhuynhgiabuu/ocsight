@@ -32,7 +32,8 @@
     "cli-table3": "^0.6.3",
     "commander": "^11.0.0",
     "csv-writer": "^1.6.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

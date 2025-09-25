@@ -3,6 +3,9 @@ import { writeFileSync } from "fs";
 import { createObjectCsvWriter } from "csv-writer";
 import { loadAllData } from "../lib/data.js";
 import { filterSessions, calculateStatistics } from "../lib/analysis.js";
+import { getExportSummary } from "../lib/safe-export.js";
+import { statusIndicator } from "../lib/ui.js";
+import chalk from "chalk";
 import {
   OpenCodeData,
   UsageStatistics,
@@ -56,10 +59,17 @@ export const exportCommand = new Command("export")
         await exportToMarkdown(statistics, filteredSessions, options.output);
       }
 
-      console.log(`Data exported to ${options.output}`);
+      // Show export summary
+      const summary = await getExportSummary(options.output);
+      console.log(statusIndicator("success", `Export completed successfully`));
+      console.log(chalk.cyan(`📁 File: ${summary.file_path}`));
+      console.log(chalk.dim(`   Size: ${summary.file_size} (${summary.format})`));
+      if (filteredSessions.length > 0) {
+        console.log(chalk.dim(`   Records: ${filteredSessions.length.toLocaleString()}`));
+      }
     } catch (error) {
-      console.error("Export failed");
-      console.error("Error:", error);
+      console.error(statusIndicator("error", "Export failed"));
+      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
       process.exit(1);
     }
   });

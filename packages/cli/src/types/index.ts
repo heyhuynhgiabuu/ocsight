@@ -120,6 +120,8 @@ export interface AnalyzeOptions {
   quick?: boolean;
   verbose?: boolean;
   quiet?: boolean;
+  tokenDetails?: boolean;
+  minimalTokens?: boolean;
 }
 
 export interface StatsOptions {

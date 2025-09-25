@@ -3,6 +3,9 @@ import { Command } from "commander";
 import { analyzeCommand } from "./commands/analyze.js";
 import { statsCommand } from "./commands/stats.js";
 import { exportCommand } from "./commands/export.js";
+import { configCommand } from "./commands/config.js";
+import { liveCommand } from "./commands/live.js";
+import { modelsCommand } from "./commands/models.js";
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -40,6 +43,9 @@ program
 program.addCommand(analyzeCommand);
 program.addCommand(statsCommand);
 program.addCommand(exportCommand);
+program.addCommand(configCommand);
+program.addCommand(liveCommand);
+program.addCommand(modelsCommand);
 
 // Parse command line arguments only when not in test environment
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "test") {

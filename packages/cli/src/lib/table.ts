@@ -16,8 +16,10 @@ export function renderTable(params: {
   align?: Array<"left" | "right" | "center">;
   colWidths?: number[];
   compact?: boolean;
+  totals?: Row;
+  summary?: Array<[string, Cell]>;
 }): string {
-  const { head, rows, align, colWidths, compact = true } = params;
+  const { head, rows, align, colWidths, compact = true, totals, summary } = params;
 
   // Auto-detect alignment for numeric columns
   const autoAlign =
@@ -51,7 +53,7 @@ export function renderTable(params: {
       "mid-mid": "┼",
       right: "│",
       "right-mid": "┤",
-      middle: "─",
+      middle: "│",
     },
     colAligns: autoAlign,
   };
@@ -62,8 +64,31 @@ export function renderTable(params: {
 
   const table = new Table(tableOptions);
 
+  // Add main data rows
   rows.forEach((row) => table.push(row));
-  return table.toString();
+  
+  // Add totals row if provided
+  if (totals) {
+    // Add separator row
+    table.push(new Array(head.length).fill(""));
+    // Add totals row with bold formatting
+    const boldTotals = totals.map((cell, i) => 
+      i === 0 ? chalk.bold("TOTALS") : chalk.bold(String(cell))
+    );
+    table.push(boldTotals);
+  }
+  
+  let result = table.toString();
+  
+  // Add summary panel if provided
+  if (summary && summary.length > 0) {
+    const summaryText = summary
+      .map(([label, value]) => `${label}: ${chalk.bold(String(value))}`)
+      .join("  ");
+    result += `\n${chalk.blue(summaryText)}`;
+  }
+  
+  return result;
 }
 
 export function renderKV(

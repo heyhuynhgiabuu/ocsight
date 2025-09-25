@@ -1,0 +1,19 @@
+{
+  "ui": {
+    "table_style": "rich",
+    "colors": true,
+    "progress_bars": true,
+    "live_refresh_interval": 30
+  },
+  "export": {
+    "default_format": "csv",
+    "include_metadata": true,
+    "include_raw_data": false
+  },
+  "paths": {
+    "data_dir": "~/.local/share/opencode/storage/message",
+    "export_dir": "./exports",
+    "cache_dir": "~/.cache/ocsight"
+  }
+}
+

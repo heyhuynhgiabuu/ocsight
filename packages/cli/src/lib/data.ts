@@ -108,9 +108,10 @@ async function loadCache(dataDir: string): Promise<CacheData | null> {
     const content = await readFile(cacheFile, "utf-8");
     const cache = JSON.parse(content) as CacheData;
 
+    const CACHE_VERSION = "3.0";
+    
     // Validate cache version
-    if (cache.version !== "3.0") {
-      // BUMPED VERSION TO INVALIDATE OLD CACHE
+    if (cache.version !== CACHE_VERSION) {
       return null;
     }
 
@@ -129,8 +130,10 @@ async function saveCache(dataDir: string, cache: CacheData): Promise<void> {
   }
 }
 
+const HASH_LENGTH = 16;
+
 function calculateFileHash(content: string): string {
-  return createHash("sha256").update(content).digest("hex").substring(0, 16);
+  return createHash("sha256").update(content).digest("hex").substring(0, HASH_LENGTH);
 }
 
 async function getFileMetadata(
@@ -574,9 +577,11 @@ export async function loadOpenCodeData(options?: {
   const sessionFiles = await findSessionFiles(dataDir);
   const messageFiles = await findMessageFiles(dataDir);
 
-  console.log(
-    `Found ${sessionFiles.length} session files and ${messageFiles.length} message files`,
-  );
+  if (!options?.quiet) {
+    console.log(
+      `Found ${sessionFiles.length} session files and ${messageFiles.length} message files`,
+    );
+  }
 
   // Initialize progress manager
   const progressManager = new ProgressManager(
@@ -596,7 +601,9 @@ export async function loadOpenCodeData(options?: {
       cache.entries.forEach((entry) => {
         cacheMap.set(entry.filePath, entry);
       });
-      console.log(`Loaded cache with ${cache.entries.length} entries`);
+      if (!options?.quiet) {
+        console.log(`Loaded cache with ${cache.entries.length} entries`);
+      }
     }
   }
 
@@ -607,7 +614,9 @@ export async function loadOpenCodeData(options?: {
   // Time-based filtering for quick mode
   if (options?.days) {
     const cutoffTime = Date.now() - options.days * 24 * 60 * 60 * 1000;
-    console.log(`Filtering to data from last ${options.days} days...`);
+    if (!options?.quiet) {
+      console.log(`Filtering to data from last ${options.days} days...`);
+    }
 
     // Filter message files by modification time
     const timeFilteredFiles: string[] = [];
@@ -622,7 +631,9 @@ export async function loadOpenCodeData(options?: {
       }
     }
     filteredMessageFiles = timeFilteredFiles;
-    console.log(`Found ${filteredMessageFiles.length} recent message files`);
+    if (!options?.quiet) {
+      console.log(`Found ${filteredMessageFiles.length} recent message files`);
+    }
   }
 
   const limitedMessageFiles = filteredMessageFiles.slice(0, messageLimit);
@@ -642,14 +653,18 @@ export async function loadOpenCodeData(options?: {
         unchangedFiles.push(file);
       }
     }
-    console.log(
-      `Processing ${filesToProcess.length} new/changed files, ${unchangedFiles.length} cached files`,
-    );
+    if (!options?.quiet) {
+      console.log(
+        `Processing ${filesToProcess.length} new/changed files, ${unchangedFiles.length} cached files`,
+      );
+    }
   } else {
     filesToProcess.push(...limitedMessageFiles);
-    console.log(
-      `Processing ${filesToProcess.length} message files${options?.days ? ` (filtered to ${options.days} days)` : ""} (cache disabled or unavailable)`,
-    );
+    if (!options?.quiet) {
+      console.log(
+        `Processing ${filesToProcess.length} message files${options?.days ? ` (filtered to ${options.days} days)` : ""} (cache disabled or unavailable)`,
+      );
+    }
   }
 
   // Load session metadata with enhanced error handling
@@ -684,19 +699,21 @@ export async function loadOpenCodeData(options?: {
     }
   }
 
-  if (sessionLoadErrors > 0) {
+  if (sessionLoadErrors > 0 && !options?.quiet) {
     console.warn(
       `Failed to load ${sessionLoadErrors}/${sessionFiles.length} session files`,
     );
   }
 
+  const BATCH_SIZE = 100;
+  const PROGRESS_UPDATE_INTERVAL = 1000;
+  
   // Load messages and group by session with batching for better performance
   const messagesBySession = new Map<string, MessageData[]>();
-  const batchSize = 100; // Process files in batches
   const newCacheEntries: CacheEntry[] = [];
 
-  for (let i = 0; i < filesToProcess.length; i += batchSize) {
-    const batch = filesToProcess.slice(i, i + batchSize);
+  for (let i = 0; i < filesToProcess.length; i += BATCH_SIZE) {
+    const batch = filesToProcess.slice(i, i + BATCH_SIZE);
 
     progressManager.updateProgress(i, "Processing message files");
 
@@ -747,22 +764,24 @@ export async function loadOpenCodeData(options?: {
     }
 
     // Progress indicator for large datasets
-    if (i % 1000 === 0 && i > 0) {
+    if (i % PROGRESS_UPDATE_INTERVAL === 0 && i > 0 && !options?.quiet) {
       console.log(`Processed ${i}/${filesToProcess.length} message files...`);
     }
   }
 
-  console.log(
-    Array.from(messagesBySession.values()).reduce(
+  if (!options?.quiet) {
+    const totalMessages = Array.from(messagesBySession.values()).reduce(
       (total, msgs) => total + msgs.length,
       0,
-    ),
-  );
+    );
+    console.log(`Processed ${totalMessages} messages across all sessions`);
+  }
 
   // Update cache with new entries
   if (useCache && newCacheEntries.length > 0) {
+    const CACHE_VERSION = "3.0";
     const updatedCache: CacheData = {
-      version: "1.0",
+      version: CACHE_VERSION,
       entries: [...(cache?.entries || []), ...newCacheEntries],
       lastProcessed: Date.now(),
     };
@@ -778,7 +797,9 @@ export async function loadOpenCodeData(options?: {
 
     updatedCache.entries = Array.from(uniqueEntries.values());
     await saveCache(dataDir, updatedCache);
-    console.log(`Updated cache with ${newCacheEntries.length} new entries`);
+    if (!options?.quiet) {
+      console.log(`Updated cache with ${newCacheEntries.length} new entries`);
+    }
   }
 
   // Use streaming approach to process sessions and reduce memory usage
@@ -797,7 +818,9 @@ export async function loadOpenCodeData(options?: {
     progressManager.updateProgress(processedCount, "Processing sessions");
   }
 
-  console.log(`Completed processing ${processedCount} sessions`);
+  if (!options?.quiet) {
+    console.log(`Completed processing ${processedCount} sessions`);
+  }
   progressManager.finish();
   return { sessions };
 }
