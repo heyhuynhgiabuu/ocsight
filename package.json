@@ -1,6 +1,6 @@
 {
   "name": "ocsight",
-  "version": "0.7.14",
+  "version": "0.8.0",
   "description": "OpenCode ecosystem observability platform",
   "type": "module",
   "main": "index.js",
@@ -27,7 +27,7 @@
     "cli",
     "mcp"
   ],
-  "author": "OpenCode",
+  "author": "heyhuynhgiabuu",
   "license": "MIT",
   "files": [
     "index.js",

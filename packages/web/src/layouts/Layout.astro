@@ -1,10 +1,8 @@
 ---
-import '../styles/tokens.css'
-import '../styles/brutalist.css'
-import CustomHeader from '../components/base/CustomHeader.astro'
-import CustomFooter from '../components/base/CustomFooter.astro'
-import SkipLink from '../components/base/SkipLink.astro'
-import SEO from '../components/base/SEO.astro'
+import '../styles/custom.css'
+import Header from '../components/Header.astro'
+import SkipLinks from '../components/SkipLinks.astro'
+import SEO from '../components/SEO.astro'
 
 export interface Props {
   title?: string;
@@ -35,13 +33,25 @@ const { title = "ocsight - OpenCode Observability", description = "OpenCode obse
       root.setAttribute('data-theme', mode);
     }
   </script>
+  <script>
+    // Register service worker for enhanced caching and offline support
+    import { registerServiceWorker } from '../lib/service-worker';
+    
+    if (typeof window !== 'undefined') {
+      registerServiceWorker({
+        swPath: '/sw.js',
+        scope: '/',
+        skipWaiting: true
+      });
+    }
+  </script>
 </head>
   <body class="min-h-screen bg-background text-foreground font-mono antialiased">
-  <SkipLink />
+  <SkipLinks />
 
   <div class="relative flex min-h-screen flex-col">
     <slot name="header">
-      <CustomHeader />
+      <Header />
     </slot>
 
     <main id="main-content" role="main">
@@ -49,7 +59,11 @@ const { title = "ocsight - OpenCode Observability", description = "OpenCode obse
     </main>
 
     <slot name="footer"> 
-      <CustomFooter />
+      <footer class="mt-16 border-t border-border py-8">
+        <div class="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          © 2024 ocsight. Built with Astro and Starlight.
+        </div>
+      </footer>
     </slot>
   </div>
 </body>

@@ -1,105 +1,85 @@
-import { defineConfig } from 'astro/config'
-import mdx from '@astrojs/mdx'
-import htmx from 'astro-htmx'
-import tailwind from '@astrojs/tailwind'
-import react from '@astrojs/react'
-import node from '@astrojs/node'
-import starlight from '@astrojs/starlight'
-import sitemap from '@astrojs/sitemap'
-import compress from 'astro-compress'
+// @ts-check
+import { defineConfig } from "astro/config"
+import starlight from "@astrojs/starlight"
+import cloudflare from "@astrojs/cloudflare"
+import config from "./config.mjs"
+import { rehypeHeadingIds } from "@astrojs/markdown-remark"
+import rehypeAutolinkHeadings from "rehype-autolink-headings"
 
+// https://astro.build/config
 export default defineConfig({
-  site: 'https://ocsight.dev',
-  compressHTML: true,
-  build: {
-    inlineStylesheets: 'auto'
+  site: config.url,
+  base: "/docs",
+  output: "server",
+  adapter: cloudflare({
+    imageService: "passthrough",
+  }),
+  devToolbar: {
+    enabled: false,
   },
-  image: {
-    service: {
-      entrypoint: 'astro/assets/services/sharp'
-    }
-  },
-  redirects: {
-    '/docs/cli-commands': '/docs/cli/',
-    '/docs/cli-config': '/docs/cli/',
-    '/docs/mcp-overview': '/docs/mcp/',
-    '/docs/api-reference': '/docs/reference/architecture',
-    '/docs/configuration': '/docs/guides/usage#configuration'
+  server: {
+    host: "0.0.0.0",
   },
   markdown: {
-    remarkPlugins: [],
-    shikiConfig: {
-      theme: 'github-dark',
-      wrap: true
-    }
+    rehypePlugins: [rehypeHeadingIds, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
   },
+  build: {},
   integrations: [
     starlight({
-      title: 'Ocsight Docs',
-      description: 'OpenCode ecosystem observability platform documentation',
-      customCss: [
-        'src/styles/starlight.css',
-        'src/styles/brutalist.css',
-        'src/styles/tokens.css'
-      ],
-      components: {
-        // Override Starlight's default header with our custom brutalist header
-        Header: 'src/components/base/CustomHeader.astro',
-        // Override the site title component for consistent branding
-        SiteTitle: 'src/components/base/SiteTitle.astro'
-      },
-      editLink: {
-        baseUrl: 'https://github.com/opencode-ai/ocsight/edit/main/packages/web/src/content/docs/'
-      },
+      title: "ocsight",
       lastUpdated: true,
-      sidebar: [
+      expressiveCode: { themes: ["kanagawa-lotus", "kanagawa-wave"] },
+      social: [
+        { icon: "github", label: "GitHub", href: config.github },
+        { icon: "npm", label: "npm", href: config.npm },
+      ],
+      head: [
         {
-          label: 'CLI Commands',
-          autogenerate: {
-            directory: 'cli/commands',
-            collapsed: true
+          tag: "link",
+          attrs: {
+            rel: "icon",
+            href: "/docs/favicon.svg",
           },
-          badge: {
-            text: 'Commands',
-            variant: 'tip'
-          }
+        },
+      ],
+      pagination: false,
+      markdown: {
+        headingLinks: false,
+      },
+      customCss: ["./src/styles/custom.css"],
+      logo: {
+        light: "./src/assets/logo-light.svg",
+        dark: "./src/assets/logo-dark.svg",
+        replacesTitle: true,
+      },
+      sidebar: [
+        "",
+        "intro",
+
+        {
+          label: "CLI Reference",
+          items: ["cli", "cli-analyze", "cli-stats", "cli-export", "cli-mcp", "cli-commands"],
+        },
+
+        {
+          label: "Integration",
+          items: ["mcp", "mcp-tools"],
+        },
+
+        {
+          label: "Reference",
+          items: ["usage", "data-format", "architecture", "api"],
         }
-      ]
+      ],
+    components: {
+        Hero: "./src/components/Hero.astro",
+        SiteTitle: "./src/components/SiteTitle.astro",
+        Footer: "./src/components/Footer.astro",
+      },
     }),
-    mdx(),
-    htmx(),
-    react(),
-    tailwind({
-      applyBaseStyles: false,
-      config: {
-        applyBaseStyles: false
-      }
-    }),
-    sitemap(),
-    compress({
-      CSS: true,
-      HTML: true,
-      JavaScript: true,
-      SVG: true,
-      Image: true
-    })
   ],
-  output: 'server',
-  adapter: node({
-    mode: 'standalone'
-  }),
-  devToolbar: { enabled: false },
-  vite: {
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['astro', 'react', 'react-dom'],
-            ui: ['clsx', 'tailwind-merge'],
-            code: ['expressive-code']
-          }
-        }
-      }
-    }
-  }
+  redirects: {
+    "/github": config.github,
+    "/npm": config.npm,
+  },
 })

@@ -1,6 +1,6 @@
 {
   "name": "ocsight-website",
-  "version": "0.7.14",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -14,10 +14,17 @@
     "docs:dev": "astro dev",
     "docs:build": "astro build",
     "docs:preview": "astro preview",
-    "docs:check": "astro check"
+    "docs:check": "astro check",
+    "deploy:dev": "astro build && wrangler pages deploy dist --project-name=ocsight-website --branch=dev",
+    "deploy:prod": "astro build && wrangler pages deploy dist --project-name=ocsight-website --branch=production",
+    "validate": "bun run scripts/validate-content.ts",
+    "check-links": "bun run scripts/check-links.ts",
+    "content:validate": "bun run validate && bun run check-links",
+    "content:build": "bun run content:validate && bun run build"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
+    "@astrojs/cloudflare": "^12.6.8",
     "@astrojs/markdown-remark": "^6.3.6",
     "@astrojs/mdx": "^4.0.0",
     "@astrojs/node": "^9.0.0",
@@ -25,6 +32,7 @@
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/starlight": "^0.35.3",
     "@astrojs/tailwind": "^6.0.2",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
     "@tailwindcss/typography": "^0.5.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
@@ -38,7 +46,9 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.0.0",
+    "rehype-autolink-headings": "^7.1.0",
     "sharp": "^0.33.0",
+    "shiki": "^3.13.0",
     "tailwind-merge": "^2.0.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.9.2"
