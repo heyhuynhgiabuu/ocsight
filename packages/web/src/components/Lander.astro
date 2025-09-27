@@ -1,0 +1,437 @@
+---
+import { Image } from 'astro:assets';
+import config from "virtual:starlight/user-config";
+import type { Props } from '@astrojs/starlight/props';
+
+// Import icons (we'll need to create these)
+// import CopyIcon from "../assets/lander/copy.svg";
+// import CheckIcon from "../assets/lander/check.svg";
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, image, actions = [] } = data.hero || {};
+
+const imageAttrs = {
+    loading: 'eager' as const,
+    decoding: 'async' as const,
+    width: 400,
+    alt: image?.alt || '',
+};
+
+const github = config.social?.filter(s => s.icon === 'github')[0];
+const npm = config.social?.filter(s => s.icon === 'npm')[0];
+
+const command = "npm install -g"
+const url = "ocsight"
+
+let darkImage: ImageMetadata | undefined;
+let lightImage: ImageMetadata | undefined;
+let rawHtml: string | undefined;
+if (image) {
+    if ('file' in image) {
+        darkImage = image.file;
+    } else if ('dark' in image) {
+        darkImage = image.dark;
+        lightImage = image.light;
+    } else {
+        rawHtml = image.html;
+  }
+}
+---
+<div class="ocsight-hero">
+    <section class="ocsight-section">
+      <div class="logo">
+        {darkImage && (
+          <Image
+            src={darkImage}
+            {...imageAttrs}
+            class:list={{ 'light:sl-hidden': Boolean(lightImage) }}
+          />
+        )}
+        {lightImage && (
+          <Image src={lightImage} {...imageAttrs} class="dark:sl-hidden" />
+        )}
+      </div>
+      <h1 class="ocsight-heading">Track OpenCode AI costs</h1>
+      <p class="ocsight-tagline">Real costs, real data. No estimates or projections.</p>
+    </section>
+
+    <section class="ocsight-section ocsight-two-col">
+      <div class="col1">
+        <a href="/docs/intro">Get Started</a>
+      </div>
+      <div class="col2">
+        <button class="ocsight-command main-cmd" data-command={`${command} ${url}`}>
+          <code>
+            <span>{command}&nbsp;</span><span class="highlight">{url}</span>
+          </code>
+          <span class="copy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section class="ocsight-section features-section">
+      <div class="ocsight-grid-2x2">
+        <div class="feature-card">
+          <h3 class="feature-title">Cost Tracking</h3>
+          <p>See exactly what you're spending on AI models with per-session breakdowns and daily totals.</p>
+        </div>
+        <div class="feature-card">
+          <h3 class="feature-title">Real-time Monitor</h3>
+          <p>Watch active OpenCode sessions live with token usage and cost accumulation in real-time.</p>
+        </div>
+        <div class="feature-card">
+          <h3 class="feature-title">Export Reports</h3>
+          <p>Generate JSON, CSV, and Markdown reports for analysis, budgeting, and expense tracking.</p>
+        </div>
+        <div class="feature-card">
+          <h3 class="feature-title">500+ Models</h3>
+          <p>Accurate pricing for all major providers using real model costs from models.dev.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ocsight-section install-section ocsight-grid-2x2">
+      <div class="col1">
+        <h3 class="ocsight-subheading npm-heading">npm</h3>
+        <button class="ocsight-command npm-cmd" data-command="npm install -g ocsight">
+          <code>
+            <span>npm install -g</span> <span class="highlight">ocsight</span>
+          </code>
+          <span class="copy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div class="col2">
+        <h3 class="ocsight-subheading bun-heading">Bun</h3>
+        <button class="ocsight-command bun-cmd" data-command="bun install -g ocsight">
+          <code>
+            <span>bun install -g</span> <span class="highlight">ocsight</span>
+          </code>
+          <span class="copy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div class="col3">
+        <h3 class="ocsight-subheading brew-heading">Homebrew</h3>
+        <button class="ocsight-command brew-cmd" data-command="brew tap heyhuynhgiabuu/tap && brew install ocsight">
+          <code>
+            <span>brew install</span> <span class="highlight">heyhuynhgiabuu/tap/ocsight</span>
+          </code>
+          <span class="copy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div class="col4">
+        <h3 class="ocsight-subheading git-heading">Manual</h3>
+        <button class="ocsight-command git-cmd" data-command="git clone https://github.com/heyhuynhgiabuu/ocsight.git">
+          <code>
+            <span>git clone</span> <span class="highlight">heyhuynhgiabuu/ocsight</span>
+          </code>
+          <span class="copy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section class="ocsight-section ocsight-footer footer-spacer">
+      <div class="col1">
+        {github && (
+          <a href={github.href} target="_blank" rel="noopener noreferrer">GitHub</a>
+        )}
+      </div>
+      <div class="col2">
+        {npm && (
+          <a href={npm.href} target="_blank" rel="noopener noreferrer">npm</a>
+        )}
+      </div>
+      <div class="col3">
+        <span>&copy;2025 <a href="https://ocsight.com" target="_blank" rel="noopener noreferrer">Ocsight</a></span>
+      </div>
+    </section>
+</div>
+
+<style>
+.logo img {
+  height: auto;
+  width: clamp(200px, 70vw, 400px);
+}
+
+.feature-card {
+  padding: 1rem;
+  border: 2px solid var(--ocsight-border-color);
+  background: var(--sl-color-bg);
+  transition: all 0.2s ease;
+}
+
+.feature-card:hover {
+  border-color: var(--kanagawa-primary);
+  background: var(--kanagawa-primary-bg);
+}
+
+.feature-title {
+  font-family: var(--sl-font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--kanagawa-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--sl-color-text);
+}
+
+/* Kanagawa-inspired accent colors for different features */
+.feature-card:nth-child(1) .feature-title {
+  color: var(--kanagawa-spring-green);
+}
+
+.feature-card:nth-child(2) .feature-title {
+  color: var(--kanagawa-wave-aqua);
+}
+
+.feature-card:nth-child(3) .feature-title {
+  color: var(--kanagawa-autumn-green);
+}
+
+.feature-card:nth-child(4) .feature-title {
+  color: var(--kanagawa-spring-green);
+}
+
+.feature-card:nth-child(1):hover {
+  border-color: var(--kanagawa-spring-green);
+}
+
+.feature-card:nth-child(2):hover {
+  border-color: var(--kanagawa-wave-aqua);
+}
+
+.feature-card:nth-child(3):hover {
+  border-color: var(--kanagawa-autumn-green);
+}
+
+.feature-card:nth-child(4):hover {
+  border-color: var(--kanagawa-spring-green);
+}
+
+/* Installation command styling with Kanagawa colors */
+.npm-cmd .highlight {
+  color: var(--kanagawa-crystal-blue) !important;
+}
+
+.npm-cmd:hover {
+  border-color: var(--kanagawa-crystal-blue) !important;
+}
+
+.npm-cmd.success {
+  border-color: var(--kanagawa-crystal-blue) !important;
+}
+
+.bun-cmd .highlight {
+  color: var(--kanagawa-carp-yellow) !important;
+}
+
+.bun-cmd:hover {
+  border-color: var(--kanagawa-carp-yellow) !important;
+}
+
+.bun-cmd.success {
+  border-color: var(--kanagawa-carp-yellow) !important;
+}
+
+.brew-cmd .highlight {
+  color: var(--kanagawa-oni-violet) !important;
+}
+
+.brew-cmd:hover {
+  border-color: var(--kanagawa-oni-violet) !important;
+}
+
+.brew-cmd.success {
+  border-color: var(--kanagawa-oni-violet) !important;
+}
+
+.git-cmd .highlight {
+  color: var(--kanagawa-sakura-pink) !important;
+}
+
+.git-cmd:hover {
+  border-color: var(--kanagawa-sakura-pink) !important;
+}
+
+.git-cmd.success {
+  border-color: var(--kanagawa-sakura-pink) !important;
+}
+
+/* Main command styling */
+.main-cmd .highlight {
+  color: var(--kanagawa-spring-green) !important;
+}
+
+.main-cmd:hover {
+  border-color: var(--kanagawa-spring-green) !important;
+}
+
+.main-cmd.success {
+  border-color: var(--kanagawa-spring-green) !important;
+}
+
+/* Section background variations */
+.features-section {
+  background: var(--kanagawa-surface-subtle);
+}
+
+.install-section {
+  background: var(--kanagawa-surface-muted);
+}
+
+/* Installation method heading colors */
+.npm-heading {
+  color: var(--kanagawa-crystal-blue);
+}
+
+.bun-heading {
+  color: var(--kanagawa-carp-yellow);
+}
+
+.brew-heading {
+  color: var(--kanagawa-oni-violet);
+}
+
+.git-heading {
+  color: var(--kanagawa-sakura-pink);
+}
+
+/* Tagline styling */
+.ocsight-tagline {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  margin: 1rem 0 0 0;
+  text-align: center;
+  color: var(--sl-color-text-accent);
+  font-weight: 400;
+}
+
+/* Footer spacing for full-height layout */
+.footer-spacer {
+  margin-top: auto;
+}
+</style>
+
+<style is:global>
+  :root[data-has-hero] {
+    header.header {
+      display: none;
+    }
+    .main-frame {
+      padding-top: 0;
+
+      .main-pane > main {
+        padding: 0;
+      }
+    }
+    main > .content-panel .sl-markdown-content {
+      margin-top: 0;
+    }
+    
+    /* Ensure full viewport usage without header */
+    .sl-flex {
+      min-height: 100vh;
+    }
+    
+    /* Remove any default margins/padding that might interfere */
+    .content-panel {
+      padding: 0;
+    }
+    
+    /* Hide edit link and pagination on landing page */
+    .starlight-footer {
+      display: none;
+    }
+    
+    /* Hide Starlight's default footer elements on landing page */
+    .sl-starlight-footer {
+      display: none;
+    }
+    
+    /* Hide pagination on landing page */
+    .sl-pagination {
+      display: none;
+    }
+    
+    /* Hide edit link on landing page */
+    .sl-edit-link {
+      display: none;
+    }
+    
+    /* Hide last updated on landing page */
+    .sl-last-updated {
+      display: none;
+    }
+    
+    /* Hide any footer-related elements on landing page */
+    footer {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Set data-has-hero attribute to hide header on landing page
+  document.documentElement.setAttribute('data-has-hero', '');
+
+  const buttons = document.querySelectorAll("button.ocsight-command") as NodeListOf<HTMLButtonElement>
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const command = button.dataset.command;
+      if (command) {
+        navigator.clipboard.writeText(command);
+        button.classList.add("success");
+        setTimeout(() => {
+          button.classList.remove("success");
+        }, 1500);
+      }
+    });
+  });
+</script>

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { analyzeCommand } from "./commands/analyze.js";
-import { statsCommand } from "./commands/stats.js";
+import { summaryCommand } from "./commands/summary.js";
+import { sessionsCommand } from "./commands/sessions.js";
+import { costsCommand } from "./commands/costs.js";
 import { exportCommand } from "./commands/export.js";
 import { configCommand } from "./commands/config.js";
 import { liveCommand } from "./commands/live.js";
@@ -40,8 +41,9 @@ program
   .version(version);
 
 // Add all commands
-program.addCommand(analyzeCommand);
-program.addCommand(statsCommand);
+program.addCommand(summaryCommand);
+program.addCommand(sessionsCommand);
+program.addCommand(costsCommand);
 program.addCommand(exportCommand);
 program.addCommand(configCommand);
 program.addCommand(liveCommand);

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline - ocsight</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        background: #ffffff;
+        color: #000000;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .offline-container {
+        text-align: center;
+        max-width: 500px;
+        border: 2px solid #000000;
+        padding: 3rem 2rem;
+        background: #ffffff;
+        box-shadow: 8px 8px 0 #000000;
+      }
+
+      .offline-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .offline-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #000000;
+      }
+
+      .offline-message {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        color: #666666;
+      }
+
+      .offline-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .offline-button {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #000000;
+        background: #ffffff;
+        color: #000000;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 4px 4px 0 #000000;
+        position: relative;
+        top: 0;
+      }
+
+      .offline-button:hover {
+        top: 2px;
+        box-shadow: 2px 2px 0 #000000;
+      }
+
+      .offline-button:active {
+        top: 4px;
+        box-shadow: none;
+      }
+
+      .offline-button.primary {
+        background: #000000;
+        color: #ffffff;
+      }
+
+      .offline-info {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #cccccc;
+        font-size: 0.875rem;
+        color: #888888;
+      }
+
+      @media (max-width: 640px) {
+        .offline-container {
+          padding: 2rem 1.5rem;
+        }
+
+        .offline-title {
+          font-size: 1.5rem;
+        }
+
+        .offline-actions {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .offline-button {
+          width: 100%;
+          max-width: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="offline-container">
+      <div class="offline-icon">📡</div>
+      <h1 class="offline-title">You're Offline</h1>
+      <p class="offline-message">
+        It looks like you've lost your internet connection. Some cached content
+        may still be available, but you'll need to reconnect to access the full
+        ocsight documentation.
+      </p>
+
+      <div class="offline-actions">
+        <button
+          class="offline-button primary"
+          onclick="window.location.reload()"
+        >
+          Try Again
+        </button>
+        <a href="/" class="offline-button"> Go Home </a>
+      </div>
+
+      <div class="offline-info">
+        <p>
+          <strong>Tip:</strong> When you're back online, this page will
+          automatically refresh to show you the latest content.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Auto-refresh when connection is restored
+      window.addEventListener("online", () => {
+        window.location.reload();
+      });
+
+      // Check connection status
+      function updateConnectionStatus() {
+        if (navigator.onLine) {
+          window.location.reload();
+        }
+      }
+
+      // Check every 5 seconds
+      setInterval(updateConnectionStatus, 5000);
+    </script>
+  </body>
+</html>

@@ -20,13 +20,11 @@ export const statsCommand = new Command("stats")
     console.log("Loading OpenCode data...");
 
     try {
-      // Quick mode: limit to recent 30 days, 1000 messages max
+      // Quick mode: load all sessions like live monitoring
       const quickOptions = options.quick
         ? {
-            limit: 1000,
             cache: true,
-            // Add time filtering for recent data
-            days: options.days || 30,
+            // Remove all limits - load all sessions like live monitoring
           }
         : undefined;
 
@@ -36,7 +34,7 @@ export const statsCommand = new Command("stats")
       );
 
       const filteredSessions = filterSessions(data, options);
-      const statistics = calculateStatistics(filteredSessions);
+      const statistics = await calculateStatistics(filteredSessions);
 
       console.log(formatStatsOutput(statistics));
     } catch (error) {

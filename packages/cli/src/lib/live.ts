@@ -1,6 +1,17 @@
 import chalk from "chalk";
-import { createProgressBar, getThresholdColor, formatDuration, createSummaryPanel } from "./ui.js";
 import { formatTokens, formatCost } from "./cost.js";
+import {
+  createBox,
+  BoxedSection,
+  formatBurnRate,
+  formatElapsedTime,
+} from "./live-ui.js";
+import { detectProjectInfo } from "./project-utils.js";
+import {
+  MS_PER_SECOND,
+  SESSION_START_TIME_HOURS_AGO,
+  MAX_PERCENTAGE,
+} from "./constants.js";
 
 export interface LiveStatus {
   sessionId: string;
@@ -8,6 +19,7 @@ export interface LiveStatus {
   totalTokens: number;
   estimatedCost: number;
   currentModel?: string;
+  projectName?: string;
   tokenBreakdown?: {
     input: number;
     output: number;
@@ -29,16 +41,18 @@ export interface LiveStatus {
     tokens: number;
     timestamp: Date;
   };
-  quota?: {
-    amount: number;
-    used: number;
-    periodType?: 'daily' | 'monthly';
-  };
   context?: {
     used: number;
     total: number;
   };
-  burnRate?: number; // tokens per minute
+  burnRate?: number;
+  modelTotals?: {
+    sessions: number;
+    totalTokens: number;
+    totalCost: number;
+    avgTokensPerSession: number;
+    avgCostPerSession: number;
+  };
 }
 
 export interface LiveOptions {
@@ -53,16 +67,16 @@ export class LiveMonitor {
 
   async start(
     getStatus: () => Promise<LiveStatus | null>,
-    options: LiveOptions
+    options: LiveOptions,
   ): Promise<void> {
     if (this.isRunning) return;
-    
+
     this.isRunning = true;
-    
+
     const updateDisplay = async () => {
       try {
         const status = await getStatus();
-        this.renderDashboard(status, options);
+        await this.renderDashboard(status, options);
       } catch (error) {
         console.error(chalk.red("Error updating live display:"), error);
       }
@@ -70,10 +84,13 @@ export class LiveMonitor {
 
     // Initial render
     await updateDisplay();
-    
+
     // Set up interval
-    this.intervalId = setInterval(updateDisplay, options.refreshInterval * 1000);
-    
+    this.intervalId = setInterval(
+      updateDisplay,
+      options.refreshInterval * MS_PER_SECOND,
+    );
+
     // Handle graceful shutdown
     process.on("SIGINT", () => {
       this.stop();
@@ -90,98 +107,168 @@ export class LiveMonitor {
     this.isRunning = false;
   }
 
-  private renderDashboard(status: LiveStatus | null, options: LiveOptions): void {
-    // Clear screen and move cursor to top
+  private async renderDashboard(
+    status: LiveStatus | null,
+    options: LiveOptions,
+  ): Promise<void> {
     process.stdout.write("\x1b[2J\x1b[H");
-    
+
     if (!status) {
-      console.log(chalk.red("No active sessions found"));
+      const errorBox = createBox([
+        {
+          title: "ERROR",
+          content: [
+            "No active sessions found",
+            "",
+            chalk.yellow("Possible reasons:"),
+            chalk.dim("• No OpenCode sessions in the last year"),
+            chalk.dim("• Sessions have no token/cost data"),
+            chalk.dim("• Data path is incorrect"),
+            "",
+            chalk.white("Try: ocsight config doctor to check paths"),
+          ],
+          color: chalk.red,
+        },
+      ]);
+      console.log(errorBox.join("\n"));
       return;
     }
 
-    const lines: string[] = [];
-    
-    // Header
-    lines.push(chalk.bold.blue("OpenCode Live Dashboard"));
-    lines.push(chalk.dim(`Updated: ${new Date().toLocaleTimeString()}`));
-    lines.push("");
+    const sections: BoxedSection[] = [];
 
-    // Session info with token breakdown
-    const sessionInfo: Array<[string, string]> = [
-      ["Session ID", status.sessionId],
-      ["Interactions", status.interactions.toLocaleString()],
-      ["Total Tokens", formatTokens(status.totalTokens)],
-      ["Total Cost", formatCost(status.estimatedCost)]
-    ];
-    
-    // Add detailed breakdown if available
-    if (status.tokenBreakdown && status.costBreakdown) {
-      if (status.tokenBreakdown.input > 0) {
-        sessionInfo.push(["Input", `${formatTokens(status.tokenBreakdown.input)} (${formatCost(status.costBreakdown.input)})`]);
-      }
-      if (status.tokenBreakdown.output > 0) {
-        sessionInfo.push(["Output", `${formatTokens(status.tokenBreakdown.output)} (${formatCost(status.costBreakdown.output)})`]);
-      }
-      if (status.tokenBreakdown.cache_read > 0) {
-        sessionInfo.push(["Cache Reads", `${formatTokens(status.tokenBreakdown.cache_read)} (${formatCost(status.costBreakdown.cache_read)})`]);
-      }
-      if (status.cacheHitRate !== undefined) {
-        const CACHE_GOOD_THRESHOLD = 0.7;
-        const CACHE_POOR_THRESHOLD = 0.3;
-        
-        const cacheColor = status.cacheHitRate > CACHE_GOOD_THRESHOLD ? chalk.green : 
-                          status.cacheHitRate > CACHE_POOR_THRESHOLD ? chalk.yellow : chalk.red;
-        sessionInfo.push(["Cache Hit Rate", cacheColor(`${(status.cacheHitRate * 100).toFixed(1)}%`)]);
-      }
+    const elapsedTime = status.recentActivity
+      ? formatElapsedTime(
+          Date.now() - (Date.now() - status.recentActivity.timestamp.getTime()),
+        )
+      : formatElapsedTime();
+
+    const contextPercent = status.context
+      ? (status.context.used / status.context.total) * MAX_PERCENTAGE
+      : 0;
+
+    const burnRateInfo = formatBurnRate(status.burnRate || 0);
+
+    const sessionStartTime = new Date();
+    sessionStartTime.setHours(
+      sessionStartTime.getHours() - SESSION_START_TIME_HOURS_AGO,
+    );
+
+    // Get project info
+    const projectInfo = await detectProjectInfo();
+    const projectName = projectInfo?.name || "Unknown Project";
+
+    // SESSION section - basic session info with context usage
+    sections.push({
+      title: "SESSION",
+      content: [
+        chalk.white("Project: ") +
+          chalk.cyan(projectName) +
+          chalk.white("  ID: ") +
+          chalk.cyan(status.sessionId) +
+          chalk.white("  Started: ") +
+          chalk.cyan(sessionStartTime.toLocaleTimeString()) +
+          chalk.white("  Elapsed: ") +
+          chalk.cyan(elapsedTime),
+      ],
+      progressBar: status.context
+        ? {
+            percent: contextPercent,
+            text: `Context: ${formatTokens(status.context.used)}/${formatTokens(status.context.total)}`,
+            color:
+              contextPercent > 90
+                ? chalk.red
+                : contextPercent > 70
+                  ? chalk.yellow
+                  : chalk.green,
+          }
+        : undefined,
+      color: chalk.cyan,
+    });
+
+    // USAGE section - current session usage
+    const tokensText = formatTokens(status.totalTokens);
+    const costText = formatCost(status.estimatedCost);
+    const burnText =
+      burnRateInfo.status === "No activity"
+        ? "IDLE"
+        : `${burnRateInfo.status} ${burnRateInfo.text}`;
+    const modelInfo = status.currentModel
+      ? status.currentModel.split("/").slice(-1)[0]
+      : "unknown";
+
+    sections.push({
+      title: "USAGE",
+      content: [
+        chalk.white("Model: ") +
+          chalk.cyan(modelInfo) +
+          chalk.white("  Tokens: ") +
+          chalk.bold.cyan(tokensText) +
+          chalk.white("  Cost: ") +
+          chalk.bold.green(costText) +
+          chalk.white("  Burn: ") +
+          burnRateInfo.color(burnText),
+      ],
+      color: chalk.green,
+    });
+
+    // TOTALS section - aggregate stats for this model
+    if (status.modelTotals && status.modelTotals.sessions > 0) {
+      const avgTokensText = formatTokens(
+        Math.floor(status.modelTotals.avgTokensPerSession),
+      );
+      const avgCostText = formatCost(status.modelTotals.avgCostPerSession);
+
+      sections.push({
+        title: "TOTALS",
+        content: [
+          chalk.white("Model Stats: ") +
+            chalk.cyan(`${status.modelTotals.sessions} sessions`) +
+            chalk.white("  Total: ") +
+            chalk.cyan(formatTokens(status.modelTotals.totalTokens)) +
+            chalk.white(" / ") +
+            chalk.green(formatCost(status.modelTotals.totalCost)) +
+            chalk.white("  Avg: ") +
+            chalk.cyan(avgTokensText) +
+            chalk.white(" / ") +
+            chalk.green(avgCostText),
+        ],
+        color: chalk.magenta,
+      });
     }
-    
-    lines.push(createSummaryPanel("Current Session", sessionInfo));
 
-    // Current model
-    if (status.currentModel) {
-      lines.push(chalk.yellow(`Model: ${status.currentModel}`));
-      lines.push("");
+    // Footer info
+    sections.push({
+      title: "",
+      content: [
+        chalk.white("Refreshing every ") +
+          chalk.cyan(`${options.refreshInterval}s`) +
+          chalk.white("  Press ") +
+          chalk.yellow("Ctrl+C") +
+          chalk.white(" to stop"),
+      ],
+      color: chalk.gray,
+    });
+
+    // Clean header without box wrapper
+    const header =
+      chalk.bold.cyan("OpenCode Live Monitor") +
+      chalk.dim(" • ") +
+      chalk.white("Real-time token usage and cost tracking");
+
+    console.log(header);
+    console.log();
+
+    const mainSections = sections.slice(0, -1);
+    if (mainSections.length > 0) {
+      const mainBox = createBox(mainSections);
+      console.log(mainBox.join("\n"));
     }
 
-    // Quota progress
-    if (status.quota) {
-      const quotaColor = getThresholdColor(status.quota.used, status.quota.amount);
-      const quotaPct = (status.quota.used / status.quota.amount) * 100;
-      const quotaBar = createProgressBar(quotaPct);
-      
-      const quotaLabel = status.quota.periodType === 'monthly' ? "Monthly Cost Quota" : "Daily Cost Quota";
-      lines.push(chalk.cyan.bold(quotaLabel));
-      lines.push(`${quotaColor(quotaBar)} $${status.quota.used.toFixed(2)} / $${status.quota.amount.toFixed(2)}`);
-      lines.push("");
+    console.log();
+
+    const footer = sections[sections.length - 1];
+    if (footer && footer.content.length > 0) {
+      console.log(footer.content[0]);
     }
-
-    // Context window usage
-    if (status.context) {
-      const contextPct = (status.context.used / status.context.total) * 100;
-      const contextColor = getThresholdColor(status.context.used, status.context.total);
-      const contextBar = createProgressBar(contextPct);
-      
-      lines.push(chalk.cyan.bold("Context Window"));
-      lines.push(`${contextColor(contextBar)} ${status.context.used.toLocaleString()} / ${status.context.total.toLocaleString()} tokens`);
-      lines.push("");
-    }
-
-    // Burn rate and recent activity
-    if (options.showBurnRate && status.burnRate !== undefined) {
-      const burnRateColor = status.burnRate > 0 ? chalk.green : chalk.dim;
-      lines.push(chalk.cyan.bold("Activity"));
-      lines.push(burnRateColor(`Rate: ${Math.round(status.burnRate).toLocaleString()} tokens/min`));
-      
-      if (status.recentActivity) {
-        const timeSince = Date.now() - status.recentActivity.timestamp.getTime();
-        lines.push(chalk.dim(`Last activity: ${formatDuration(timeSince)} ago (${status.recentActivity.tokens.toLocaleString()} tokens)`));
-      }
-      lines.push("");
-    }
-
-    // Instructions
-    lines.push(chalk.dim("Press Ctrl+C to stop monitoring"));
-
-    console.log(lines.join("\n"));
   }
 }

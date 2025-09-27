@@ -1,0 +1,140 @@
+---
+title: CLI Overview
+description: Complete guide to the ocsight command-line interface
+---
+
+The `ocsight` CLI provides comprehensive OpenCode usage tracking and cost analysis from your terminal.
+
+## Installation
+
+```bash
+# npm
+npm install -g ocsight
+
+# bun
+bun install -g ocsight
+
+# homebrew
+brew tap heyhuynhgiabuu/tap
+brew install ocsight
+```
+
+Verify installation:
+
+```bash
+ocsight --version
+```
+
+## Command Map
+
+| Command | Purpose | Key Options |
+|---------|---------|-------------|
+| `summary` | Overall usage analysis | `--detailed`, `--days`, `--provider` |
+| `sessions` | Session management | `list`, `show`, `top` |
+| `costs` | Cost tracking and alerts | `--days`, `--alert`, `today` |
+| `live` | Real-time monitoring | `--session`, `--refresh` |
+| `export` | Data export | `--format`, `--output` |
+| `models` | Model pricing info | `list`, `show`, `compare` |
+| `config` | Configuration | `show`, `init`, `doctor` |
+
+## Quick Examples
+
+### Get usage overview
+```bash
+ocsight summary
+```
+
+### Track spending
+```bash
+ocsight costs --days 30
+ocsight costs today
+```
+
+### Explore sessions
+```bash
+ocsight sessions list --recent
+ocsight sessions top --cost
+```
+
+### Export data
+```bash
+ocsight export --format json
+ocsight export --format csv --days 7
+```
+
+### Live monitoring
+```bash
+ocsight live
+ocsight live --session ses_123
+```
+
+## Common Options
+
+Most commands support these filters:
+
+```bash
+--days <number>     # Filter to last N days
+--provider <name>   # Filter by provider
+--format <type>     # Output format (json, text)
+--quiet            # Minimal output
+--help             # Show help
+```
+
+## Output Formats
+
+### Default (Text)
+Human-readable tables and summaries with color highlighting.
+
+### JSON
+Machine-readable format for automation:
+
+```bash
+ocsight summary --format json | jq '.summary.totalCost'
+```
+
+### CSV
+Spreadsheet-compatible export:
+
+```bash
+ocsight export --format csv --output usage.csv
+```
+
+### Markdown
+Documentation-ready reports:
+
+```bash
+ocsight export --format markdown --output report.md
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | Error (file access, parsing, etc.) |
+| `2` | Invalid usage |
+| `130` | User interrupted |
+
+## Performance
+
+- Processes thousands of messages in seconds
+- Smart caching reduces file reads
+- Progress bars for long operations
+- Memory-efficient streaming
+
+## Data Source
+
+OCsight reads from OpenCode's storage:
+
+```
+~/.local/share/opencode/storage/
+├── session/  # Session metadata
+└── message/  # Message content
+```
+
+## Next Steps
+
+- [Summary Command](cli-summary) - Usage analysis
+- [Sessions Command](cli-sessions) - Session exploration
+- [Costs Command](cli-costs) - Financial tracking
+- [Export Command](cli-export) - Data export

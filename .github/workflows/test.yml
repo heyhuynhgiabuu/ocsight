@@ -46,14 +46,12 @@ jobs:
           chmod +x index.js
           node index.js --version
           node index.js --help
-          node index.js analyze --help
-          node index.js stats --help
+          node index.js summary --help
+          node index.js sessions --help
+          node index.js costs --help
           node index.js export --help
-
-      - name: Test MCP server startup
-        run: |
-          cd packages/mcp && bun run build
-          timeout 5s bun run dist/server.js || true
+          node index.js live --help
+          node index.js models --help
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4

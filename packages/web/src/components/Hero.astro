@@ -1,0 +1,15 @@
+---
+import Default from '@astrojs/starlight/components/Hero.astro';
+import Lander from './Lander.astro';
+
+const { slug } = Astro.locals.starlightRoute.entry;
+const path = Astro.url.pathname;
+
+// Check if this is the homepage
+const isHomePage = path === "/" || slug === "" || slug === "index";
+---
+
+{ isHomePage
+  ? <Lander {...Astro.props} />
+  : <Default {...Astro.props}><slot /></Default>
+}

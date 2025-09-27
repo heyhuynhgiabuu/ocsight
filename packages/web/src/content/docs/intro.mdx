@@ -1,0 +1,214 @@
+---
+title: Introduction
+description: OCsight - OpenCode usage tracker with real costs and real data
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+[**ocsight**](/) tracks your OpenCode usage with accurate cost calculations and session analysis.
+
+## What It Does
+
+- **Reads** OpenCode session files from `~/.local/share/opencode/`
+- **Calculates** real costs using models.dev pricing data
+- **Shows** token usage, costs by provider, daily activity
+- **Exports** to JSON, CSV, or Markdown formats
+
+## What It Doesn't Do
+
+- No fake metrics or hardcoded success rates
+- No broken project detection
+- No misleading cost projections
+- No unnecessary complexity
+
+---
+
+### Prerequisites
+
+To use ocsight, you need:
+
+1. OpenCode installed with existing sessions
+2. Node.js 18+ or Bun runtime
+3. Access to `~/.local/share/opencode/storage/`
+
+---
+
+### Install
+
+<Tabs>
+  <TabItem label="Homebrew">
+    ```bash
+    brew tap heyhuynhgiabuu/tap
+    brew install ocsight
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```bash
+    npm install -g ocsight
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```bash
+    bun install -g ocsight
+    ```
+  </TabItem>
+  <TabItem label="Manual">
+    ```bash
+    git clone https://github.com/heyhuynhgiabuu/ocsight.git
+    cd ocsight
+    bun install && bun run build
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
+### Quick Start
+
+Get started with the most common commands:
+
+```bash
+# Get usage summary
+ocsight summary
+
+# Track costs for the last 7 days
+ocsight costs
+
+# List recent sessions
+ocsight sessions list --recent
+
+# Export data to JSON
+ocsight export
+```
+
+---
+
+### Core Commands
+
+## summary
+Unified usage analysis combining sessions, costs, and provider breakdown:
+
+```bash
+ocsight summary              # Quick overview
+ocsight summary --detailed   # Extended analysis
+ocsight summary --days 30    # Last 30 days
+```
+
+## sessions
+Explore and analyze individual sessions:
+
+```bash
+ocsight sessions list        # List all sessions
+ocsight sessions show ses_123  # View specific session
+ocsight sessions top --cost    # Most expensive sessions
+```
+
+## costs
+Financial tracking with spending alerts:
+
+```bash
+ocsight costs                # Last 7 days
+ocsight costs today          # Today's costs
+ocsight costs --alert 100    # Alert if >$100/day
+```
+
+## live
+Real-time monitoring dashboard:
+
+```bash
+ocsight live                 # Monitor active session
+ocsight live --session ses_123  # Monitor specific session
+```
+
+## export
+Export data for external analysis:
+
+```bash
+ocsight export               # JSON (default)
+ocsight export --format csv  # CSV format
+ocsight export --format markdown  # Markdown report
+```
+
+---
+
+### Example Output
+
+```
+📊 Usage Summary
+════════════════
+
+Overview
+Sessions          │ 787
+Total Cost        │ $8,736.43
+Total Tokens      │ 2,949,563,969
+Avg Cost/Session  │ $11.10
+
+Provider Breakdown
+┌─────────┬──────────┬──────────┬───────────────┐
+│Provider │ Sessions │ Cost     │ Tokens        │
+├─────────┼──────────┼──────────┼───────────────┤
+│anthropic│      26  │ $8,237.66│ 699,650,136   │
+│github   │     517  │ $0.00    │ 805,039,693   │
+└─────────┴──────────┴──────────┴───────────────┘
+```
+
+---
+
+### Filtering Options
+
+Most commands support filtering:
+
+```bash
+# Time-based filtering
+--days 30              # Last N days
+--start 2025-09-01     # Start date
+--end 2025-09-14       # End date
+
+# Provider filtering
+--provider anthropic   # Specific provider
+
+# Output formats
+--format json          # JSON output
+--format csv           # CSV output
+--quiet               # Minimal output
+--detailed            # Extended output
+```
+
+---
+
+### Data Location
+
+OCsight reads from OpenCode's standard storage location:
+
+```
+~/.local/share/opencode/storage/
+├── session/<project-hash>/ses_*.json   # Session metadata
+└── message/<session-id>/msg_*.json     # Individual messages
+```
+
+---
+
+### Performance
+
+- Processes thousands of messages in seconds
+- Smart caching reduces redundant file reads
+- Streaming architecture for memory efficiency
+- Progress indicators for long operations
+
+---
+
+### Accuracy
+
+- Real costs from models.dev pricing database
+- Actual token counts from OpenCode messages
+- No fake metrics or projections
+- Consistent calculations across all commands
+
+---
+
+### Next Steps
+
+- Check the [CLI Commands](cli-commands) reference
+- Learn about [Session Management](cli-sessions)
+- Set up [Cost Tracking](cli-costs)
+- Configure [Data Export](cli-export)

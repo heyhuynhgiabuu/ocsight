@@ -3,7 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-bun.lock
+bun.lockb
 package-lock.json
 
 # Build outputs
@@ -111,10 +111,9 @@ out/
 *.sqlite
 *.sqlite3
 opencode-export-*.json
-
-# MCP server specific
-.mcp/
-mcp-*.json
+ocsight-export-*.json
+ocsight-export-*.csv
+ocsight-export-*.md
 
 # Development tools
 .vscode/
@@ -136,13 +135,13 @@ Thumbs.db
 logs
 *.log 
 
-# Documentation
-docs/
+# Astro website cache
+packages/web/.astro/
+packages/web/dist/
 
-# Website (published separately)
-# ocsight-website/
+# SST deployment
+.sst/
+sst-env.d.ts
 
-# Script files generated during build
-script/bump-version.js
-script/release.js
-script/release.ts
+# Cloudflare
+wrangler.toml.backup

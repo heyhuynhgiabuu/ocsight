@@ -1,6 +1,6 @@
 {
   "name": "ocsight",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "OpenCode ecosystem observability platform",
   "type": "module",
   "main": "index.js",
@@ -24,8 +24,7 @@
     "opencode",
     "observability",
     "analytics",
-    "cli",
-    "mcp"
+    "cli"
   ],
   "author": "heyhuynhgiabuu",
   "license": "MIT",
@@ -37,14 +36,11 @@
   "devDependencies": {
     "@types/node": "^18.0.0",
     "bun-types": "latest",
+    "esbuild": "^0.25.10",
     "turbo": "^2.0.0",
     "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "@heyhuynhgiabuu/ocsight-cli": "^0.7.8",
-    "@modelcontextprotocol/sdk": "^1.18.0"
   }
 }

@@ -1,0 +1,11 @@
+# Robots.txt for Ocsight
+# Allow all web crawlers to access the site
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ocsight.dev/sitemap-0.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

@@ -1,0 +1,237 @@
+---
+interface NavigationItem {
+  label: string
+  href: string
+  description?: string
+}
+
+interface Props {
+  previous?: NavigationItem
+  next?: NavigationItem
+  related?: NavigationItem[]
+  class?: string
+}
+
+const { previous, next, related = [], class: className = '' } = Astro.props
+---
+
+{(previous || next || related.length > 0) && (
+  <nav class={`contextual-nav ${className}`} aria-label="Page navigation">
+    <div class="nav-grid">
+      <!-- Previous/Next Navigation -->
+      {(previous || next) && (
+        <section class="prev-next-nav">
+          <div class="nav-buttons">
+            {previous && (
+              <a href={previous.href} class="nav-button prev-button">
+                <span class="nav-direction">← Previous</span>
+                <span class="nav-title">{previous.label}</span>
+                {previous.description && (
+                  <span class="nav-description">{previous.description}</span>
+                )}
+              </a>
+            )}
+            
+            {next && (
+              <a href={next.href} class="nav-button next-button">
+                <span class="nav-direction">Next →</span>
+                <span class="nav-title">{next.label}</span>
+                {next.description && (
+                  <span class="nav-description">{next.description}</span>
+                )}
+              </a>
+            )}
+          </div>
+        </section>
+      )}
+
+      <!-- Related Content -->
+      {related.length > 0 && (
+        <section class="related-nav">
+          <h3 class="related-title">Related Documentation</h3>
+          <ul class="related-list">
+            {related.map((item) => (
+              <li>
+                <a href={item.href} class="related-link">
+                  <span class="related-label">{item.label}</span>
+                  {item.description && (
+                    <span class="related-description">{item.description}</span>
+                  )}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  </nav>
+)}
+
+<style>
+  .contextual-nav {
+    margin-top: var(--space-12);
+    padding-top: var(--space-8);
+    border-top: 2px solid rgb(var(--color-border));
+  }
+
+  .nav-grid {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 1024px) {
+    .nav-grid {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  /* Previous/Next Navigation */
+  .prev-next-nav {
+    order: 1;
+  }
+
+  .nav-buttons {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .nav-buttons {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .nav-button {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-6);
+    border: 2px solid rgb(var(--color-border));
+    border-radius: var(--border-radius);
+    background: rgb(var(--color-background));
+    text-decoration: none;
+    transition: all var(--transition-duration) var(--transition-timing);
+    box-shadow: var(--shadow-brutal);
+    position: relative;
+    top: 0;
+  }
+
+  .nav-button:hover {
+    top: -2px;
+    box-shadow: var(--shadow-md);
+    border-color: rgb(var(--color-primary));
+  }
+
+  .nav-button:active {
+    top: 0;
+    box-shadow: var(--shadow);
+  }
+
+  .next-button {
+    text-align: right;
+  }
+
+  .nav-direction {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgb(var(--color-primary));
+    margin-bottom: var(--space-2);
+  }
+
+  .nav-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: rgb(var(--color-foreground));
+    margin-bottom: var(--space-1);
+    line-height: 1.2;
+  }
+
+  .nav-description {
+    font-size: var(--font-size-sm);
+    color: rgb(var(--color-muted-foreground));
+    line-height: 1.4;
+  }
+
+  /* Related Content */
+  .related-nav {
+    order: 2;
+  }
+
+  @media (min-width: 1024px) {
+    .related-nav {
+      order: 1;
+    }
+    .prev-next-nav {
+      order: 2;
+    }
+  }
+
+  .related-title {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgb(var(--color-foreground));
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid rgb(var(--color-border));
+    padding-bottom: var(--space-2);
+  }
+
+  .related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .related-link {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4);
+    border: 1px solid rgb(var(--color-border));
+    border-radius: var(--border-radius);
+    background: rgb(var(--color-muted));
+    text-decoration: none;
+    transition: all var(--transition-duration) var(--transition-timing);
+  }
+
+  .related-link:hover {
+    background: rgb(var(--color-accent));
+    border-color: rgb(var(--color-primary));
+  }
+
+  .related-label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: rgb(var(--color-foreground));
+    margin-bottom: var(--space-1);
+  }
+
+  .related-description {
+    font-size: var(--font-size-xs);
+    color: rgb(var(--color-muted-foreground));
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .contextual-nav {
+      margin-top: var(--space-8);
+      padding-top: var(--space-6);
+    }
+
+    .nav-button {
+      padding: var(--space-4);
+    }
+
+    .nav-title {
+      font-size: var(--font-size-base);
+    }
+  }
+</style>

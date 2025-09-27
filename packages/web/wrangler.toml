@@ -1,0 +1,18 @@
+name = "ocsight-website"
+compatibility_date = "2024-12-01"
+
+[env.production]
+name = "ocsight-website"
+vars = { ENVIRONMENT = "production" }
+
+[env.dev]
+name = "ocsight-website-dev"
+vars = { ENVIRONMENT = "development" }
+
+[[env.production.pages]]
+project = "ocsight-website"
+production_branch = "main"
+
+[[env.dev.pages]]
+project = "ocsight-website"
+production_branch = "develop"

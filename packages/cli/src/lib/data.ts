@@ -109,7 +109,7 @@ async function loadCache(dataDir: string): Promise<CacheData | null> {
     const cache = JSON.parse(content) as CacheData;
 
     const CACHE_VERSION = "3.0";
-    
+
     // Validate cache version
     if (cache.version !== CACHE_VERSION) {
       return null;
@@ -133,7 +133,10 @@ async function saveCache(dataDir: string, cache: CacheData): Promise<void> {
 const HASH_LENGTH = 16;
 
 function calculateFileHash(content: string): string {
-  return createHash("sha256").update(content).digest("hex").substring(0, HASH_LENGTH);
+  return createHash("sha256")
+    .update(content)
+    .digest("hex")
+    .substring(0, HASH_LENGTH);
 }
 
 async function getFileMetadata(
@@ -160,6 +163,34 @@ async function hasFileChanged(
     metadata.size !== cacheEntry.size ||
     metadata.hash !== cacheEntry.hash
   );
+}
+
+// Optimized version that returns both change status and content
+async function analyzeFile(
+  filePath: string,
+  cacheEntry: CacheEntry | undefined,
+): Promise<{
+  changed: boolean;
+  metadata: { mtime: number; size: number; hash: string };
+  content: string;
+}> {
+  const stats = await stat(filePath);
+  const content = await readFile(filePath, "utf-8");
+  const hash = calculateFileHash(content);
+
+  const metadata = {
+    mtime: stats.mtimeMs,
+    size: stats.size,
+    hash: hash,
+  };
+
+  const changed =
+    !cacheEntry ||
+    metadata.mtime !== cacheEntry.mtime ||
+    metadata.size !== cacheEntry.size ||
+    metadata.hash !== cacheEntry.hash;
+
+  return { changed, metadata, content };
 }
 
 interface SessionStreamData {
@@ -297,11 +328,17 @@ async function* streamProcessSessions(
     let totalCost = 0;
     let provider = "unknown";
     let model = "unknown";
+    let latestAssistantTime = 0;
 
     for (const msg of messages) {
       if (msg.role === "assistant" && msg.providerID && msg.modelID) {
-        provider = msg.providerID;
-        model = msg.modelID;
+        // Use the most recent assistant message's model info
+        const msgTime = msg.time?.created || 0;
+        if (msgTime > latestAssistantTime) {
+          latestAssistantTime = msgTime;
+          provider = msg.providerID;
+          model = msg.modelID;
+        }
 
         if (msg.tokens) {
           totalTokens += (msg.tokens.input || 0) + (msg.tokens.output || 0);
@@ -707,13 +744,20 @@ export async function loadOpenCodeData(options?: {
 
   const BATCH_SIZE = 100;
   const PROGRESS_UPDATE_INTERVAL = 1000;
-  
+
   // Load messages and group by session with batching for better performance
   const messagesBySession = new Map<string, MessageData[]>();
   const newCacheEntries: CacheEntry[] = [];
 
-  for (let i = 0; i < filesToProcess.length; i += BATCH_SIZE) {
-    const batch = filesToProcess.slice(i, i + BATCH_SIZE);
+  // Always load ALL message files so sessions retain their messages.
+  // Cache still only updated for changed files to avoid churn.
+  const allMessageFiles =
+    useCache && cache ? [...filesToProcess, ...unchangedFiles] : filesToProcess;
+
+  const changedSet = new Set(filesToProcess);
+
+  for (let i = 0; i < allMessageFiles.length; i += BATCH_SIZE) {
+    const batch = allMessageFiles.slice(i, i + BATCH_SIZE);
 
     progressManager.updateProgress(i, "Processing message files");
 
@@ -734,16 +778,18 @@ export async function loadOpenCodeData(options?: {
 
           const message = data as MessageData;
 
-          // Create cache entry for this file
-          const metadata = await getFileMetadata(file);
-          const cacheEntry: CacheEntry = {
-            filePath: file,
-            mtime: metadata.mtime,
-            size: metadata.size,
-            hash: metadata.hash,
-            processedAt: Date.now(),
-          };
-          newCacheEntries.push(cacheEntry);
+          // Only update cache metadata for changed files
+          if (changedSet.has(file)) {
+            const metadata = await getFileMetadata(file);
+            const cacheEntry: CacheEntry = {
+              filePath: file,
+              mtime: metadata.mtime,
+              size: metadata.size,
+              hash: metadata.hash,
+              processedAt: Date.now(),
+            };
+            newCacheEntries.push(cacheEntry);
+          }
 
           return message;
         },
@@ -765,7 +811,9 @@ export async function loadOpenCodeData(options?: {
 
     // Progress indicator for large datasets
     if (i % PROGRESS_UPDATE_INTERVAL === 0 && i > 0 && !options?.quiet) {
-      console.log(`Processed ${i}/${filesToProcess.length} message files...`);
+      console.log(
+        `Processed ${Math.min(i, allMessageFiles.length)}/${allMessageFiles.length} message files...`,
+      );
     }
   }
 

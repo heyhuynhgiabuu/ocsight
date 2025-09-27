@@ -1,0 +1,170 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+import { Icon } from '@astrojs/starlight/components';
+import config from "virtual:starlight/user-config";
+---
+
+<div class="ocsight-footer-wrapper">
+  <Default />
+  
+  <div class="ocsight-custom-footer">
+    <div class="ocsight-footer-content">
+      <div class="ocsight-footer-sections">
+        <div class="ocsight-footer-section">
+          <h3>Documentation</h3>
+          <ul>
+            <li><a href="/docs/intro">Getting Started</a></li>
+            <li><a href="/docs/cli">CLI Reference</a></li>
+  
+            <li><a href="/docs/usage">Usage Guide</a></li>
+          </ul>
+        </div>
+        
+        <div class="ocsight-footer-section">
+          <h3>Community</h3>
+          <ul>
+            <li>
+              <a href={config.github} target="_blank" rel="noopener noreferrer" class="ocsight-footer-link-with-icon">
+                <Icon name="github" size="1rem" />
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href={config.npm} target="_blank" rel="noopener noreferrer" class="ocsight-footer-link-with-icon">
+                <Icon name="npm" size="1rem" />
+                npm Package
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/heyhuynhgiabuu/ocsight/issues" target="_blank" rel="noopener noreferrer">
+                Report Issues
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="ocsight-footer-section">
+          <h3>Contribute</h3>
+          <ul>
+            <li>
+              <a href={`${config.github}/edit/main/packages/web/src/content/docs/${Astro.url.pathname.split('/').pop() || 'intro'}.mdx`} target="_blank" rel="noopener noreferrer">
+                Edit this page
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/heyhuynhgiabuu/ocsight" target="_blank" rel="noopener noreferrer">
+                View Source Code
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="ocsight-footer-bottom">
+        <div class="ocsight-footer-copyright">
+          <p>&copy; 2025 Ocsight. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a> and <a href="https://starlight.astro.build" target="_blank" rel="noopener noreferrer">Starlight</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ocsight-footer-wrapper {
+    margin-top: 3rem;
+  }
+  
+  .ocsight-custom-footer {
+    border-top: 1px solid var(--sl-color-gray-200);
+    padding-top: 2rem;
+    background: var(--sl-color-bg);
+  }
+  
+  .ocsight-footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  
+  .ocsight-footer-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .ocsight-footer-section h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sl-color-text);
+    margin: 0 0 1rem 0;
+  }
+  
+  .ocsight-footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .ocsight-footer-section li {
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .ocsight-footer-section a {
+    color: var(--sl-color-text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+    display: block;
+  }
+  
+  .ocsight-footer-section a:hover {
+    color: var(--sl-color-text);
+  }
+  
+  .ocsight-footer-link-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .ocsight-footer-bottom {
+    border-top: 1px solid var(--sl-color-gray-200);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .ocsight-footer-copyright {
+    text-align: center;
+  }
+  
+  .ocsight-footer-copyright p {
+    color: var(--sl-color-text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+  
+  .ocsight-footer-copyright a {
+    color: var(--sl-color-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .ocsight-footer-copyright a:hover {
+    color: var(--sl-color-text);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .ocsight-footer-sections {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    .ocsight-footer-copyright {
+      text-align: left;
+    }
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+// Skip links for keyboard navigation accessibility
+interface SkipLink {
+  href: string
+  label: string
+}
+
+const skipLinks: SkipLink[] = [
+  { href: '#main-content', label: 'Skip to main content' },
+  { href: '#navigation', label: 'Skip to navigation' },
+  { href: '#search', label: 'Skip to search' },
+  { href: '#footer', label: 'Skip to footer' }
+]
+---
+
+<div class="skip-links" aria-label="Skip navigation links">
+  {skipLinks.map(link => (
+    <a href={link.href} class="skip-link">
+      {link.label}
+    </a>
+  ))}
+</div>
+
+<style>
+  .skip-links {
+    position: relative;
+    z-index: 9999;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    z-index: 9999;
+    padding: var(--space-3) var(--space-4);
+    background: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-foreground));
+    text-decoration: none;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    border: 2px solid rgb(var(--color-border));
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-brutal);
+    transition: all var(--transition-duration) var(--transition-timing);
+  }
+
+  .skip-link:focus {
+    position: absolute;
+    left: var(--space-4);
+    top: var(--space-4);
+    z-index: 9999;
+    outline: 2px solid rgb(var(--color-primary-foreground));
+    outline-offset: 2px;
+  }
+
+  .skip-link:hover:focus {
+    background: rgb(var(--color-foreground));
+    color: rgb(var(--color-background));
+    border-color: rgb(var(--color-foreground));
+  }
+
+  /* Ensure skip links work on all screen sizes */
+  @media (max-width: 768px) {
+    .skip-link:focus {
+      left: var(--space-2);
+      top: var(--space-2);
+      right: var(--space-2);
+      width: auto;
+      text-align: center;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .skip-link {
+      border-width: 3px;
+    }
+    
+    .skip-link:focus {
+      outline-width: 3px;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
+</style>

@@ -1,268 +1,222 @@
 import { Command } from "commander";
 import { writeFileSync } from "fs";
 import { createObjectCsvWriter } from "csv-writer";
-import { loadAllData } from "../lib/data.js";
-import { filterSessions, calculateStatistics } from "../lib/analysis.js";
+import { dataService } from "../services/data.js";
+import { costService } from "../services/cost.js";
+import { formatService } from "../services/format.js";
 import { getExportSummary } from "../lib/safe-export.js";
-import { statusIndicator } from "../lib/ui.js";
 import chalk from "chalk";
-import {
-  OpenCodeData,
-  UsageStatistics,
-  OpenCodeSession,
-} from "../types/index.js";
+
+interface ExportOptions {
+  days?: number;
+  start?: string;
+  end?: string;
+  provider?: string;
+  format?: "csv" | "json" | "markdown";
+  output?: string;
+  session?: string;
+}
 
 export const exportCommand = new Command("export")
-  .description("Export OpenCode usage data to CSV or JSON")
-  .option("--quick", "Quick export mode with recent data only")
-  .option("-p, --path <path>", "Custom path to OpenCode data directory")
+  .description("Export OpenCode usage data")
   .option("-d, --days <days>", "Include data from last N days", parseInt)
   .option("-s, --start <date>", "Start date (YYYY-MM-DD)")
   .option("-e, --end <date>", "End date (YYYY-MM-DD)")
   .option("--provider <provider>", "Filter by provider")
-  .option("--project <project>", "Include only this project")
-  .option("--exclude-project <project>", "Exclude this project")
-  .option("-f, --format <format>", "Export format (csv|json|markdown)", "csv")
+  .option("--session <id>", "Export specific session")
+  .option(
+    "-f, --format <format>",
+    "Export format (csv, json, markdown)",
+    "json",
+  )
   .option("-o, --output <file>", "Output file path")
-  .action(async (options) => {
-    console.log("Loading OpenCode data...");
-
+  .action(async (options: ExportOptions) => {
     try {
-      // Quick mode: limit to recent 30 days, 1000 messages max
-      const quickOptions = options.quick
-        ? {
-            limit: 1000,
-            cache: true,
-            // Add time filtering for recent data
-            days: options.days || 30,
-          }
-        : undefined;
+      console.log("Loading OpenCode data...");
 
-      const data = await loadAllData(quickOptions);
-      console.log(`Analyzing data${options.quick ? " (quick mode)" : ""}...`);
+      // Load sessions with filters
+      const sessions = await dataService.loadSessions({
+        days: options.days,
+        provider: options.provider,
+        session: options.session,
+        quiet: true,
+        cache: true,
+      });
 
-      const filteredSessions = filterSessions(data, options);
-      const statistics = calculateStatistics(filteredSessions);
-
-      if (!options.output) {
-        const timestamp = new Date().toISOString().split("T")[0];
-        options.output = `opencode-export-${timestamp}.${options.format}`;
+      if (sessions.length === 0) {
+        console.log(
+          formatService.renderWarning(
+            "No sessions found with the specified filters",
+          ),
+        );
+        return;
       }
 
-      console.log(`Exporting to ${options.format.toUpperCase()}...`);
+      // Generate output filename if not provided
+      if (!options.output) {
+        const timestamp = new Date().toISOString().split("T")[0];
+        const ext = options.format || "json";
+        options.output = `ocsight-export-${timestamp}.${ext}`;
+      }
 
-      if (options.format === "json") {
-        await exportToJson(statistics, data, options.output);
-      } else if (options.format === "csv") {
-        await exportToCsv(filteredSessions, options.output);
-      } else if (options.format === "markdown") {
-        await exportToMarkdown(statistics, filteredSessions, options.output);
+      console.log(
+        `Exporting ${sessions.length} sessions to ${options.format?.toUpperCase()}...`,
+      );
+
+      // Export based on format
+      switch (options.format) {
+        case "csv":
+          await exportToCsv(sessions, options.output);
+          break;
+        case "markdown":
+          await exportToMarkdown(sessions, options.output);
+          break;
+        case "json":
+        default:
+          await exportToJson(sessions, options.output);
+          break;
       }
 
       // Show export summary
       const summary = await getExportSummary(options.output);
-      console.log(statusIndicator("success", `Export completed successfully`));
+      console.log(formatService.renderSuccess(`Export completed successfully`));
       console.log(chalk.cyan(`📁 File: ${summary.file_path}`));
-      console.log(chalk.dim(`   Size: ${summary.file_size} (${summary.format})`));
-      if (filteredSessions.length > 0) {
-        console.log(chalk.dim(`   Records: ${filteredSessions.length.toLocaleString()}`));
-      }
+      console.log(
+        chalk.dim(`   Size: ${summary.file_size} (${summary.format})`),
+      );
+      console.log(chalk.dim(`   Records: ${sessions.length.toLocaleString()}`));
     } catch (error) {
-      console.error(statusIndicator("error", "Export failed"));
-      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+      console.error(formatService.renderError("Export failed"));
+      console.error(error instanceof Error ? error.message : "Unknown error");
       process.exit(1);
     }
   });
 
 async function exportToJson(
-  statistics: UsageStatistics,
-  data: OpenCodeData,
+  sessions: any[],
   outputPath: string,
 ): Promise<void> {
+  // Calculate aggregates
+  const costSummary = await costService.aggregateCosts(sessions);
+  const dailyCosts = costService.getDailyCosts(sessions);
+
   const exportData = {
     metadata: {
       exportedAt: new Date().toISOString(),
-      totalSessions: statistics.totalSessions,
+      totalSessions: sessions.length,
+      totalMessages: sessions.reduce((sum, s) => sum + s.messages.length, 0),
+      totalCost: costService.formatCostInDollars(costSummary.totalCostCents),
+      totalTokens: costSummary.totalTokens,
     },
-    statistics,
-    rawData: data,
+    summary: {
+      byProvider: costService.getProviderBreakdown(costSummary),
+      dailyCosts: dailyCosts.slice(0, 30),
+      insights: costService.getCostInsights(costSummary),
+    },
+    sessions: sessions.map((s) => ({
+      id: s.id,
+      title: s.title || "Untitled",
+      created: new Date(s.time.created).toISOString(),
+      updated: s.time.updated ? new Date(s.time.updated).toISOString() : null,
+      provider: s.model.provider,
+      model: s.model.model,
+      messages: s.messages.length,
+      tokensUsed: s.tokens_used || 0,
+      costCents: s.cost_cents,
+      duration: s.time.updated
+        ? Math.round((s.time.updated - s.time.created) / 60000)
+        : 0,
+    })),
   };
 
   writeFileSync(outputPath, JSON.stringify(exportData, null, 2));
 }
 
-async function exportToCsv(
-  sessions: OpenCodeSession[],
-  outputPath: string,
-): Promise<void> {
+async function exportToCsv(sessions: any[], outputPath: string): Promise<void> {
   const csvWriter = createObjectCsvWriter({
     path: outputPath,
     header: [
       { id: "date", title: "Date" },
       { id: "sessionId", title: "Session ID" },
-      { id: "sessionTitle", title: "Session Title" },
+      { id: "title", title: "Title" },
       { id: "provider", title: "Provider" },
       { id: "model", title: "Model" },
-      { id: "tokensUsed", title: "Tokens Used" },
-      { id: "costCents", title: "Cost (Cents)" },
-      { id: "toolsUsed", title: "Tools Used" },
-      { id: "sessionDuration", title: "Duration (Minutes)" },
+      { id: "messages", title: "Messages" },
+      { id: "tokensUsed", title: "Tokens" },
+      { id: "costDollars", title: "Cost ($)" },
+      { id: "duration", title: "Duration (min)" },
     ],
   });
 
-  const csvData = sessions.map((session) => {
-    const duration = session.time.updated
-      ? new Date(session.time.updated)
-      : new Date(session.time.created) && new Date(session.time.created)
-        ? Math.round(
-            (new Date(
-              session.time.updated
-                ? new Date(session.time.updated)
-                : new Date(session.time.created),
-            ).getTime() -
-              new Date(new Date(session.time.created)).getTime()) /
-              60000,
-          )
-        : 0;
-
-    const tools =
-      session.messages?.flatMap(
-        (msg) => msg.tools?.map((tool) => tool.name) || [],
-      ) || [];
-
-    return {
-      date: new Date(new Date(session.time.created))
-        .toISOString()
-        .split("T")[0],
-      sessionId: session.id,
-      sessionTitle: session.title || "Untitled",
-      provider: session.model?.provider || "unknown",
-      model: session.model?.model || "unknown",
-      tokensUsed: session.tokens_used || 0,
-      costCents: session.cost_cents || 0,
-      toolsUsed: tools.join(", "),
-      sessionDuration: duration,
-    };
-  });
+  const csvData = sessions.map((session) => ({
+    date: new Date(session.time.created).toISOString().split("T")[0],
+    sessionId: session.id,
+    title: session.title || "Untitled",
+    provider: session.model.provider,
+    model: session.model.model,
+    messages: session.messages.length,
+    tokensUsed: session.tokens_used || 0,
+    costDollars: (session.cost_cents / 100).toFixed(2),
+    duration: session.time.updated
+      ? Math.round((session.time.updated - session.time.created) / 60000)
+      : 0,
+  }));
 
   await csvWriter.writeRecords(csvData);
 }
 
 async function exportToMarkdown(
-  statistics: UsageStatistics,
-  sessions: OpenCodeSession[],
+  sessions: any[],
   outputPath: string,
 ): Promise<void> {
-  const markdown = generateMarkdownReport(statistics, sessions);
-  writeFileSync(outputPath, markdown);
-}
+  const costSummary = await costService.aggregateCosts(sessions);
+  const dailyCosts = costService.getDailyCosts(sessions);
+  const providerBreakdown = costService.getProviderBreakdown(costSummary);
 
-function generateMarkdownReport(
-  statistics: UsageStatistics,
-  sessions: OpenCodeSession[],
-): string {
-  const reportDate = new Date().toISOString().split("T")[0];
+  let markdown = `# OCsight Export Report\n\n`;
+  markdown += `**Generated:** ${new Date().toISOString()}\n`;
+  markdown += `**Sessions:** ${sessions.length}\n\n`;
 
-  let markdown = `# OpenCode Usage Report\n\n`;
-  markdown += `**Generated:** ${reportDate}\n`;
-  markdown += `**Period:** ${formatDateRange(sessions)}\n\n`;
-
+  // Summary
   markdown += `## Summary\n\n`;
-  markdown += `- **Total Sessions:** ${statistics.totalSessions}\n`;
-  markdown += `- **Total Messages:** ${statistics.totalMessages}\n`;
-  markdown += `- **Total Tools:** ${statistics.totalTools}\n`;
-  markdown += `- **Total Tokens:** ${statistics.totalTokens.toLocaleString()}\n`;
-  markdown += `- **Total Cost:** $${(statistics.totalCostCents / 100).toFixed(2)}\n\n`;
+  markdown += `- **Total Cost:** ${formatService.formatCurrency(costSummary.totalCostCents)}\n`;
+  markdown += `- **Total Tokens:** ${formatService.formatNumber(costSummary.totalTokens)}\n`;
+  markdown += `- **Average Cost/Session:** ${formatService.formatCurrency(costSummary.averageCostPerSession)}\n`;
+  markdown += `- **Total Messages:** ${sessions.reduce((sum, s) => sum + s.messages.length, 0).toLocaleString()}\n\n`;
 
-  const topTools = Object.entries(statistics.toolUsage)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10)
-    .map(([name, count]) => ({ name, count }));
-
-  if (topTools.length > 0) {
-    markdown += `## Top Tools Used\n\n`;
-    markdown += `| Tool | Usage Count |\n`;
-    markdown += `|------|-------------|\n`;
-    topTools.forEach((tool) => {
-      markdown += `| ${tool.name} | ${tool.count} |\n`;
+  // Provider breakdown
+  if (providerBreakdown.length > 0) {
+    markdown += `## Providers\n\n`;
+    markdown += `| Provider | Sessions | Cost | Tokens | % |\n`;
+    markdown += `|----------|----------|------|--------|---|\n`;
+    providerBreakdown.forEach((p) => {
+      markdown += `| ${p.provider} | ${p.sessions} | ${formatService.formatCurrency(p.costCents)} | ${formatService.formatNumber(p.tokens)} | ${p.percentage.toFixed(1)}% |\n`;
     });
     markdown += `\n`;
   }
 
-  const providerStats = Object.entries(statistics.sessionsByProvider).map(
-    ([provider, sessions]) => ({
-      provider,
-      sessions,
-      tokens: statistics.tokensByProvider[provider] || 0,
-      costCents: statistics.costsByProvider[provider] || 0,
-    }),
-  );
-
-  if (providerStats.length > 0) {
-    markdown += `## Provider Statistics\n\n`;
-    markdown += `| Provider | Sessions | Tokens | Cost |\n`;
-    markdown += `|----------|----------|--------|------|\n`;
-    providerStats.forEach((provider) => {
-      markdown += `| ${provider.provider} | ${provider.sessions} | ${provider.tokens.toLocaleString()} | $${(provider.costCents / 100).toFixed(2)} |\n`;
+  // Recent activity
+  if (dailyCosts.length > 0) {
+    markdown += `## Daily Activity (Last 7 Days)\n\n`;
+    markdown += `| Date | Sessions | Cost | Tokens |\n`;
+    markdown += `|------|----------|------|--------|\n`;
+    dailyCosts.slice(0, 7).forEach((d) => {
+      markdown += `| ${d.date} | ${d.sessions} | ${formatService.formatCurrency(d.costCents)} | ${formatService.formatNumber(d.tokens)} |\n`;
     });
     markdown += `\n`;
   }
 
-  const dailyStatsArray = Object.entries(statistics.dailyStats)
-    .sort(([a], [b]) => b.localeCompare(a))
-    .map(([date, stats]) => ({ date, ...stats }));
-
-  if (dailyStatsArray.length > 0) {
-    markdown += `## Daily Activity\n\n`;
-    markdown += `| Date | Sessions | Tokens | Cost |\n`;
-    markdown += `|------|----------|--------|------|\n`;
-    dailyStatsArray.slice(0, 14).forEach((day) => {
-      markdown += `| ${day.date} | ${day.sessions} | ${day.tokens.toLocaleString()} | $${(day.cost / 100).toFixed(2)} |\n`;
+  // Top 10 sessions by cost
+  const topSessions = dataService.getTopSessionsByCost(sessions, 10);
+  if (topSessions.length > 0) {
+    markdown += `## Top Sessions by Cost\n\n`;
+    markdown += `| Session ID | Date | Provider | Cost | Tokens |\n`;
+    markdown += `|------------|------|----------|------|--------|\n`;
+    topSessions.forEach((s) => {
+      markdown += `| ${s.id.substring(0, 12)} | ${formatService.formatDate(s.time.created)} | ${s.model.provider} | ${formatService.formatCurrency(s.cost_cents)} | ${formatService.formatNumber(s.tokens_used || 0)} |\n`;
     });
     markdown += `\n`;
   }
 
-  if (sessions.length > 0) {
-    markdown += `## Recent Sessions\n\n`;
-    markdown += `| Date | Title | Provider | Model | Duration | Tools |\n`;
-    markdown += `|------|-------|----------|-------|----------|-------|\n`;
-    sessions.slice(0, 20).forEach((session) => {
-      const duration = session.time.updated
-        ? new Date(session.time.updated)
-        : new Date(session.time.created) && new Date(session.time.created)
-          ? Math.round(
-              (new Date(
-                session.time.updated
-                  ? new Date(session.time.updated)
-                  : new Date(session.time.created),
-              ).getTime() -
-                new Date(new Date(session.time.created)).getTime()) /
-                60000,
-            )
-          : 0;
-      const tools =
-        session.messages?.flatMap(
-          (msg) => msg.tools?.map((tool) => tool.name) || [],
-        ) || [];
-      markdown += `| ${new Date(new Date(session.time.created)).toISOString().split("T")[0]} | ${session.title || "Untitled"} | ${session.model?.provider || "unknown"} | ${session.model?.model || "unknown"} | ${duration}min | ${tools.slice(0, 3).join(", ")}${tools.length > 3 ? "..." : ""} |\n`;
-    });
-    markdown += `\n`;
-  }
-
-  return markdown;
-}
-
-function formatDateRange(sessions: OpenCodeSession[]): string {
-  if (sessions.length === 0) return "No data";
-
-  const dates = sessions.map(
-    (s) => new Date(s.time.created).toISOString().split("T")[0],
-  );
-  const minDate = Math.min(...dates.map((d) => new Date(d).getTime()));
-  const maxDate = Math.max(...dates.map((d) => new Date(d).getTime()));
-
-  const min = new Date(minDate).toISOString().split("T")[0];
-  const max = new Date(maxDate).toISOString().split("T")[0];
-
-  return min === max ? min : `${min} to ${max}`;
+  writeFileSync(outputPath, markdown);
 }

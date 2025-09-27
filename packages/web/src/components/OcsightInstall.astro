@@ -1,0 +1,214 @@
+---
+const installs = [
+  {
+    title: 'Quick Start (Recommended)',
+    command: 'npx ocsight@latest summary',
+    description: 'Run directly without installation. Always gets the latest version.',
+    badge: 'No install required'
+  },
+  {
+    title: 'npm',
+    command: 'npm install -g ocsight',
+    description: 'Install globally from the public npm registry.',
+    badge: 'Most popular'
+  },
+  {
+    title: 'bun',
+    command: 'bun install -g ocsight',
+    description: 'Ultra-fast install and runtime performance.',
+    badge: 'Fastest'
+  },
+  {
+    title: 'homebrew',
+    command: 'brew tap heyhuynhgiabuu/tap && brew install ocsight',
+    description: 'Official formula for macOS package management.',
+    badge: 'macOS native'
+  },
+];
+
+const quickCommands = [
+  {
+    title: 'Analyze last 7 days',
+    command: 'ocsight summary --days 7'
+  },
+  {
+    title: 'Track today\'s costs',
+    command: 'ocsight costs today'
+  },
+  {
+    title: 'Export usage data',
+    command: 'ocsight export --format csv'
+  }
+];
+---
+
+<section id="install" class="border-t border-border bg-background py-24">
+  <div class="container flex flex-col gap-16">
+    <!-- Installation Methods -->
+    <div class="flex flex-col gap-12">
+      <div class="max-w-3xl space-y-4 text-center">
+        <span class="inline-flex w-fit items-center gap-2 border border-border bg-muted px-3 py-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Start in 30 seconds
+        </span>
+        <h2 class="text-3xl font-semibold text-foreground sm:text-4xl">Installation</h2>
+        <p class="text-muted-foreground">
+          Choose your preferred method. All options provide the same powerful CLI with zero configuration required.
+        </p>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        {installs.map(item => (
+          <article class="flex flex-col gap-4 rounded-sm border border-border bg-background p-6 shadow-brutal" data-install-card>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <h3 class="font-mono text-sm uppercase tracking-widest text-muted-foreground">{item.title}</h3>
+                {item.badge && (
+                  <span class="rounded-sm border border-border bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                data-copy={item.command}
+                data-copy-label={item.title}
+                aria-label={`Copy ${item.title} command`}
+                aria-live="polite"
+                class="inline-flex items-center gap-2 border border-border px-3 py-1 text-xs uppercase tracking-widest transition-colors hover:bg-foreground hover:text-background"
+              >
+                <span class="sr-only" data-copy-status>Copy {item.title} command</span>
+                <span aria-hidden="true">Copy</span>
+              </button>
+            </div>
+            <p class="text-sm text-muted-foreground">{item.description}</p>
+            <code class="overflow-x-auto rounded-sm border border-dashed border-border bg-muted p-4 font-mono text-sm">{item.command}</code>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <!-- Quick Commands -->
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_400px]">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-2xl font-semibold text-foreground mb-4">Quick Commands</h3>
+          <p class="text-muted-foreground mb-6">
+            Common commands to get started immediately. Run these after installation to explore your OpenCode usage.
+          </p>
+        </div>
+        
+        <div class="space-y-4">
+          {quickCommands.map(item => (
+            <div class="rounded-sm border border-border bg-background p-4 shadow-brutal">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-mono text-sm uppercase tracking-widest text-muted-foreground">{item.title}</h4>
+                <button
+                  type="button"
+                  data-copy={item.command}
+                  data-copy-label={item.title}
+                  aria-label={`Copy ${item.title} command`}
+                  class="inline-flex items-center gap-2 border border-border px-2 py-1 text-xs uppercase tracking-widest transition-colors hover:bg-foreground hover:text-background"
+                >
+                  <span aria-hidden="true">Copy</span>
+                </button>
+              </div>
+              <code class="block rounded-sm border border-dashed border-border bg-muted p-3 font-mono text-sm">{item.command}</code>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="rounded-sm border border-border bg-background p-6 shadow-brutal">
+          <h3 class="font-mono text-sm uppercase tracking-widest text-muted-foreground mb-3">System Requirements</h3>
+          <ul class="space-y-2 text-sm text-muted-foreground">
+            <li>• Node.js 18+ or Bun 1.0+</li>
+            <li>• OpenCode installation</li>
+            <li>• 50MB disk space</li>
+            <li>• Read access to OpenCode data</li>
+          </ul>
+        </div>
+
+        <div class="rounded-sm border border-border bg-background p-6 shadow-brutal">
+          <h3 class="font-mono text-sm uppercase tracking-widest text-muted-foreground mb-3">Verify Installation</h3>
+          <p class="text-sm text-muted-foreground mb-3">
+            Confirm ocsight is working correctly:
+          </p>
+          <code class="block rounded-sm border border-dashed border-border bg-muted p-3 font-mono text-sm">ocsight --version</code>
+        </div>
+
+        <div class="rounded-sm border border-border bg-background p-6 shadow-brutal">
+          <h3 class="font-mono text-sm uppercase tracking-widest text-muted-foreground mb-3">Need Help?</h3>
+          <ul class="space-y-2 text-sm text-muted-foreground">
+            <li>• <a href="/docs" class="text-primary hover:opacity-80">Documentation</a></li>
+            <li>• <a href="https://github.com/heyhuynhgiabuu/ocsight/issues" class="text-primary hover:opacity-80">GitHub Issues</a></li>
+            <li>• <a href="/docs/troubleshooting" class="text-primary hover:opacity-80">Troubleshooting</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('[data-install-card] [data-copy]');
+    cards.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cmd = btn.getAttribute('data-copy');
+        if (!cmd) {
+          return;
+        }
+        const write = globalThis.navigator?.clipboard?.writeText?.(cmd);
+        if (!write) {
+          console.warn('Clipboard unavailable. Copy manually.');
+          return;
+        }
+        const label = btn.getAttribute('data-copy-label') || 'install';
+        const status = btn.querySelector('[data-copy-status]');
+        const text = btn.querySelector('[aria-hidden="true"]');
+        btn.setAttribute('aria-label', `${label} install command copied`);
+        if (status) {
+          status.textContent = `Copied ${label} install command`;
+        }
+        if (text) {
+          text.textContent = 'Copied';
+        }
+        btn.classList.add('bg-foreground', 'text-background');
+        write
+          .then(() => {
+            setTimeout(() => {
+              btn.setAttribute('aria-label', `Copy ${label} install command`);
+              if (status) {
+                status.textContent = `Copy ${label} install command`;
+              }
+              if (text) {
+                text.textContent = 'Copy';
+              }
+              btn.classList.remove('bg-foreground', 'text-background');
+            }, 1200);
+          })
+          .catch(err => {
+            console.warn('Copy failed:', err);
+            btn.setAttribute('aria-label', `Copy ${label} install command manually`);
+            if (status) {
+              status.textContent = `Copy ${label} install command manually`;
+            }
+            if (text) {
+              text.textContent = 'Copy manually';
+            }
+            setTimeout(() => {
+              btn.setAttribute('aria-label', `Copy ${label} install command`);
+              if (status) {
+                status.textContent = `Copy ${label} install command`;
+              }
+              if (text) {
+                text.textContent = 'Copy';
+              }
+              btn.classList.remove('bg-foreground', 'text-background');
+            }, 1600);
+          });
+      });
+    });
+  });
+</script>

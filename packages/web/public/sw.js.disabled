@@ -1,0 +1,158 @@
+// Enhanced Service Worker for ocsight with advanced caching strategies
+const CACHE_NAME = "ocsight-v1";
+const STATIC_CACHE = "static-v1";
+const DYNAMIC_CACHE = "dynamic-v1";
+const API_CACHE = "api-v1";
+
+// Critical assets to cache immediately
+const STATIC_ASSETS = [
+  "/",
+  "/docs/",
+  "/manifest.json",
+  "/logo.svg",
+  "/offline.html",
+];
+
+// Cache strategies
+const CACHE_STRATEGIES = {
+  CACHE_FIRST: "cache-first",
+  NETWORK_FIRST: "network-first",
+  STALE_WHILE_REVALIDATE: "stale-while-revalidate",
+};
+
+// Install event - cache static assets
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    }),
+  );
+  self.skipWaiting();
+});
+
+// Activate event - clean up old caches
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+            return caches.delete(cacheName);
+          }
+        }),
+      );
+    }),
+  );
+  self.clients.claim();
+});
+
+// Enhanced fetch event with multiple caching strategies
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests and external requests
+  if (request.method !== "GET" || !url.origin.includes("ocsight.dev")) {
+    return;
+  }
+
+  // API requests - network-first with short cache
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(handleApiRequest(request));
+    return;
+  }
+
+  // Static assets - cache-first
+  if (isStaticAsset(url.pathname)) {
+    event.respondWith(handleStaticAsset(request));
+    return;
+  }
+
+  // Documentation pages - stale-while-revalidate
+  if (url.pathname.startsWith("/docs/")) {
+    event.respondWith(handleDocumentationPage(request));
+    return;
+  }
+
+  // Default - network-first for dynamic content
+  event.respondWith(handleDynamicContent(request));
+});
+
+// Cache-first strategy for static assets
+async function handleStaticAsset(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const response = await fetch(request);
+    const cache = await caches.open(STATIC_CACHE);
+    cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    console.error("Failed to fetch static asset:", error);
+    return new Response("Asset not available offline", { status: 503 });
+  }
+}
+
+// Network-first with cache fallback for API requests
+async function handleApiRequest(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(API_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    return new Response("API not available offline", { status: 503 });
+  }
+}
+
+// Stale-while-revalidate for documentation pages
+async function handleDocumentationPage(request) {
+  const cachedResponse = await caches.match(request);
+
+  const fetchPromise = fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        const cache = caches.open(DYNAMIC_CACHE);
+        cache.then((c) => c.put(request, response.clone()));
+      }
+      return response;
+    })
+    .catch(() => cachedResponse);
+
+  return cachedResponse || fetchPromise;
+}
+
+// Network-first for dynamic content
+async function handleDynamicContent(request) {
+  try {
+    const response = await fetch(request);
+    const cache = await caches.open(DYNAMIC_CACHE);
+    cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    return (
+      cachedResponse ||
+      new Response("Content not available offline", { status: 503 })
+    );
+  }
+}
+
+// Helper function to identify static assets
+function isStaticAsset(pathname) {
+  return (
+    STATIC_ASSETS.includes(pathname) ||
+    pathname.match(
+      /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|woff|woff2|ttf|eot)$/,
+    )
+  );
+}

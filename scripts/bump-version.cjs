@@ -102,7 +102,6 @@ async function main() {
   const packageFiles = [
     "package.json",
     "packages/cli/package.json",
-    "packages/mcp/package.json",
     "packages/web/package.json",
   ];
 

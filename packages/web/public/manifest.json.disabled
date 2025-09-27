@@ -1,0 +1,21 @@
+{
+  "name": "Ocsight - OpenCode Observability",
+  "short_name": "Ocsight",
+  "description": "OpenCode ecosystem observability platform. See everything happening in your OpenCode development.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["developer tools", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

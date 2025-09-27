@@ -1,476 +1,346 @@
-# ocsight
+# OCsight - OpenCode Observability
 
-OpenCode observability platform. See everything happening in your OpenCode development.
+Track OpenCode AI costs and usage. Real costs, real data. No estimates or projections.
+
+![Usage Summary](assets/summary.png)
+
+## What It Does
+
+**ocsight** reads your OpenCode session files and shows you:
+
+- How much you're spending on AI models
+- Which providers and models you're using
+- Token usage and cost breakdowns
+- Real-time monitoring of active sessions
 
 ## Installation
 
-### Homebrew (Recommended)
-
 ```bash
-# Add the tap
-brew tap heyhuynhgiabuu/tap
+# macOS/Linux (Homebrew)
+brew install heyhuynhgiabuu/tap/ocsight
 
-# Install ocsight
-brew install ocsight
-```
-
-### npm
-
-```bash
+# Node.js (npm)
 npm install -g ocsight
-```
 
-### Manual Installation
-
-```bash
-# Clone and build
-git clone https://github.com/heyhuynhgiabuu/ocsight.git
-cd ocsight
-bun install && bun run build
-
-# Or download pre-built binaries from releases
+# Direct download
+curl -L https://github.com/heyhuynhgiabuu/ocsight/releases/latest/download/ocsight-$(uname -s)-$(uname -m).zip | tar -xz
 ```
 
 ## Quick Start
 
 ```bash
-# Install and build
-bun install && bun run build
+# See what you've spent
+ocsight summary
 
-# Live monitoring
+# Track today's costs
+ocsight costs today
+
+# Monitor live session
 ocsight live
-
-# Analyze usage
-ocsight analyze --quick
-
-# Export report
-ocsight export --format markdown --days 7
 ```
 
-## What It Does
+## Screenshots & Examples
 
-- **Live Monitoring**: Real-time dashboard with cost quota tracking
-- **Models Database**: 1000+ AI models with current pricing from models.dev
-- **Real Data**: Reads actual OpenCode session and message storage
-- **Performance**: Processes 17,400+ messages in <2 seconds
-- **Quick Analysis**: `--quick` flag for 90% faster analysis (6-13ms vs 60-120ms)
-- **Smart Caching**: 91% compression + LRU eviction (40% memory reduction)
-- **Exports**: JSON, CSV, Markdown reports
-- **MCP Server**: Real-time analytics via Model Context Protocol
-- **Filtering**: By time, provider, model, project
-- **Cross-Platform**: Go binaries for macOS, Linux, and Windows
+### 📊 Usage Summary
 
-## Commands
+See your OpenCode usage at a glance with provider breakdowns and daily activity:
 
-### Live Monitoring
+![Summary Command](assets/summary.png)
 
-```bash
-# Start live dashboard
-ocsight live
+### 💰 Cost Tracking
 
-# Custom refresh rate and quota
-ocsight live --refresh 10 --quota 25.00 --quota-period monthly
+Track your AI spending with daily breakdowns and spending alerts:
 
-# Monitor specific session
-ocsight live --session ses_1234
-```
+![Costs Command](assets/costs.png)
 
-### Analysis
+### 📋 Session Management
 
-```bash
-# Quick analysis (90% faster)
-ocsight analyze --quick
+Browse, analyze, and drill into individual sessions:
 
-# Basic analysis
-ocsight analyze
+![Sessions Command](assets/sessions.png)
 
-# Time-based filtering
-ocsight analyze --days 7
-ocsight analyze --start 2025-09-01 --end 2025-09-14
+### 🔴 Live Monitoring
 
-# Provider/project filtering
-ocsight analyze --provider anthropic
-ocsight analyze --project "my-project"
-```
+Real-time dashboard showing active session metrics:
 
-### Statistics
+![Live Monitor](assets/live.png)
 
-```bash
-# Quick stats (fast)
-ocsight stats --quick
+### 🤖 Model Database
 
-# Detailed stats
-ocsight stats
+Browse and compare pricing across 500+ AI models:
 
-# Time-filtered stats
-ocsight stats --days 30
-```
+![Models Database](assets/models.png)
 
-### Export
+## Export Formats
 
-```bash
-# Quick export (fast)
-ocsight export --quick --days 7
+ocsight can export your data in multiple formats for reporting and analysis:
 
-# CSV export (default)
-ocsight export --days 7
-
-# JSON export
-ocsight export --format json --output data.json
-
-# Markdown reports
-ocsight export --format markdown --output report.md
-```
-
-### Models Database
-
-```bash
-# Browse available models
-ocsight models list --provider openai --limit 10
-
-# Model details with cost calculation
-ocsight models show "anthropic/claude-3.5-sonnet" --calculate "10000,5000"
-
-# Compare two models
-ocsight models compare "openai/gpt-4o" "anthropic/claude-3.5-sonnet"
-
-# List providers
-ocsight models providers
-```
-
-### Configuration
-
-```bash
-# Initialize configuration
-ocsight config init
-
-# Show current settings
-ocsight config show
-
-# Validate configuration
-ocsight config doctor
-```
-
-## MCP Server
-
-Start MCP server for real-time analytics:
-
-```bash
-# Start server
-ocsight mcp
-
-# Or direct execution
-bun run src/mcp/server.ts
-```
-
-### MCP Tools
-
-- `list_providers`: List all AI providers
-- `get_tool_usage`: Tool usage statistics
-- `get_daily_stats`: Daily activity metrics
-- `analyze_project`: Project-specific analysis
-
-### Integration
-
-Add to OpenCode configuration:
+### JSON Export
 
 ```json
 {
-  "mcpServers": {
-    "ocsight": {
-      "command": "npx",
-      "args": ["ocsight", "mcp"]
+  "summary": {
+    "totalSessions": 787,
+    "totalCost": 8736.43,
+    "totalTokens": 2949563969,
+    "dateRange": "2024-12-12 to 2024-12-19"
+  },
+  "providers": [
+    {
+      "name": "anthropic",
+      "sessions": 26,
+      "cost": 8237.66,
+      "tokens": 699650136
     }
-  }
+  ]
 }
 ```
 
-## Performance (v0.7.5)
+### CSV Export
 
-ocsight v0.7.5 introduces major performance improvements:
-
-### Quick Mode
-
-```bash
-# 90% faster analysis (6-13ms vs 60-120ms)
-ocsight analyze --quick
-ocsight stats --quick
-ocsight export --quick
+```csv
+Date,Provider,Model,Sessions,Tokens,Cost
+2024-12-19,anthropic,claude-3.5-sonnet,15,12345678,234.56
+2024-12-18,openai,gpt-4o,23,23456789,456.78
+2024-12-17,anthropic,claude-3.5-haiku,19,18234567,345.67
 ```
 
-### Benchmarks
+### Markdown Report
 
-- **100 sessions**: Processed in 6-13ms (quick mode)
-- **Cache compression**: 91% ratio with LRU eviction
-- **Memory usage**: 40% reduction with intelligent caching
-- **Throughput**: 3x improvement with concurrent processing
-
-### Smart Features
-
-- **Concurrent processing**: Multiple sessions processed simultaneously
-- **Intelligent caching**: Persistent cache with compression and eviction
-- **Progress throttling**: Clean console output without spam
-
-## Examples
-
-### Live Monitoring Dashboard
-
-```bash
-$ ocsight live --quota 25.00
-
-OpenCode Live Dashboard
-Updated: 3:41:44 AM
-
-Current Session
-  Session ID: ses_67df
-  Total Tokens: 36.3M
-  Total Cost: $19.20
-  Cache Hit Rate: 95.9%
-
-Model: anthropic/claude-sonnet-4-20250514
-
-Daily Cost Quota
-[██████████████████████████████] 100.0% $19.20 / $10.00
-
-Context Window
-[█████████████████░░░░░░░░░░░░░] 57.3% 114,520 / 200,000 tokens
-
-Activity
-Rate: 17,980 tokens/min
-Last activity: 9.5s ago (89,904 tokens)
-```
-
-### Basic Analysis Output
-
-```bash
-$ ocsight analyze --quick
-
-📊 OpenCode Analysis (Quick Mode)
-
-Overview:
-  Sessions: 5
-  Messages: 1,000
-  Tools used: 0
-  Total cost: $0.00
-  Total tokens: 0
-
-By Provider:
-  unknown: 5 sessions, $0.00, 0 tokens
-
-Recent Activity:
-  2025-09-14: 1 sessions, $0.00
-  2025-09-13: 4 sessions, $0.00
-```
-
-### Markdown Export
-
-```bash
-$ ocsight export --format markdown --days 7
-✔ Data exported to opencode-export-2025-09-14.md
-
-$ cat opencode-export-2025-09-14.md
+```markdown
 # OpenCode Usage Report
 
-**Generated:** 2025-09-14 | **Period:** 7 days
-**Sessions:** 5 | **Messages:** 1,000 | **Tools:** 0
-
 ## Summary
-- Total Cost: $0.00
-- Total Tokens: 0
-- Active Days: 2
 
-## Provider Statistics
-| Provider | Sessions | Messages | Cost | Tokens |
-|----------|----------|----------|------|--------|
-| unknown | 5 | 1,000 | $0.00 | 0 |
+- **Period**: 2024-12-12 to 2024-12-19
+- **Total Sessions**: 787
+- **Total Cost**: $8,736.43
+- **Total Tokens**: 2,949,563,969
 
-## Daily Activity
-| Date | Sessions | Messages | Cost |
-|------|----------|----------|------|
-| 2025-09-14 | 1 | 200 | $0.00 |
-| 2025-09-13 | 4 | 800 | $0.00 |
+## Top Providers
+
+| Provider  | Sessions | Cost      | Tokens      |
+| --------- | -------- | --------- | ----------- |
+| anthropic | 26       | $8,237.66 | 699,650,136 |
+| openai    | 77       | $405.73   | 471,822,278 |
 ```
 
-## Data Structure
+## Commands Reference
 
-OpenCode stores data in `~/.local/share/opencode/storage/`:
+### `summary` - Usage Overview
 
-```
-storage/
-├── session/<project-hash>/ses_*.json    # Session metadata
-└── message/<session-id>/msg_*.json      # Individual messages
-```
-
-### Session Format
-
-```json
-{
-  "id": "ses_abc123",
-  "title": "Session title",
-  "time": {
-    "created": 1755603816859,
-    "updated": 1755603816866
-  },
-  "version": "0.5.7",
-  "parentID": "ses_parent123"
-}
+```bash
+ocsight summary                    # Last 7 days
+ocsight summary --days 30          # Last month
+ocsight summary --provider anthropic  # Filter by provider
+ocsight summary --detailed          # Full breakdown
 ```
 
-### Message Format
+### `sessions` - Session Management
 
-```json
-{
-  "id": "msg_xyz789",
-  "role": "user",
-  "sessionID": "ses_abc123",
-  "time": {
-    "created": 1755603816890
-  },
-  "content": "Message content",
-  "tools": []
-}
+```bash
+ocsight sessions list              # List all sessions
+ocsight sessions list --recent     # Recent only
+ocsight sessions show ses_123      # View specific session
+ocsight sessions top --cost        # Most expensive sessions
+ocsight sessions top --tokens      # Most tokens used
 ```
 
-## Architecture
+### `costs` - Cost Tracking
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   CLI Commands  │    │   MCP Server    │    │  Output Formats │
-│  (analyze, etc) │    │  (real-time)    │    │ (JSON,CSV,MD)   │
-└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          └──────────┬───────────┼──────────┬───────────┘
-                     │           │          │
-           ┌─────────▼─────────┐ │          │
-           │  Data Processing  │ │          │
-           │  (Core Engine)    │ │          │
-           └─────────┬─────────┘ │          │
-                     │           │          │
-        ┌────────────▼───────────┴──────────▼─────────────────┐
-        │              Data Layer                             │
-        │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-        │  │   Cache     │  │   Storage   │  │   Stream    │  │
-        │  │ (SHA256)    │  │ (OpenCode)  │  │ (Async)     │  │
-        │  └─────────────┘  └─────────────┘  └─────────────┘  │
-        └─────────────────────────────────────────────────────┘
-                              │
-                    ┌─────────▼─────────┐
-                    │  OpenCode Data    │
-                    │  ~/.local/share/  │
-                    │    opencode/      │
-                    └───────────────────┘
+```bash
+ocsight costs                      # Last 7 days
+ocsight costs today                # Today only
+ocsight costs --days 30            # Last month
+ocsight costs --alert 100          # Alert if >$100/day
+ocsight costs --provider anthropic # Filter by provider
 ```
 
-### Components
+### `live` - Real-time Monitoring
 
-**CLI Interface**: Entry point for all commands (analyze, stats, export)
+```bash
+ocsight live                       # Monitor current session
+ocsight live --session ses_123     # Monitor specific session
+ocsight live --refresh 5           # Update every 5 seconds
+```
 
-**MCP Server**: Real-time analytics server with tools:
+### `export` - Export Data
 
-- `list_providers`, `get_tool_usage`, `get_daily_stats`, `analyze_project`
+```bash
+ocsight export                     # JSON format
+ocsight export --format csv        # CSV format
+ocsight export --format markdown   # Markdown report
+ocsight export --output report.csv # Custom filename
+```
 
-**Data Processing Engine**: Core logic that:
+### `models` - Model Pricing
 
-- Discovers sessions and messages
-- Applies smart caching (91% compression + LRU)
-- Concurrent processing (3x throughput)
-- Calculates statistics
-- Filters by time, provider, project
+```bash
+ocsight models list                # List all models
+ocsight models providers           # List providers
+ocsight models show gpt-4o         # Model details
+```
 
-**Data Layer**:
+## Example Terminal Output
 
-- **Cache**: File-based caching with SHA256 validation
-- **Storage**: Reads from OpenCode's `~/.local/share/opencode/storage/`
-- **Stream**: Async generators for memory-efficient processing
+```
+📊 Usage Summary
+════════════════
 
-**Output Formats**: JSON, CSV, Markdown reports
+Overview
+Sessions          │ 787
+Total Cost        │ $8,736.43
+Total Tokens      │ 2,949,563,969
+Avg Cost/Session  │ $11.10
 
-### Data Flow
+Provider Breakdown
+┌──────────┬──────────┬──────────┬───────────────┐
+│ Provider │ Sessions │ Cost     │ Tokens        │
+├──────────┼──────────┼──────────┼───────────────┤
+│ anthropic│      26  │ $8,237.66│ 699,650,136   │
+│ openai   │      77  │   $405.73│ 471,822,278   │
+│ github   │     517  │     $0.00│ 805,039,693   │
+└──────────┴──────────┴──────────┴───────────────┘
 
-1. **Input**: CLI command or MCP tool request
-2. **Discovery**: Scan OpenCode storage for sessions/messages
-3. **Cache Check**: Validate cached data, skip unchanged files
-4. **Processing**: Stream data through analysis pipeline
-5. **Analysis**: Calculate statistics, apply filters
-6. **Output**: Generate terminal display or export file
+Daily Activity (Last 7 Days)
+┌────────────┬─────────┬──────────┬─────────────┐
+│ Date       │ Sessions│ Cost     │ Tokens      │
+├────────────┼─────────┼──────────┼─────────────┤
+│ 2024-12-19 │      15 │   $234.56│  12,345,678 │
+│ 2024-12-18 │      23 │   $456.78│  23,456,789 │
+│ 2024-12-17 │      19 │   $345.67│  18,234,567 │
+└────────────┴─────────┴──────────┴─────────────┘
+```
+
+## Why ocsight?
+
+### ✅ Accurate
+
+- **Real costs** from actual model pricing (models.dev)
+- **Exact tokens** from OpenCode sessions
+- **No estimates** or projections
+
+### 🚀 Fast
+
+- Optimized caching for large datasets
+- Instant results after first run
+- Handles 10k+ sessions efficiently
+
+### 🎯 Focused
+
+- Does one thing well: track AI costs
+- No unnecessary features or complexity
+- Clean, readable output
+
+### 🔒 Private
+
+- Runs entirely locally
+- Never sends data anywhere
+- Your usage stays on your machine
+
+## Requirements
+
+- Node.js 18+ or Bun
+- OpenCode installed and configured
+- Session data in `~/.local/share/opencode/storage/`
+
+## Data Sources
+
+ocsight reads from your local OpenCode storage:
+
+```
+~/.local/share/opencode/storage/
+├── session/<project-hash>/ses_*.json   # Session metadata
+└── message/<session-id>/msg_*.json     # Individual messages
+```
 
 ## Development
 
-### Adding Table Rendering
-
-The project uses `cli-table3` for structured output display. The table utilities are centralized in `src/lib/table.ts`:
-
-- `renderTable()` - Formats data into bordered tables with auto-alignment
-- `renderKV()` - Key-value pair tables (metrics, overview data)
-- `section()` - Adds titled sections with chalk theming
-
-**Design Principles:**
-
-- Minimal borders using Unicode box characters
-- Auto-detection of numeric columns for right-alignment
-- Compact layout by default to conserve vertical space
-- Chalk integration for colored headers and content
-- NO_COLOR environment variable support
-
-**Usage:**
-
-```typescript
-import { renderTable, renderKV, section } from "../lib/table.js";
-
-// Data table
-const table = renderTable({
-  head: ["Provider", "Sessions", "Cost"],
-  rows: [["OpenAI", 100, "$50.00"]],
-});
-
-// Metrics table
-const metrics = renderKV([
-  ["Total Sessions", 150],
-  ["Average Cost", "$0.84"],
-]);
-
-// Section with title
-console.log(section("📊 Analysis:", table));
-```
-
-### Development Commands
-
 ```bash
-# Development
-bun run dev analyze --days 7
+# Clone repository
+git clone https://github.com/heyhuynhgiabuu/ocsight
+cd ocsight
 
-# Build all packages
+# Install dependencies
+bun install
+
+# Build project
 bun run build
 
-# Test
+# Run tests
 bun test
 
-# Performance tests
-bun test packages/cli/test/performance.test.ts
-
-# MCP server
-bun run src/mcp/server.ts
+# Run locally
+node index.js summary
 ```
 
-### Tech Stack
+## Configuration
 
-- **Runtime**: Bun + TypeScript (ES modules)
-- **CLI**: Commander.js
-- **Models**: models.dev API for 1000+ AI models with real-time pricing
-- **MCP**: Model Context Protocol SDK (@modelcontextprotocol/sdk@^1.18.0)
-- **Tables**: cli-table3 for structured output
-- **Styling**: Chalk + ora (v8+ ES module)
-- **Export**: csv-writer + custom templates
-- **Validation**: Zod
-- **Performance**: Custom caching with compression and LRU eviction
+ocsight works out of the box with sensible defaults. Optional config:
+
+```bash
+# Initialize config
+ocsight config init
+
+# View current config
+ocsight config show
+
+# Validate setup
+ocsight config doctor
+```
+
+## Troubleshooting
+
+**No data showing?**
+
+- Check OpenCode is installed: `which opencode`
+- Verify data exists: `ls ~/.local/share/opencode/storage/`
+- Run doctor: `ocsight config doctor`
+
+**Wrong costs?**
+
+- ocsight uses models.dev pricing
+- Some providers (github) show $0.00 for free tiers
+- Custom/enterprise pricing not supported
+
+**Performance issues?**
+
+- First run caches data (may be slow)
+- Use `--days` flag to limit data range
+- Large histories (>10k sessions) may be slow
+
+## Project Structure
+
+```
+ocsight/
+├── packages/
+│   ├── cli/          # CLI implementation
+│   └── web/          # Documentation website
+├── assets/           # Screenshots and examples
+├── scripts/          # Build and release scripts
+└── README.md         # You are here
+```
 
 ## Contributing
 
+Contributions welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
-3. Test with real OpenCode data
+3. Add tests for new features
 4. Submit a pull request
 
 ## License
 
-MIT
+MIT © heyhuynhgiabuu
+
+## Links
+
+- [GitHub Repository](https://github.com/heyhuynhgiabuu/ocsight)
+- [NPM Package](https://www.npmjs.com/package/ocsight)
+- [Documentation](https://ocsight.com)
+- [Issue Tracker](https://github.com/heyhuynhgiabuu/ocsight/issues)
+
+---
+
+**v1.0.0** · Track your AI costs with confidence · Built with simplicity and accuracy in mind

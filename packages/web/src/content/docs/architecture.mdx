@@ -1,0 +1,86 @@
+---
+title: "Architecture"
+description: "Understand how ocsight is designed and how data flows through the system"
+---
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   CLI Commands  │    │  Live Monitor   │    │  Output Formats │
+│ (summary, etc)  │    │  (real-time)    │    │ (JSON,CSV,MD)   │
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          └──────────┬───────────┼──────────┬───────────┘
+                     │           │          │
+           ┌─────────▼─────────┐ │          │
+           │  Data Processing  │ │          │
+           │  (Core Engine)    │ │          │
+           └─────────┬─────────┘ │          │
+                     │           │          │
+        ┌────────────▼───────────┴──────────▼─────────────────┐
+        │              Data Layer                             │
+        │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+        │  │   Cache     │  │   Storage   │  │   Stream    │  │
+        │  │ (SHA256)    │  │ (OpenCode)  │  │ (Async)     │  │
+        │  └─────────────┘  └─────────────┘  └─────────────┘  │
+        └─────────────────────────────────────────────────────┘
+                      │
+            ┌─────────▼─────────┐
+            │  OpenCode Data    │
+            │  ~/.local/share/  │
+            │    opencode/      │
+            └───────────────────┘
+```
+
+### Components
+
+**CLI Interface**: Entry point for all commands (summary, sessions, costs, export, live, models)
+
+**Live Monitor**: Real-time dashboard that:
+- Tracks active sessions as they run
+- Updates token usage and costs in real-time
+- Shows message flow and tool usage
+- Refreshes automatically
+
+**Data Processing Engine**: Core logic that:
+- Discovers sessions and messages
+- Applies caching and streaming
+- Calculates costs using models.dev pricing
+- Filters by time, provider, session
+
+**Data Layer**:
+- **Cache**: File-based caching with SHA256 validation
+- **Storage**: Reads from OpenCode's `~/.local/share/opencode/storage/`
+- **Stream**: Async generators for memory-efficient processing
+
+**Output Formats**: JSON, CSV, Markdown reports
+
+### Data Flow
+
+1. **Input**: CLI command request
+2. **Discovery**: Scan OpenCode storage for sessions/messages
+3. **Cache Check**: Validate cached data, skip unchanged files
+4. **Processing**: Stream data through analysis pipeline
+5. **Cost Calculation**: Apply models.dev pricing to token usage
+6. **Output**: Generate terminal display or export file
+
+### Service Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                     Service Layer                        │
+├──────────────┬──────────────┬──────────────┬────────────┤
+│ DataService  │ CostService  │ FormatService│ CacheService│
+├──────────────┼──────────────┼──────────────┼────────────┤
+│ Load sessions│ Calculate    │ Format output│ SHA256 hash│
+│ Load messages│ model costs  │ Tables/JSON  │ LRU cache  │
+│ Filter data  │ Daily totals │ CSV/Markdown │ Compression│
+└──────────────┴──────────────┴──────────────┴────────────┘
+```
+
+### Performance Optimizations
+
+- **Caching**: SHA256-based cache validation prevents redundant file reads
+- **Streaming**: Process large datasets without loading everything into memory
+- **Compression**: 91% reduction in cache size
+- **Concurrency**: Parallel processing of independent operations
+- **Progress**: Visual feedback for long-running operations

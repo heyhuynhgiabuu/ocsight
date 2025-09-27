@@ -41,10 +41,20 @@ export class ProgressManager {
     this.lastUpdateTime = now;
     this.processedItems = processed;
 
-    const percentage = (processed / this.totalItems) * 100;
+    const percentage =
+      this.totalItems > 0 ? (processed / this.totalItems) * 100 : 0;
     const elapsed = now - this.startTime.getTime();
-    const rate = processed / (elapsed / 1000);
-    const eta = (this.totalItems - processed) / rate;
+    const elapsedSeconds = elapsed / 1000;
+
+    // Calculate rate with protection against division by zero
+    const rate =
+      elapsedSeconds > 0 && processed > 0 ? processed / elapsedSeconds : 0;
+
+    // Calculate ETA with protection against invalid values
+    const eta =
+      rate > 0 && this.totalItems > processed
+        ? (this.totalItems - processed) / rate
+        : 0;
 
     // Save progress state for recovery
     this.progressState = {
@@ -116,6 +126,11 @@ export class ProgressManager {
   }
 
   private formatTime(seconds: number): string {
+    // Handle invalid inputs
+    if (!isFinite(seconds) || seconds <= 0 || isNaN(seconds)) {
+      return "--";
+    }
+
     if (seconds < 60) {
       return `${Math.round(seconds)}s`;
     } else if (seconds < 3600) {

@@ -1,0 +1,86 @@
+---
+interface BreadcrumbItem {
+  label: string
+  href: string
+  current?: boolean
+}
+
+interface Props {
+  items: BreadcrumbItem[]
+  class?: string
+}
+
+const { items, class: className = '' } = Astro.props
+
+// Ensure the last item is marked as current
+const breadcrumbs = items.map((item, index) => ({
+  ...item,
+  current: index === items.length - 1
+}))
+---
+
+<nav aria-label="Breadcrumb" class={`breadcrumbs ${className}`}>
+  <ol class="flex items-center space-x-2 text-sm font-mono">
+    {breadcrumbs.map((item, index) => (
+      <li class="flex items-center">
+        {index > 0 && (
+          <span class="mx-2 text-muted-foreground" aria-hidden="true">/</span>
+        )}
+        {item.current ? (
+          <span 
+            class="text-foreground font-medium" 
+            aria-current="page"
+          >
+            {item.label}
+          </span>
+        ) : (
+          <a 
+            href={item.href}
+            class="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {item.label}
+          </a>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid rgb(var(--color-border));
+    margin-bottom: var(--space-6);
+  }
+
+  .breadcrumbs ol {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .breadcrumbs ol::-webkit-scrollbar {
+    display: none;
+  }
+
+  .breadcrumbs a {
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .breadcrumbs {
+      padding: var(--space-2) 0;
+      margin-bottom: var(--space-4);
+    }
+    
+    .breadcrumbs ol {
+      font-size: var(--font-size-xs);
+    }
+  }
+</style>

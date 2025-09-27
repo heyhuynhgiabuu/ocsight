@@ -1,0 +1,408 @@
+/* OpenCode-inspired design system for Ocsight */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+:root {
+  /* Override Starlight defaults with OpenCode-inspired values */
+  --sl-color-bg-surface: var(--sl-color-bg-nav);
+  --sl-color-divider: var(--sl-color-gray-5);
+
+  /* Typography - Inter for text, IBM Plex Mono for code */
+  --sl-font-system:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
+  --sl-font-mono:
+    "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
+    Consolas, "Courier New", monospace;
+  --sl-font: var(--sl-font-system);
+}
+
+/* Enhanced typography with Inter */
+body {
+  font-family: var(--sl-font-system);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Ensure code elements use monospace */
+code,
+pre,
+kbd,
+samp,
+.command,
+.ocsight-command code {
+  font-family: var(--sl-font-mono) !important;
+}
+
+/* Improve heading typography - make h2 look like h4, h3 look like h5 */
+h1 {
+  font-family: var(--sl-font-system);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-size: 2.25rem;
+}
+
+h2 {
+  font-family: var(--sl-font-system);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-size: 1.125rem;
+  text-transform: uppercase;
+  color: var(--sl-color-text-accent);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-family: var(--sl-font-system);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--sl-font-system);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Feature titles should use monospace for technical feel */
+.feature-title {
+  font-family: var(--sl-font-mono) !important;
+}
+
+/* Remove box shadows from code blocks like OpenCode */
+.expressive-code .frame {
+  box-shadow: none;
+}
+
+/* Dark mode syntax highlighting */
+@media (prefers-color-scheme: dark) {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
+/* OpenCode-inspired Lander styles */
+:root {
+  --ocsight-vertical-padding: 1.5rem;
+  --ocsight-horizontal-padding: 1rem;
+  --ocsight-border-width: 2px;
+  --ocsight-border-color: var(--sl-color-gray-5);
+  --ocsight-bg-surface: var(--sl-color-bg-surface);
+
+  /* Kanagawa color palette */
+  --kanagawa-spring-green: #98bb6c;
+  --kanagawa-autumn-green: #76946a;
+  --kanagawa-wave-aqua: #7aa89f;
+  --kanagawa-winter-green: #2b3328;
+  --kanagawa-sumi-ink: #1f1f28;
+  --kanagawa-fuji-white: #dcd7ba;
+  --kanagawa-crystal-blue: #7e9cd8;
+  --kanagawa-spring-blue: #7fb4ca;
+  --kanagawa-oni-violet: #957fb8;
+  --kanagawa-carp-yellow: #e6c384;
+  --kanagawa-boat-yellow: #c0a36e;
+  --kanagawa-sakura-pink: #d27e99;
+}
+
+/* Dark theme Kanagawa overrides */
+:root[data-theme="dark"] {
+  --kanagawa-primary: var(--kanagawa-spring-green);
+  --kanagawa-primary-bg: var(--kanagawa-winter-green);
+  --kanagawa-primary-hover: var(--kanagawa-wave-aqua);
+  --kanagawa-accent: var(--kanagawa-autumn-green);
+  --kanagawa-surface-subtle: rgba(152, 187, 108, 0.05);
+  --kanagawa-surface-muted: rgba(122, 168, 159, 0.03);
+}
+
+/* Light theme Kanagawa overrides */
+:root[data-theme="light"] {
+  --kanagawa-primary: var(--kanagawa-autumn-green);
+  --kanagawa-primary-bg: #f0f4f0;
+  --kanagawa-primary-hover: var(--kanagawa-spring-green);
+  --kanagawa-accent: var(--kanagawa-wave-aqua);
+  --kanagawa-surface-subtle: rgba(118, 148, 106, 0.08);
+  --kanagawa-surface-muted: rgba(122, 168, 159, 0.05);
+}
+
+.ocsight-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--ocsight-horizontal-padding);
+  font-family: var(--sl-font-system);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ocsight-section {
+  border: var(--ocsight-border-width) solid var(--ocsight-border-color);
+  padding: var(--ocsight-vertical-padding) var(--ocsight-horizontal-padding);
+  margin-bottom: var(--ocsight-vertical-padding);
+  background: var(--ocsight-bg-surface);
+}
+
+.ocsight-section:last-child {
+  margin-bottom: 0;
+}
+
+.ocsight-heading {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+}
+
+.ocsight-subheading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ocsight-two-col {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ocsight-horizontal-padding);
+  align-items: center;
+}
+
+.ocsight-grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Always exactly 2 columns */
+  gap: var(--ocsight-horizontal-padding);
+}
+
+.ocsight-footer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--ocsight-horizontal-padding);
+  text-align: center;
+}
+
+.ocsight-command {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: var(--ocsight-border-width) solid var(--ocsight-border-color);
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  font-family: var(--sl-font-mono);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ocsight-command:hover {
+  background: var(--sl-color-bg-surface);
+  border-color: var(--kanagawa-primary);
+}
+
+.ocsight-command.success {
+  border-color: var(--kanagawa-primary);
+  background: var(--kanagawa-primary-bg);
+}
+
+.ocsight-command code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+.ocsight-command .highlight {
+  color: var(--kanagawa-primary);
+  font-weight: 600;
+}
+
+.ocsight-command .copy {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.ocsight-command:hover .copy {
+  opacity: 1;
+}
+
+.ocsight-command .copy svg:last-child {
+  display: none;
+}
+
+.ocsight-command.success .copy svg:first-child {
+  display: none;
+}
+
+.ocsight-command.success .copy svg:last-child {
+  display: block;
+  color: var(--kanagawa-primary);
+}
+
+/* Links - no decoration by default */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Command and section links */
+.ocsight-section a {
+  color: var(--kanagawa-primary);
+  text-decoration: none;
+  font-weight: 500;
+  border: var(--ocsight-border-width) solid var(--ocsight-border-color);
+  padding: 0.75rem 1.5rem;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.ocsight-section a:hover {
+  background: var(--kanagawa-primary-bg);
+  border-color: var(--kanagawa-primary);
+  text-decoration: none;
+}
+
+.ocsight-footer a {
+  border: none;
+  padding: 0;
+  display: inline;
+  text-decoration: none;
+}
+
+.ocsight-footer a:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ocsight-two-col {
+    grid-template-columns: 1fr;
+    gap: calc(var(--ocsight-vertical-padding) / 2);
+  }
+
+  .ocsight-grid-2x2 {
+    grid-template-columns: 1fr;
+  }
+
+  .ocsight-footer {
+    grid-template-columns: 1fr;
+    gap: calc(var(--ocsight-vertical-padding) / 2);
+  }
+}
+
+/* Custom footer styles similar to OpenCode */
+.starlight-footer {
+  border-top: 1px solid var(--sl-color-gray-200);
+  padding: 2rem 0;
+  margin-top: 3rem;
+}
+
+.starlight-footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.starlight-footer-section h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sl-color-text);
+  margin: 0 0 1rem 0;
+}
+
+.starlight-footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.starlight-footer-section li {
+  margin: 0 0 0.5rem 0;
+}
+
+.starlight-footer-section a {
+  color: var(--sl-color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.starlight-footer-section a:hover {
+  color: var(--sl-color-text);
+  text-decoration: underline;
+}
+
+.starlight-footer-bottom {
+  border-top: 1px solid var(--sl-color-gray-200);
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.starlight-footer-copyright {
+  color: var(--sl-color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.starlight-footer-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.starlight-footer-links a {
+  color: var(--sl-color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.starlight-footer-links a:hover {
+  color: var(--sl-color-text);
+  text-decoration: underline;
+}
+
+/* Responsive adjustments for footer */
+@media (max-width: 768px) {
+  .starlight-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .starlight-footer-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

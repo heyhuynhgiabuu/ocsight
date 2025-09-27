@@ -57,13 +57,8 @@ export default defineConfig({
         "intro",
 
         {
-          label: "CLI Reference",
-          items: ["cli", "cli-analyze", "cli-stats", "cli-export", "cli-mcp", "cli-commands"],
-        },
-
-        {
-          label: "Integration",
-          items: ["mcp", "mcp-tools"],
+          label: "Commands",
+          items: ["cli", "cli-commands", "cli-summary", "cli-sessions", "cli-costs", "cli-export"],
         },
 
         {

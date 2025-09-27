@@ -1,0 +1,158 @@
+---
+title: "Usage"
+description: "How to use ocsight for tracking OpenCode costs and usage"
+---
+
+Learn how to use ocsight to monitor and analyze your OpenCode AI costs and usage.
+
+### Basic Analysis
+
+Get a usage summary for your OpenCode sessions:
+
+```bash
+ocsight summary
+```
+
+View detailed analysis with all metrics:
+
+```bash
+ocsight summary --detailed
+```
+
+Analyze sessions from the last 30 days:
+
+```bash
+ocsight summary --days 30
+```
+
+### Cost Tracking
+
+Track your AI spending over time:
+
+```bash
+# Last 7 days (default)
+ocsight costs
+
+# Today's costs only
+ocsight costs today
+
+# Last month with spending alert
+ocsight costs --days 30 --alert 100
+```
+
+### Session Management
+
+Explore individual sessions:
+
+```bash
+# List all sessions
+ocsight sessions list
+
+# Show recent sessions only
+ocsight sessions list --recent
+
+# View specific session details
+ocsight sessions show ses_123
+
+# Find most expensive sessions
+ocsight sessions top --cost
+
+# Find sessions with most tokens
+ocsight sessions top --tokens
+```
+
+### Live Monitoring
+
+Monitor active OpenCode sessions in real-time:
+
+```bash
+# Monitor current active session
+ocsight live
+
+# Monitor specific session
+ocsight live --session ses_123
+
+# Custom refresh interval (seconds)
+ocsight live --refresh 5
+```
+
+### Export Results
+
+Export data for external analysis:
+
+```bash
+# JSON format (default)
+ocsight export
+
+# CSV format for spreadsheets
+ocsight export --format csv --output data.csv
+
+# Markdown report for documentation
+ocsight export --format markdown --output report.md
+
+# Export specific date range
+ocsight export --days 30 --format json
+```
+
+### Model Pricing
+
+Browse and compare AI model costs:
+
+```bash
+# List all models
+ocsight models list
+
+# View specific model pricing
+ocsight models show gpt-4o
+
+# Compare models
+ocsight models compare gpt-4o claude-3.5-sonnet
+
+# List all providers
+ocsight models providers
+```
+
+### Sample Workflows
+
+## Daily Cost Review
+
+```bash
+# Quick overview of today's spending
+ocsight costs today
+
+# Detailed breakdown for the week
+ocsight summary --days 7
+```
+
+## Monthly Reporting
+
+```bash
+# Generate monthly report
+ocsight export --days 30 --format markdown --output monthly-report.md
+
+# Export CSV for accounting
+ocsight export --days 30 --format csv --output costs.csv
+```
+
+## Provider Analysis
+
+```bash
+# Compare provider costs
+ocsight summary --provider anthropic --days 30
+ocsight summary --provider openai --days 30
+
+# Export provider-specific data
+ocsight export --provider anthropic --format csv
+```
+
+### Data Location
+
+ocsight reads data from OpenCode's storage directory:
+
+```
+~/.local/share/opencode/storage/
+├── session/<project-hash>/ses_*.json
+└── message/<session-id>/msg_*.json
+```
+
+Ensure OpenCode has been used and has session data before running analysis.

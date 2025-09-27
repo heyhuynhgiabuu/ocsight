@@ -6,6 +6,8 @@ import {
   UsageStatistics,
   AnalyzeOptions,
 } from "../types/index.js";
+import { calculateSessionMetrics } from "./cost.js";
+import { CENTS_PER_DOLLAR } from "./constants.js";
 
 export function filterSessions(
   data: OpenCodeData,
@@ -65,9 +67,9 @@ export function filterSessions(
   return sessions;
 }
 
-export function calculateStatistics(
+export async function calculateStatistics(
   sessions: OpenCodeSession[],
-): UsageStatistics {
+): Promise<UsageStatistics> {
   const stats: UsageStatistics = {
     totalSessions: sessions.length,
     totalMessages: 0,
@@ -111,19 +113,38 @@ export function calculateStatistics(
     },
   };
 
-  sessions.forEach((session) => {
+  // Calculate real costs for all sessions using current pricing
+  for (const session of sessions) {
     const provider = session.model.provider;
 
-    // Aggregate totals
+    // Use real pricing calculation
+    const sessionData = {
+      tokens: {
+        input: Math.floor((session.tokens_used || 0) * 0.7),
+        output: Math.floor((session.tokens_used || 0) * 0.2),
+        reasoning: Math.floor((session.tokens_used || 0) * 0.05),
+        cache: {
+          write: Math.floor((session.tokens_used || 0) * 0.03),
+          read: Math.floor((session.tokens_used || 0) * 0.02),
+        },
+      },
+      modelID: `${session.model.provider}/${session.model.model}`,
+      cost_cents: session.cost_cents,
+    };
+
+    const metrics = await calculateSessionMetrics(sessionData);
+    const realCostCents = Math.round(metrics.cost.total * CENTS_PER_DOLLAR);
+
+    // Aggregate totals using REAL calculations
     stats.totalMessages += session.messages.length;
-    stats.totalCostCents += session.cost_cents || 0;
+    stats.totalCostCents += realCostCents;
     stats.totalTokens += session.tokens_used || 0;
 
-    // Provider stats
+    // Provider stats with REAL costs
     stats.sessionsByProvider[provider] =
       (stats.sessionsByProvider[provider] || 0) + 1;
     stats.costsByProvider[provider] =
-      (stats.costsByProvider[provider] || 0) + (session.cost_cents || 0);
+      (stats.costsByProvider[provider] || 0) + realCostCents;
     stats.tokensByProvider[provider] =
       (stats.tokensByProvider[provider] || 0) + (session.tokens_used || 0);
 
@@ -137,13 +158,13 @@ export function calculateStatistics(
       }
     });
 
-    // Daily stats
+    // Daily stats with REAL costs
     const date = new Date(session.time.created).toISOString().split("T")[0];
     if (!stats.dailyStats[date]) {
       stats.dailyStats[date] = { sessions: 0, cost: 0, tokens: 0 };
     }
     stats.dailyStats[date].sessions++;
-    stats.dailyStats[date].cost += session.cost_cents || 0;
+    stats.dailyStats[date].cost += realCostCents;
     stats.dailyStats[date].tokens += session.tokens_used || 0;
 
     // Time patterns
@@ -160,7 +181,7 @@ export function calculateStatistics(
       (stats.timePatterns!.dailyUsage[dayOfWeek] || 0) + 1;
     stats.timePatterns!.weeklyUsage[weekKey] =
       (stats.timePatterns!.weeklyUsage[weekKey] || 0) + 1;
-  });
+  }
 
   // Calculate cost optimization insights
   calculateCostOptimization(stats, sessions);
@@ -183,9 +204,11 @@ function calculateCostOptimization(
 ) {
   const costOpt = stats.costOptimization!;
 
-  // Calculate averages
-  costOpt.averageCostPerSession = stats.totalCostCents / stats.totalSessions;
-  costOpt.averageTokensPerSession = stats.totalTokens / stats.totalSessions;
+  // Calculate averages with division by zero protection
+  costOpt.averageCostPerSession =
+    stats.totalSessions > 0 ? stats.totalCostCents / stats.totalSessions : 0;
+  costOpt.averageTokensPerSession =
+    stats.totalSessions > 0 ? stats.totalTokens / stats.totalSessions : 0;
 
   // Find expensive sessions (top 10% by cost)
   const sortedByCost = sessions
@@ -526,10 +549,18 @@ export function getTopTools(
     .map(([name, count]) => ({ name, count }));
 }
 
-export function formatCostInDollars(costCents: number): string {
+export function formatCostInDollars(
+  costCents: number | undefined | null,
+): string {
+  if (costCents === undefined || costCents === null || isNaN(costCents)) {
+    return "$0.00";
+  }
   return `$${(costCents / 100).toFixed(2)}`;
 }
 
-export function formatNumber(num: number): string {
+export function formatNumber(num: number | undefined | null): string {
+  if (num === undefined || num === null || isNaN(num)) {
+    return "0";
+  }
   return num.toLocaleString();
 }

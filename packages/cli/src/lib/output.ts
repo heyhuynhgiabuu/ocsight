@@ -157,7 +157,7 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
     "TOTALS",
     stats.totalSessions,
     formatCostInDollars(stats.totalCostCents),
-    formatNumber(stats.totalTokens)
+    formatNumber(stats.totalTokens),
   ];
 
   const providerTable = renderTable({
@@ -165,9 +165,14 @@ export function formatAnalyzeOutput(stats: UsageStatistics): string {
     rows: providerRows,
     totals: providerTotals,
     summary: [
-      ["Average per session", `$${(stats.totalCostCents / 100 / stats.totalSessions).toFixed(4)}`],
-      ["Providers used", Object.keys(stats.sessionsByProvider).length]
-    ]
+      [
+        "Average per session",
+        stats.totalSessions > 0
+          ? `$${(stats.totalCostCents / 100 / stats.totalSessions).toFixed(4)}`
+          : "$0.00",
+      ],
+      ["Providers used", Object.keys(stats.sessionsByProvider).length],
+    ],
   });
   lines.push(section("By Provider:", providerTable));
 

@@ -1,0 +1,285 @@
+---
+import Button from './Button.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const installs = [
+  {
+    id: 'npm',
+    label: 'npm',
+    command: 'npm install -g ocsight',
+    note: 'Global CLI install for Node environments.',
+  },
+  {
+    id: 'bun',
+    label: 'bun',
+    command: 'bun install -g ocsight',
+    note: 'Ultra-fast Bun install for bleeding-edge teams.',
+  },
+  {
+    id: 'brew',
+    label: 'brew',
+    command: 'brew tap heyhuynhgiabuu/tap && brew install ocsight',
+    note: 'Homebrew tap for macOS operators.',
+  },
+  {
+    id: 'manual',
+    label: 'manual',
+    command: 'git clone https://github.com/heyhuynhgiabuu/ocsight.git && cd ocsight && bun install && bun run build',
+    note: 'Manual build from source.',
+  },
+];
+
+const features = [
+  {
+    heading: 'Real costs',
+    value: 'models.dev',
+    delta: 'Accurate pricing',
+  },
+  {
+    heading: '500+ models',
+    value: 'All providers',
+    delta: 'Up to date',
+  },
+  {
+    heading: 'Private',
+    value: '100% local',
+    delta: 'No telemetry',
+  },
+];
+---
+
+<section class={`relative overflow-hidden border-b border-border bg-background py-24 ${className}`}>
+  <div class="container grid gap-16 lg:grid-cols-[minmax(0,1fr)_400px]">
+    <div class="flex flex-col gap-10">
+      <div class="flex flex-col gap-4">
+        <span class="inline-flex w-fit items-center gap-2 border border-border bg-muted px-3 py-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Analyze OpenCode usage from local files
+        </span>
+        <h1 class="max-w-3xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
+          Track OpenCode AI costs and usage
+        </h1>
+        <p class="max-w-2xl text-lg text-muted-foreground">
+          Real costs, real data. No estimates or projections. Track your AI spending with accurate cost calculations from your OpenCode sessions.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <Button href="/docs/getting-started" variant="primary" size="lg">Start in 5 minutes</Button>
+        <Button href="https://github.com/heyhuynhgiabuu/ocsight" size="lg">View on GitHub</Button>
+      </div>
+      
+      <div class="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+        <span class="inline-flex items-center gap-2 border border-border bg-muted px-2 py-1 font-mono uppercase tracking-wider">
+          <span class="h-2 w-2 rounded-full bg-green-500"></span>
+          100% Local
+        </span>
+        <span class="inline-flex items-center gap-2 border border-border bg-muted px-2 py-1 font-mono uppercase tracking-wider">
+          MIT Licensed
+        </span>
+        <span class="inline-flex items-center gap-2 border border-border bg-muted px-2 py-1 font-mono uppercase tracking-wider">
+          Zero Config
+        </span>
+        <span class="inline-flex items-center gap-2 border border-border bg-muted px-2 py-1 font-mono uppercase tracking-wider">
+          Open Source
+        </span>
+      </div>
+
+      <div data-install-tabs class="rounded-sm border border-border bg-muted p-6 shadow-brutal">
+        <div class="flex flex-wrap gap-2" role="tablist">
+          {installs.map(item => (
+            <button
+              type="button"
+              role="tab"
+              data-install-tab={item.id}
+              aria-selected={item.id === 'npm'}
+              aria-controls={`install-pane-${item.id}`}
+              class={`rounded-sm border border-transparent px-3 py-2 font-mono text-xs uppercase tracking-wide text-muted-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-foreground ${item.id === 'npm' ? 'bg-background text-foreground border-border' : 'hover:border-border hover:bg-background'}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div class="relative mt-4 space-y-4">
+          {installs.map(item => (
+            <div
+              data-install-pane={item.id}
+              id={`install-pane-${item.id}`}
+              role="tabpanel"
+              class={`flex flex-col gap-3 rounded-sm border border-border bg-background p-4 font-mono text-sm text-foreground transition-opacity ${item.id === 'npm' ? '' : 'hidden opacity-0'}`}
+            >
+              <div class="flex items-center justify-between gap-4">
+                <code class="overflow-hidden text-ellipsis whitespace-nowrap">{item.command}</code>
+                <button
+                  type="button"
+                  data-copy={item.command}
+                  data-copy-label={item.label}
+                  aria-label={`Copy ${item.label} install command`}
+                  aria-live="polite"
+                  class="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-widest transition-colors hover:bg-foreground hover:text-background"
+                >
+                  <span class="sr-only" data-copy-status>Copy {item.label} install command</span>
+                  <span aria-hidden="true">Copy</span>
+                </button>
+              </div>
+              <p class="text-xs text-muted-foreground">{item.note}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4 rounded-sm border border-border bg-background p-6 shadow-brutal">
+      <div class="rounded-sm border border-border bg-muted px-4 py-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        Live agent feed
+      </div>
+      <div class="space-y-3 overflow-hidden rounded-sm border border-dashed border-border bg-background p-4 font-mono text-sm">
+        <div class="flex items-center justify-between text-foreground">
+          <span class="text-muted-foreground">ocsight summary</span>
+          <span class="text-xs text-green-500">65ms</span>
+        </div>
+        <div class="text-muted-foreground">Sessions: 45 • Tokens: 156,789 • Cost: $12.34</div>
+        <div class="flex items-center justify-between text-foreground">
+          <span class="text-muted-foreground">ocsight costs</span>
+          <span class="text-xs text-green-500">91ms</span>
+        </div>
+        <div class="text-muted-foreground">Daily cost: $234.56 • Alert threshold: $100</div>
+        <div class="flex items-center justify-between text-foreground">
+          <span class="text-muted-foreground">ocsight live</span>
+          <span class="text-xs text-green-500">Active</span>
+        </div>
+        <div class="text-muted-foreground">Monitoring session: ses_abc123 • 15 messages</div>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        {features.map(item => (
+          <div class="rounded-sm border border-border bg-muted px-4 py-3">
+            <p class="font-mono text-xs uppercase tracking-widest text-muted-foreground">{item.heading}</p>
+            <p class="text-2xl font-semibold text-foreground">{item.value}</p>
+            <p class="font-mono text-xs text-muted-foreground">{item.delta}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // @ts-check
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrap = document.querySelector('[data-install-tabs]');
+    if (!wrap) {
+      return;
+    }
+
+    const tabs = wrap.querySelectorAll<HTMLButtonElement>('[data-install-tab]');
+    const panes = wrap.querySelectorAll<HTMLElement>('[data-install-pane]');
+
+    function show(id: string) {
+      panes.forEach(pane => {
+        const key = pane.getAttribute('data-install-pane');
+        if (key === id) {
+          pane.classList.remove('hidden');
+          pane.classList.remove('opacity-0');
+          pane.setAttribute('aria-hidden', 'false');
+          pane.setAttribute('tabindex', '0');
+          pane.removeAttribute('hidden');
+          return;
+        }
+        pane.classList.add('hidden');
+        pane.setAttribute('aria-hidden', 'true');
+        pane.setAttribute('tabindex', '-1');
+        pane.setAttribute('hidden', 'true');
+      });
+
+      tabs.forEach(tab => {
+        const key = tab.getAttribute('data-install-tab');
+        if (key === id) {
+          tab.classList.add('bg-background', 'text-foreground', 'border-border');
+          tab.classList.remove('hover:bg-background');
+          tab.setAttribute('aria-selected', 'true');
+          tab.setAttribute('tabindex', '0');
+          return;
+        }
+        tab.classList.remove('bg-background', 'text-foreground', 'border-border');
+        tab.classList.add('hover:bg-background');
+        tab.setAttribute('aria-selected', 'false');
+        tab.setAttribute('tabindex', '-1');
+      });
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const key = tab.getAttribute('data-install-tab');
+        if (key) {
+          show(key);
+        }
+      });
+    });
+
+    show('npm');
+
+    wrap.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cmd = btn.getAttribute('data-copy');
+        if (!cmd) {
+          return;
+        }
+        const write = globalThis.navigator?.clipboard?.writeText?.(cmd);
+        if (!write) {
+          console.warn('Clipboard unavailable. Copy manually.');
+          return;
+        }
+        btn.setAttribute('data-copy-state', 'pending');
+        const label = btn.getAttribute('data-copy-label') || 'install';
+        const status = btn.querySelector('[data-copy-status]');
+        const text = btn.querySelector('[aria-hidden="true"]');
+        write
+          .then(() => {
+            btn.setAttribute('aria-label', `${label} install command copied`);
+            if (status) {
+              status.textContent = `Copied ${label} install command`;
+            }
+            if (text) {
+              text.textContent = 'Copied';
+            }
+            btn.classList.add('bg-foreground', 'text-background');
+            setTimeout(() => {
+              btn.setAttribute('aria-label', `Copy ${label} install command`);
+              if (status) {
+                status.textContent = `Copy ${label} install command`;
+              }
+              if (text) {
+                text.textContent = 'Copy';
+              }
+              btn.classList.remove('bg-foreground', 'text-background');
+              btn.removeAttribute('data-copy-state');
+            }, 1200);
+          })
+          .catch(err => {
+            console.warn('Copy failed:', err);
+            if (status) {
+              status.textContent = `Copy ${label} install command manually`;
+            }
+            if (text) {
+              text.textContent = 'Copy manually';
+            }
+            setTimeout(() => {
+              btn.setAttribute('aria-label', `Copy ${label} install command`);
+              if (status) {
+                status.textContent = `Copy ${label} install command`;
+              }
+              if (text) {
+                text.textContent = 'Copy';
+              }
+              btn.removeAttribute('data-copy-state');
+            }, 1600);
+          });
+      });
+    });
+  });
+</script>
