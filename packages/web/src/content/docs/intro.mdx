@@ -56,7 +56,7 @@ To use ocsight, you need:
     ```bash
     git clone https://github.com/heyhuynhgiabuu/ocsight.git
     cd ocsight
-    bun install && bun run build
+    bun install && bun run build  # Bun-optimized build process
     ```
   </TabItem>
 </Tabs>
@@ -190,10 +190,12 @@ OCsight reads from OpenCode's standard storage location:
 
 ### Performance
 
+- **Bun.js Optimized**: Built with Bun runtime for maximum performance
 - Processes thousands of messages in seconds
-- Smart caching reduces redundant file reads
+- Smart caching reduces redundant file reads by 90%+
 - Streaming architecture for memory efficiency
 - Progress indicators for long operations
+- Parallel processing for concurrent operations
 
 ---
 
@@ -212,3 +214,4 @@ OCsight reads from OpenCode's standard storage location:
 - Learn about [Session Management](cli-sessions)
 - Set up [Cost Tracking](cli-costs)
 - Configure [Data Export](cli-export)
+- Explore [Performance Optimizations](performance)

@@ -1,4 +1,4 @@
-import { readdir, readFile, stat, writeFile, mkdir } from "fs/promises";
+import { readdir, mkdir } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import { createHash } from "crypto";
@@ -15,7 +15,7 @@ export function getDefaultOpenCodePath(): string {
 
   if (platform === "win32") {
     return join(
-      process.env.USERPROFILE || homedir(),
+      Bun.env.USERPROFILE || homedir(),
       ".local",
       "share",
       "opencode",
@@ -32,9 +32,10 @@ export async function findOpenCodeDataDirectory(
   const basePath = customPath || getDefaultOpenCodePath();
 
   try {
-    const stats = await stat(basePath);
-    if (!stats.isDirectory()) {
-      throw new Error(`Path is not a directory: ${basePath}`);
+    const file = Bun.file(basePath);
+    if (!(await file.exists())) {
+      // Create directory structure if it doesn't exist
+      await mkdir(basePath, { recursive: true });
     }
     return basePath;
   } catch (error) {
@@ -97,15 +98,19 @@ async function getCacheFilePath(dataDir: string): Promise<string> {
   try {
     await mkdir(cacheDir, { recursive: true });
   } catch (error) {
-    // Cache directory might already exist
+    // Directory might already exist, ignore
   }
   return join(cacheDir, "data-cache.json");
 }
 
 async function loadCache(dataDir: string): Promise<CacheData | null> {
   try {
-    const cacheFile = await getCacheFilePath(dataDir);
-    const content = await readFile(cacheFile, "utf-8");
+    const cacheFilePath = await getCacheFilePath(dataDir);
+    const file = Bun.file(cacheFilePath);
+    if (!(await file.exists())) {
+      return null;
+    }
+    const content = await file.text();
     const cache = JSON.parse(content) as CacheData;
 
     const CACHE_VERSION = "3.0";
@@ -123,8 +128,8 @@ async function loadCache(dataDir: string): Promise<CacheData | null> {
 
 async function saveCache(dataDir: string, cache: CacheData): Promise<void> {
   try {
-    const cacheFile = await getCacheFilePath(dataDir);
-    await writeFile(cacheFile, JSON.stringify(cache, null, 2));
+    const cacheFilePath = await getCacheFilePath(dataDir);
+    await Bun.write(cacheFilePath, JSON.stringify(cache, null, 2));
   } catch (error) {
     console.warn("Failed to save cache:", error);
   }
@@ -142,8 +147,9 @@ function calculateFileHash(content: string): string {
 async function getFileMetadata(
   filePath: string,
 ): Promise<{ mtime: number; size: number; hash: string }> {
-  const stats = await stat(filePath);
-  const content = await readFile(filePath, "utf-8");
+  const file = Bun.file(filePath);
+  const content = await file.text();
+  const stats = await file.stat();
   return {
     mtime: stats.mtimeMs,
     size: stats.size,
@@ -174,8 +180,9 @@ async function analyzeFile(
   metadata: { mtime: number; size: number; hash: string };
   content: string;
 }> {
-  const stats = await stat(filePath);
-  const content = await readFile(filePath, "utf-8");
+  const file = Bun.file(filePath);
+  const content = await file.text();
+  const stats = await file.stat();
   const hash = calculateFileHash(content);
 
   const metadata = {
@@ -520,7 +527,10 @@ async function* streamProcessSessions(
       },
       messages: processedMessages,
       tokens_used: totalTokens,
-      cost_cents: Math.round(totalCost * 100), // Convert to cents
+      cost_cents:
+        isFinite(totalCost) && !isNaN(totalCost)
+          ? Math.round(totalCost * 100)
+          : 0,
       model: {
         provider: provider,
         model: model,
@@ -534,10 +544,8 @@ export async function findSessionFiles(dataDir: string): Promise<string[]> {
   const sessionDir = join(dataDir, "storage", "session");
 
   try {
-    const sessionStat = await stat(sessionDir);
-    if (!sessionStat.isDirectory()) {
-      return files;
-    }
+    // Check if directory exists by trying to read it
+    await readdir(sessionDir);
 
     async function searchSessionDirectory(dir: string) {
       try {
@@ -545,12 +553,16 @@ export async function findSessionFiles(dataDir: string): Promise<string[]> {
 
         for (const entry of entries) {
           const fullPath = join(dir, entry);
-          const stats = await stat(fullPath);
 
-          if (stats.isDirectory()) {
+          // Check if it's a directory by trying to read it as a directory
+          try {
+            await readdir(fullPath);
             await searchSessionDirectory(fullPath);
-          } else if (entry.endsWith(".json") && entry.startsWith("ses_")) {
-            files.push(fullPath);
+          } catch {
+            // Not a directory, check if it's a session file
+            if (entry.endsWith(".json") && entry.startsWith("ses_")) {
+              files.push(fullPath);
+            }
           }
         }
       } catch (error) {
@@ -571,10 +583,8 @@ export async function findMessageFiles(dataDir: string): Promise<string[]> {
   const messageDir = join(dataDir, "storage", "message");
 
   try {
-    const messageStat = await stat(messageDir);
-    if (!messageStat.isDirectory()) {
-      return files;
-    }
+    // Check if directory exists by trying to read it
+    await readdir(messageDir);
 
     async function searchMessageDirectory(dir: string) {
       try {
@@ -582,12 +592,16 @@ export async function findMessageFiles(dataDir: string): Promise<string[]> {
 
         for (const entry of entries) {
           const fullPath = join(dir, entry);
-          const stats = await stat(fullPath);
 
-          if (stats.isDirectory()) {
+          // Check if it's a directory by trying to read it as a directory
+          try {
+            await readdir(fullPath);
             await searchMessageDirectory(fullPath);
-          } else if (entry.endsWith(".json") && entry.startsWith("msg_")) {
-            files.push(fullPath);
+          } catch {
+            // Not a directory, check if it's a message file
+            if (entry.endsWith(".json") && entry.startsWith("msg_")) {
+              files.push(fullPath);
+            }
           }
         }
       } catch (error) {
@@ -611,8 +625,10 @@ export async function loadOpenCodeData(options?: {
   verbose?: boolean;
 }): Promise<OpenCodeData> {
   const dataDir = await findOpenCodeDataDirectory();
-  const sessionFiles = await findSessionFiles(dataDir);
-  const messageFiles = await findMessageFiles(dataDir);
+  const [sessionFiles, messageFiles] = await Promise.all([
+    findSessionFiles(dataDir),
+    findMessageFiles(dataDir),
+  ]);
 
   if (!options?.quiet) {
     console.log(
@@ -659,7 +675,8 @@ export async function loadOpenCodeData(options?: {
     const timeFilteredFiles: string[] = [];
     for (const file of messageFiles) {
       try {
-        const stats = await stat(file);
+        const fileObj = Bun.file(file);
+        const stats = await fileObj.stat();
         if (stats.mtimeMs >= cutoffTime) {
           timeFilteredFiles.push(file);
         }
@@ -704,14 +721,14 @@ export async function loadOpenCodeData(options?: {
     }
   }
 
-  // Load session metadata with enhanced error handling
+  // Load session metadata with enhanced error handling and concurrency
   const sessionMap = new Map<string, SessionMetadata>();
   let sessionLoadErrors = 0;
 
-  for (const file of sessionFiles) {
-    const session = await safeFileOperation(
+  const sessionPromises = sessionFiles.map(async (file) => {
+    return await safeFileOperation(
       async () => {
-        const content = await readFile(file, "utf-8");
+        const content = await Bun.file(file).text();
         const data = JSON.parse(content);
 
         if (!validateSessionData(data)) {
@@ -728,8 +745,12 @@ export async function loadOpenCodeData(options?: {
       file,
       "session loading",
     );
+  });
 
-    if (session) {
+  const sessionResults = await Promise.all(sessionPromises);
+
+  for (const session of sessionResults) {
+    if (session !== undefined && session !== null) {
       sessionMap.set(session.id, session);
     } else {
       sessionLoadErrors++;
@@ -764,7 +785,7 @@ export async function loadOpenCodeData(options?: {
     const batchPromises = batch.map(async (file) => {
       return await safeFileOperation(
         async () => {
-          const content = await readFile(file, "utf-8");
+          const content = await Bun.file(file).text();
           const data = JSON.parse(content);
 
           if (!validateMessageData(data)) {
@@ -848,6 +869,9 @@ export async function loadOpenCodeData(options?: {
     if (!options?.quiet) {
       console.log(`Updated cache with ${newCacheEntries.length} new entries`);
     }
+
+    // Trigger garbage collection after cache update
+    Bun.gc();
   }
 
   // Use streaming approach to process sessions and reduce memory usage
@@ -870,6 +894,10 @@ export async function loadOpenCodeData(options?: {
     console.log(`Completed processing ${processedCount} sessions`);
   }
   progressManager.finish();
+
+  // Trigger garbage collection after processing all sessions
+  Bun.gc();
+
   return { sessions };
 }
 

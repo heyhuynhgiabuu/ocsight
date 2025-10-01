@@ -25,7 +25,6 @@ export const sessionsCommand = new Command("sessions").description(
   "Session management and exploration",
 );
 
-// List subcommand
 sessionsCommand
   .command("list")
   .description("List sessions")

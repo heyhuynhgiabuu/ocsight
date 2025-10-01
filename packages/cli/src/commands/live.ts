@@ -3,25 +3,15 @@ import chalk from "chalk";
 import { bootstrap } from "../lib/bootstrap.js";
 import { LiveMonitor, LiveStatus } from "../lib/live.js";
 import { statusIndicator } from "../lib/ui.js";
-import { loadAllData } from "../lib/data.js";
+import { SessionManager } from "../lib/session-manager.js";
 import { calculateSessionMetrics } from "../lib/cost.js";
+import { findOpenCodeDataDirectory } from "../lib/data.js";
 import {
-  LIVE_MONITORING_LIMIT,
-  CENTS_PER_DOLLAR,
-  MS_PER_MINUTE,
-  MIN_MESSAGES_FOR_RATE,
-  ACTIVITY_WINDOW_MINUTES,
-  BURN_RATE_SMOOTHING_MINUTES,
-  FALLBACK_CONTEXT_RATIO,
-  TOKEN_ESTIMATES,
-  RECENT_SESSIONS_DISPLAY,
-  AVAILABLE_SESSIONS_DISPLAY,
-  DEBUG_SESSION_LIMIT,
-  DEBUG_DAYS_BACK,
   MIN_REFRESH_INTERVAL,
   MAX_REFRESH_INTERVAL,
   DEFAULT_REFRESH_INTERVAL,
 } from "../lib/constants.js";
+import { BudgetTracker } from "../lib/budget-tracker.js";
 
 export const liveCommand = new Command("live")
   .description("Monitor OpenCode usage in real-time")
@@ -35,7 +25,7 @@ export const liveCommand = new Command("live")
   .option("--no-progress", "Hide progress bars")
   .action(async (options) => {
     try {
-      await bootstrap(options.config, false, false);
+      const ctx = await bootstrap(options.config, false, false);
       const refreshInterval = parseInt(options.refresh, 10);
 
       if (
@@ -51,405 +41,158 @@ export const liveCommand = new Command("live")
         process.exit(1);
       }
 
+      const dataDir = await findOpenCodeDataDirectory();
+      const sessionManager = new SessionManager();
+      await sessionManager.init(dataDir);
+
+      const budgetTracker = new BudgetTracker(
+        sessionManager,
+        ctx.config.budget,
+      );
+
       const monitor = new LiveMonitor();
 
       console.log(chalk.blue("Starting live monitoring..."));
       console.log(chalk.dim(`Refresh interval: ${refreshInterval}s`));
-      if (options.session) {
-        console.log(
-          chalk.dim(`Monitoring specific session: ${options.session}`),
-        );
-      } else {
-        console.log(chalk.dim("Monitoring most recently updated session"));
-      }
       console.log(chalk.dim("Press Ctrl+C to stop\n"));
 
-      // Show recent sessions for debugging
-      try {
-        const debugData = await loadAllData({
-          limit: DEBUG_SESSION_LIMIT,
-          cache: true,
-          days: DEBUG_DAYS_BACK,
-          quiet: true,
+      // Show recent sessions (metadata only - very fast!)
+      const recentSessions = sessionManager.getRecentSessions(5);
+      if (recentSessions.length > 0 && !options.session) {
+        console.log(
+          chalk.cyan(
+            "Recent Sessions (use --session <id> to monitor specific one):",
+          ),
+        );
+        recentSessions.forEach((session, index) => {
+          const isActive = index === 0 ? "[ACTIVE] " : "        ";
+          const lastUpdate = new Date(session.mtime).toLocaleTimeString();
+          console.log(`  ${isActive}${session.id}: ${lastUpdate}`);
         });
-
-        if (debugData.sessions.length > 0) {
-          const recentSessions = debugData.sessions
-            .sort(
-              (a, b) =>
-                (b.time.updated || b.time.created) -
-                (a.time.updated || a.time.created),
-            )
-            .slice(0, RECENT_SESSIONS_DISPLAY);
-
-          if (!options.session) {
-            console.log(
-              chalk.cyan(
-                "Recent Sessions (use --session <id> to monitor specific one):",
-              ),
-            );
-            recentSessions.forEach((session, index) => {
-              const isActive = index === 0 ? "[ACTIVE] " : "        ";
-              const lastUpdate = new Date(
-                session.time.updated || session.time.created,
-              ).toLocaleTimeString();
-              const modelName =
-                session.model.model === "claude-sonnet-4-20250514"
-                  ? "claude-sonnet-4"
-                  : session.model.model;
-              console.log(
-                `  ${isActive}${session.id.slice(0, 8)}: ${session.model.provider}/${modelName} (${lastUpdate})`,
-              );
-            });
-            console.log("");
-          }
-        }
-      } catch (error) {
-        // Ignore debug error
+        console.log("");
       }
 
+      // Get status function (NO MORE loadAllData - lazy loading!)
       const getStatus = async (): Promise<LiveStatus | null> => {
         try {
-          // Load recent data efficiently - NO date filtering!
-          const data = await loadAllData({
-            limit: LIVE_MONITORING_LIMIT,
-            cache: false, // Don't use cache for live monitoring
-            // REMOVED days filter - will load ALL sessions regardless of age
-            quiet: true,
-          });
+          // Determine which session to monitor
+          let sessionId = options.session;
 
-          if (!data.sessions.length) {
-            // Try to find sessions directly from file system as fallback
-            const { findMostRecentlyActiveSession, getActiveSessionInfo } =
-              await import("../lib/session-utils.js");
-            const directSessionId = await findMostRecentlyActiveSession();
-
-            if (directSessionId) {
-              const directInfo = await getActiveSessionInfo(directSessionId);
-              if (directInfo) {
-                // Get actual model context limit
-                const { findModel } = await import("../lib/models-db.js");
-                const modelInfo = await findModel(
-                  `${directInfo.provider}/${directInfo.model}`,
-                );
-                const contextLimit = modelInfo?.limit?.context || 128000; // Fallback to reasonable default
-
-                // Create minimal status from direct session info
-                return {
-                  sessionId: directSessionId.slice(0, 8),
-                  interactions: directInfo.messageCount,
-                  totalTokens: directInfo.totalTokens.total,
-                  estimatedCost: directInfo.realCost || directInfo.totalCost,
-                  currentModel: `${directInfo.provider}/${directInfo.model}`,
-                  tokenBreakdown: directInfo.totalTokens,
-                  context: {
-                    used: directInfo.currentContextTokens,
-                    total: contextLimit,
-                  },
-                  burnRate: 0,
-                };
-              }
+          if (!sessionId) {
+            const mostRecent = sessionManager.getMostRecentSession();
+            if (!mostRecent) {
+              return null;
             }
+            sessionId = mostRecent.id;
+          }
 
+          // Normalize session ID
+          if (!sessionId.startsWith("ses_")) {
+            sessionId = `ses_${sessionId}`;
+          }
+
+          // Load session (lazy - only 1 session loaded!)
+          const session = await sessionManager.loadSession(sessionId);
+
+          if (!session) {
             return null;
           }
 
-          let activeSession;
-
-          // If specific session ID is provided, use that
-          if (options.session) {
-            const sessionIdToFind = options.session.startsWith("ses_")
-              ? options.session
-              : `ses_${options.session}`;
-            activeSession = data.sessions.find(
-              (s) =>
-                s.id === sessionIdToFind || s.id.startsWith(sessionIdToFind),
-            );
-
-            if (!activeSession) {
-              console.error(
-                chalk.red(
-                  `Session '${options.session}' not found in recent data.`,
-                ),
-              );
-              console.log(chalk.yellow("Available sessions:"));
-              const AVAILABLE_SESSIONS_DISPLAY = 5;
-
-              data.sessions
-                .slice(0, AVAILABLE_SESSIONS_DISPLAY)
-                .forEach((s) => {
-                  console.log(
-                    `  ${s.id.slice(0, 8)}: ${s.model.provider}/${s.model.model}`,
-                  );
-                });
-              return null;
-            }
-          } else {
-            // Find the truly active session by checking message timestamps
-            // This is more accurate than just looking at session metadata
-            const { findMostRecentlyActiveSession, getActiveSessionInfo } =
-              await import("../lib/session-utils.js");
-            const activeSessionId = await findMostRecentlyActiveSession();
-
-            if (activeSessionId) {
-              activeSession = data.sessions.find(
-                (s) => s.id === activeSessionId,
-              );
-
-              // If the truly active session is not in our dataset, get info directly from files
-              if (!activeSession) {
-                console.log(
-                  chalk.yellow(
-                    `Found active session ${activeSessionId.slice(0, 8)} not in dataset, reading directly...`,
-                  ),
-                );
-                const directSessionInfo =
-                  await getActiveSessionInfo(activeSessionId);
-
-                if (directSessionInfo) {
-                  // Create a session object using real token data from message files
-                  activeSession = {
-                    id: directSessionInfo.sessionId,
-                    title: "Active Session (Direct)",
-                    time: {
-                      created: Math.floor(
-                        directSessionInfo.lastActivity.getTime(),
-                      ),
-                      updated: Math.floor(
-                        directSessionInfo.lastActivity.getTime(),
-                      ),
-                    },
-                    messages: [], // We'll estimate activity without loading all messages
-                    tokens_used: directSessionInfo.totalTokens.total, // Real token data from message files
-                    cost_cents: Math.round(directSessionInfo.totalCost * 100), // Real cost data
-                    model: {
-                      provider: directSessionInfo.provider,
-                      model: directSessionInfo.model,
-                    },
-                  } as any; // Type assertion for compatibility
-
-                  console.log(
-                    chalk.green(
-                      `Using direct session: ${directSessionInfo.provider}/${directSessionInfo.model}`,
-                    ),
-                  );
-                  console.log(
-                    chalk.blue(
-                      `Real token data: ${directSessionInfo.totalTokens.total.toLocaleString()} tokens, $${directSessionInfo.totalCost.toFixed(4)}`,
-                    ),
-                  );
-                }
-              }
-            }
-
-            // Fallback to session metadata if file-based detection fails
-            if (!activeSession) {
-              const sortedSessions = data.sessions.sort(
-                (a, b) =>
-                  (b.time.updated || b.time.created) -
-                  (a.time.updated || a.time.created),
-              );
-              activeSession = sortedSessions[0];
-            }
-          }
-
-          if (!activeSession) return null;
-
-          // ALWAYS use direct session reading for accurate context calculation
-          const { getActiveSessionInfo } = await import(
-            "../lib/session-utils.js"
-          );
-          const realSessionInfo = await getActiveSessionInfo(activeSession.id);
-
-          const ACTIVITY_WINDOW_MINUTES = 5;
-          const BURN_RATE_SMOOTHING_MINUTES = 5;
-          const MIN_MESSAGES_FOR_RATE = 1;
-          const MS_TO_MINUTES = 1000 * 60;
-
-          // Calculate realistic activity rate
-          let burnRate = 0;
-          if (
-            realSessionInfo &&
-            realSessionInfo.messageCount > MIN_MESSAGES_FOR_RATE
-          ) {
-            // Check how long ago the last activity was
-            const minutesAgo =
-              (Date.now() - realSessionInfo.lastActivity.getTime()) /
-              MS_TO_MINUTES;
-
-            // Only show activity rate if there was recent activity
-            if (minutesAgo < ACTIVITY_WINDOW_MINUTES) {
-              // Estimate tokens per minute based on recent activity
-              const avgTokensPerMessage =
-                realSessionInfo.totalTokens.total /
-                realSessionInfo.messageCount;
-              burnRate = Math.floor(
-                avgTokensPerMessage / BURN_RATE_SMOOTHING_MINUTES,
-              );
-            }
-          }
-
-          const FALLBACK_CONTEXT_RATIO = 0.01;
-
-          let sessionTokenData;
-          let currentContextTokens = Math.floor(
-            activeSession.tokens_used * FALLBACK_CONTEXT_RATIO,
-          );
-
-          if (realSessionInfo) {
-            sessionTokenData = {
-              input: realSessionInfo.totalTokens.input,
-              output: realSessionInfo.totalTokens.output,
-              reasoning: realSessionInfo.totalTokens.reasoning,
-              cache: {
-                write: realSessionInfo.totalTokens.cache_write,
-                read: realSessionInfo.totalTokens.cache_read,
-              },
-            };
-            currentContextTokens = realSessionInfo.currentContextTokens;
-
-            // Context calculation now accurate!
-
-            // Override session data with accurate totals
-            activeSession.tokens_used = realSessionInfo.totalTokens.total;
-            activeSession.cost_cents = Math.round(
-              realSessionInfo.totalCost * 100,
-            );
-          }
-
-          const TOKEN_ESTIMATES = {
-            INPUT_RATIO: 0.7,
-            OUTPUT_RATIO: 0.2,
-            REASONING_RATIO: 0.05,
-            CACHE_WRITE_RATIO: 0.03,
-            CACHE_READ_RATIO: 0.02,
-          };
-
-          // Use real token data if available, otherwise estimate
-          const mockSessionData = {
-            tokens: sessionTokenData || {
-              input: Math.floor(
-                activeSession.tokens_used * TOKEN_ESTIMATES.INPUT_RATIO,
+          // Calculate token breakdown from messages
+          const tokens = {
+            input: session.messages
+              .filter((m) => m.role === "user")
+              .reduce((sum, m) => sum + (m.tokens?.input || 0), 0),
+            output: session.messages
+              .filter((m) => m.role === "assistant")
+              .reduce((sum, m) => sum + (m.tokens?.output || 0), 0),
+            reasoning: session.messages.reduce(
+              (sum, m) => sum + (m.tokens?.reasoning || 0),
+              0,
+            ),
+            cache: {
+              write: session.messages.reduce(
+                (sum, m) => sum + (m.tokens?.cache?.write || 0),
+                0,
               ),
-              output: Math.floor(
-                activeSession.tokens_used * TOKEN_ESTIMATES.OUTPUT_RATIO,
+              read: session.messages.reduce(
+                (sum, m) => sum + (m.tokens?.cache?.read || 0),
+                0,
               ),
-              reasoning: Math.floor(
-                activeSession.tokens_used * TOKEN_ESTIMATES.REASONING_RATIO,
-              ),
-              cache: {
-                write: Math.floor(
-                  activeSession.tokens_used * TOKEN_ESTIMATES.CACHE_WRITE_RATIO,
-                ),
-                read: Math.floor(
-                  activeSession.tokens_used * TOKEN_ESTIMATES.CACHE_READ_RATIO,
-                ),
-              },
             },
-            modelID: `${activeSession.model.provider}/${activeSession.model.model}`,
-            cost_cents: activeSession.cost_cents,
           };
 
-          const metrics = await calculateSessionMetrics(mockSessionData);
+          // Calculate metrics
+          const metrics = await calculateSessionMetrics({
+            tokens,
+            modelID: `${session.model.provider}/${session.model.model}`,
+            cost_cents: session.cost_cents,
+          });
 
           // Get model info for context window
           const { findModel } = await import("../lib/models-db.js");
-          const modelInfo = await findModel(mockSessionData.modelID);
-          const contextLimit = modelInfo?.limit?.context || 128000; // Reasonable fallback for most models
+          const modelInfo = await findModel(metrics.model_id);
+          const contextLimit = modelInfo?.limit?.context || 128000;
 
-          // Calculate model totals - aggregate stats for this specific model with REAL pricing
-          const modelTotals = await (async () => {
-            const modelId = mockSessionData.modelID;
-            const modelSessions = data.sessions.filter(
-              (s) => `${s.model.provider}/${s.model.model}` === modelId,
-            );
+          const recentActivity = await sessionManager.getRecentActivity(
+            sessionId,
+            30,
+          );
 
-            if (modelSessions.length === 0) return undefined;
-
-            // Get actual model pricing
-            const { calculateModelCost } = await import("../lib/models-db.js");
-
-            let totalTokens = 0;
-            let totalRealCost = 0;
-
-            // Calculate real costs for each session using model pricing
-            for (const session of modelSessions) {
-              totalTokens += session.tokens_used || 0;
-
-              // Estimate token breakdown from session total
-              const tokenBreakdown = {
-                input: Math.floor(
-                  (session.tokens_used || 0) * TOKEN_ESTIMATES.INPUT_RATIO,
-                ),
-                output: Math.floor(
-                  (session.tokens_used || 0) * TOKEN_ESTIMATES.OUTPUT_RATIO,
-                ),
-                reasoning: Math.floor(
-                  (session.tokens_used || 0) * TOKEN_ESTIMATES.REASONING_RATIO,
-                ),
-                cache_write: Math.floor(
-                  (session.tokens_used || 0) *
-                    TOKEN_ESTIMATES.CACHE_WRITE_RATIO,
-                ),
-                cache_read: Math.floor(
-                  (session.tokens_used || 0) * TOKEN_ESTIMATES.CACHE_READ_RATIO,
-                ),
-              };
-
-              // Calculate real cost using model pricing
-              if (modelInfo) {
-                const sessionRealCost = calculateModelCost(
-                  modelInfo,
-                  tokenBreakdown,
-                );
-                totalRealCost += sessionRealCost;
-              } else {
-                // Fallback to stored cost if model not found
-                totalRealCost += (session.cost_cents || 0) / CENTS_PER_DOLLAR;
-              }
-            }
-
-            return {
-              sessions: modelSessions.length,
-              totalTokens,
-              totalCost: totalRealCost,
-              avgTokensPerSession: Math.floor(
-                totalTokens / modelSessions.length,
-              ),
-              avgCostPerSession: totalRealCost / modelSessions.length,
-            };
-          })();
+          const monthlySpend = await budgetTracker.getMonthlySpend();
+          const [budgetHealth, providerBudgets, budgetAlerts] =
+            await Promise.all([
+              budgetTracker.getBudgetHealth(monthlySpend),
+              budgetTracker.getProviderBudgetStatus(monthlySpend),
+              budgetTracker.getAlerts(monthlySpend),
+            ]);
 
           return {
-            sessionId: activeSession.id.slice(0, 8),
-            interactions: activeSession.messages.length,
-            totalTokens: activeSession.tokens_used,
+            sessionId: session.id.slice(0, 8),
+            interactions: session.message_count,
+            totalTokens: session.tokens_used,
             estimatedCost: metrics.cost.total,
             currentModel: metrics.model_id,
             tokenBreakdown: metrics.tokens,
             costBreakdown: metrics.cost,
             cacheHitRate: metrics.cache_hit_rate,
-            recentActivity: realSessionInfo
-              ? {
-                  tokens: Math.floor(
-                    realSessionInfo.totalTokens.total /
-                      realSessionInfo.messageCount,
-                  ), // Avg per message
-                  timestamp: realSessionInfo.lastActivity,
-                }
-              : undefined,
-            burnRate,
             context: {
-              used: currentContextTokens, // Use calculated current context tokens
+              used: session.context_used,
               total: contextLimit,
             },
-            modelTotals,
+            burnRate: recentActivity.cost_per_minute * 60,
+            recentActivity: {
+              tokens: recentActivity.tokens,
+              timestamp: new Date(recentActivity.last_message_time),
+            },
+            budgetHealth,
+            providerBudgets,
+            budgetAlerts,
           };
         } catch (error) {
           console.error(chalk.red("Error loading session data:"), error);
           return null;
         }
       };
+
+      // Start file watcher (event-driven - replaces polling!)
+      sessionManager.startWatcher((changedSessionId) => {
+        console.log(
+          chalk.dim(`Session ${changedSessionId} changed, refreshing...`),
+        );
+        // Watcher will trigger display update automatically
+      });
+
+      // Cleanup on exit
+      const cleanup = () => {
+        sessionManager.stopWatcher();
+        monitor.stop();
+        console.log(chalk.yellow("\nLive monitoring stopped."));
+        process.exit(0);
+      };
+
+      process.on("SIGINT", cleanup);
+      process.on("SIGTERM", cleanup);
 
       await monitor.start(getStatus, {
         refreshInterval,

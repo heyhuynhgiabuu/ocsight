@@ -28,40 +28,46 @@ export interface SessionMetrics {
 
 export const calculateCost = async (
   tokens: TokenBreakdown,
-  modelId: string
+  modelId: string,
 ): Promise<CostBreakdown> => {
   const model = await findModel(modelId);
-  
+
   if (!model || !model.cost) {
-    console.warn(`Warning: Unknown model '${modelId}' or no cost data, using zero cost`);
+    console.warn(
+      `Warning: Unknown model '${modelId}' or no cost data, using zero cost`,
+    );
     return {
       input: 0,
       output: 0,
       reasoning: 0,
       cache_write: 0,
       cache_read: 0,
-      total: 0
+      total: 0,
     };
   }
-  
+
   const input = (tokens.input / 1_000_000) * (model.cost.input || 0);
   const output = (tokens.output / 1_000_000) * (model.cost.output || 0);
-  const reasoning = (tokens.reasoning / 1_000_000) * (model.cost.reasoning || model.cost.input || 0); // Use reasoning cost or fallback to input cost
-  const cache_write = (tokens.cache_write / 1_000_000) * (model.cost.cache_write || 0);
-  const cache_read = (tokens.cache_read / 1_000_000) * (model.cost.cache_read || 0);
-  
+  const reasoning =
+    (tokens.reasoning / 1_000_000) *
+    (model.cost.reasoning || model.cost.input || 0);
+  const cache_write =
+    (tokens.cache_write / 1_000_000) * (model.cost.cache_write || 0);
+  const cache_read =
+    (tokens.cache_read / 1_000_000) * (model.cost.cache_read || 0);
+
   return {
     input,
     output,
     reasoning,
     cache_write,
     cache_read,
-    total: input + output + reasoning + cache_write + cache_read
+    total: input + output + reasoning + cache_write + cache_read,
   };
 };
 
 export const calculateSessionMetrics = async (
-  sessionData: any // Replace with proper OpenCode session type
+  sessionData: any,
 ): Promise<SessionMetrics> => {
   const tokens: TokenBreakdown = {
     input: sessionData.tokens?.input || 0,
@@ -69,15 +75,19 @@ export const calculateSessionMetrics = async (
     reasoning: sessionData.tokens?.reasoning || 0,
     cache_write: sessionData.tokens?.cache?.write || 0,
     cache_read: sessionData.tokens?.cache?.read || 0,
-    total: 0
+    total: 0,
   };
-  
-  tokens.total = tokens.input + tokens.output + tokens.reasoning + tokens.cache_write + tokens.cache_read;
-  
-  // Use the models database for more accurate cost calculation
-  const modelId = sessionData.modelID || 'unknown';
+
+  tokens.total =
+    tokens.input +
+    tokens.output +
+    tokens.reasoning +
+    tokens.cache_write +
+    tokens.cache_read;
+
+  const modelId = sessionData.modelID || "unknown";
   const model = await findModel(modelId);
-  
+
   let cost: CostBreakdown;
   if (model) {
     const totalCost = calculateModelCost(model, {
@@ -85,43 +95,54 @@ export const calculateSessionMetrics = async (
       output: tokens.output,
       reasoning: tokens.reasoning,
       cache_read: tokens.cache_read,
-      cache_write: tokens.cache_write
+      cache_write: tokens.cache_write,
     });
-    
-    // Breakdown the total cost proportionally (this is an approximation)
+
     const totalTokens = tokens.total || 1;
-    cost = {
-      input: totalCost * (tokens.input / totalTokens),
-      output: totalCost * (tokens.output / totalTokens),
-      reasoning: totalCost * (tokens.reasoning / totalTokens),
-      cache_write: totalCost * (tokens.cache_write / totalTokens),
-      cache_read: totalCost * (tokens.cache_read / totalTokens),
-      total: totalCost
-    };
+
+    // Validate inputs to prevent NaN/Infinity
+    if (!isFinite(totalTokens) || totalTokens <= 0 || !isFinite(totalCost)) {
+      cost = {
+        input: 0,
+        output: 0,
+        reasoning: 0,
+        cache_write: 0,
+        cache_read: 0,
+        total: 0,
+      };
+    } else {
+      cost = {
+        input: totalCost * (tokens.input / totalTokens),
+        output: totalCost * (tokens.output / totalTokens),
+        reasoning: totalCost * (tokens.reasoning / totalTokens),
+        cache_write: totalCost * (tokens.cache_write / totalTokens),
+        cache_read: totalCost * (tokens.cache_read / totalTokens),
+        total: totalCost,
+      };
+    }
   } else {
-    // Fallback to legacy calculation
     cost = await calculateCost(tokens, modelId);
   }
-  
-  const cache_hit_rate = tokens.cache_read > 0 
-    ? tokens.cache_read / (tokens.cache_read + tokens.cache_write)
-    : 0;
-    
-  const efficiency_score = cost.total > 0 
-    ? (tokens.cache_read * 0.1) / cost.total // Higher cache usage = better efficiency
-    : 0;
-  
+
+  const cache_total = tokens.cache_read + tokens.cache_write;
+  const cache_hit_rate = cache_total > 0 ? tokens.cache_read / cache_total : 0;
+
+  const efficiency_score =
+    cost.total > 0 && tokens.cache_read > 0 && isFinite(cost.total)
+      ? (tokens.cache_read * 0.1) / cost.total
+      : 0;
+
   return {
     tokens,
     cost,
-    model_id: model ? `${model.provider_id}/${model.model_id}` : modelId, // Use found model info or fallback
+    model_id: model ? `${model.provider_id}/${model.model_id}` : modelId,
     cache_hit_rate,
-    efficiency_score
+    efficiency_score,
   };
 };
 
 export const formatCost = (cost: number, precision = 4): string => {
-  if (cost < 0.0001) return '$0.0000';
+  if (cost < 0.0001) return "$0.0000";
   return `$${cost.toFixed(precision)}`;
 };
 

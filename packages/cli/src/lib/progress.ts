@@ -1,4 +1,3 @@
-import { writeFileSync, readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
@@ -33,10 +32,7 @@ export class ProgressManager {
   updateProgress(processed: number, operation: string): void {
     const now = Date.now();
 
-    // Throttle updates to prevent spam
-    if (now - this.lastUpdateTime < this.UPDATE_THROTTLE_MS) {
-      return;
-    }
+    if (now - this.lastUpdateTime < this.UPDATE_THROTTLE_MS) return;
 
     this.lastUpdateTime = now;
     this.processedItems = processed;
@@ -45,18 +41,13 @@ export class ProgressManager {
       this.totalItems > 0 ? (processed / this.totalItems) * 100 : 0;
     const elapsed = now - this.startTime.getTime();
     const elapsedSeconds = elapsed / 1000;
-
-    // Calculate rate with protection against division by zero
     const rate =
       elapsedSeconds > 0 && processed > 0 ? processed / elapsedSeconds : 0;
-
-    // Calculate ETA with protection against invalid values
     const eta =
       rate > 0 && this.totalItems > processed
         ? (this.totalItems - processed) / rate
         : 0;
 
-    // Save progress state for recovery
     this.progressState = {
       processed,
       total: this.totalItems,
@@ -64,47 +55,40 @@ export class ProgressManager {
       elapsed,
     };
 
-    if (!this.isQuiet) {
-      const etaStr = this.formatTime(eta);
-      const rateStr = rate.toFixed(0);
-      const percentStr = percentage.toFixed(1);
+    if (this.isQuiet) return;
 
-      if (this.isVerbose) {
-        process.stdout.write(
-          `\r${operation}: ${percentStr}% (${processed}/${this.totalItems}) ` +
-            `Rate: ${rateStr}/sec ETA: ${etaStr} ` +
-            `Elapsed: ${this.formatTime(elapsed / 1000)}`,
-        );
-      } else {
-        process.stdout.write(
-          `\r${operation}: ${percentStr}% (${processed}/${this.totalItems}) ETA: ${etaStr}`,
-        );
-      }
-    }
+    const etaStr = this.formatTime(eta);
+    const rateStr = rate.toFixed(0);
+    const percentStr = percentage.toFixed(1);
+
+    const output = this.isVerbose
+      ? `\r${operation}: ${percentStr}% (${processed}/${this.totalItems}) Rate: ${rateStr}/sec ETA: ${etaStr} Elapsed: ${this.formatTime(elapsed / 1000)}`
+      : `\r${operation}: ${percentStr}% (${processed}/${this.totalItems}) ETA: ${etaStr}`;
+
+    process.stdout.write(output);
   }
 
   private setupSignalHandlers(): void {
-    process.on("SIGINT", () => {
+    process.on("SIGINT", async () => {
       console.log("\nInterrupted. Saving progress...");
-      this.saveProgressState();
+      await this.saveProgressState();
       process.exit(0);
     });
   }
 
-  private saveProgressState(): void {
+  private async saveProgressState(): Promise<void> {
     try {
       const stateFile = join(tmpdir(), "ocsight-progress.json");
-      writeFileSync(stateFile, JSON.stringify(this.progressState));
-    } catch (error) {
-      // Ignore errors, continue with exit
-    }
+      await Bun.write(stateFile, JSON.stringify(this.progressState));
+    } catch {}
   }
 
-  resumeFromSavedState(): boolean {
+  async resumeFromSavedState(): Promise<boolean> {
     try {
       const stateFile = join(tmpdir(), "ocsight-progress.json");
-      if (existsSync(stateFile)) {
-        const savedState = JSON.parse(readFileSync(stateFile, "utf8"));
+      const file = Bun.file(stateFile);
+      if (await file.exists()) {
+        const savedState = await file.json();
         this.progressState = savedState;
         this.processedItems = savedState.processed;
         console.log(
@@ -112,9 +96,7 @@ export class ProgressManager {
         );
         return true;
       }
-    } catch (error) {
-      // Ignore errors, start fresh
-    }
+    } catch {}
     return false;
   }
 
@@ -126,21 +108,18 @@ export class ProgressManager {
   }
 
   private formatTime(seconds: number): string {
-    // Handle invalid inputs
-    if (!isFinite(seconds) || seconds <= 0 || isNaN(seconds)) {
-      return "--";
-    }
+    if (!isFinite(seconds) || seconds <= 0 || isNaN(seconds)) return "--";
 
-    if (seconds < 60) {
-      return `${Math.round(seconds)}s`;
-    } else if (seconds < 3600) {
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+
+    if (seconds < 3600) {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = Math.round(seconds % 60);
       return `${minutes}m ${remainingSeconds}s`;
-    } else {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      return `${hours}h ${minutes}m`;
     }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
   }
 }

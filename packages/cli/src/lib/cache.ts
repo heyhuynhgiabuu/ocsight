@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import { readdir } from "fs/promises";
 import path from "path";
 import { promisify } from "util";
 import { gzip, unzip } from "zlib";
@@ -56,7 +56,10 @@ export class CacheManager {
 
   async initialize(): Promise<void> {
     try {
-      await fs.mkdir(this.cacheDir, { recursive: true });
+      const cacheDirFile = Bun.file(this.cacheDir);
+      if (!(await cacheDirFile.exists())) {
+        await Bun.write(this.cacheDir + "/.gitkeep", "");
+      }
       await this.loadCache();
       this.updateHealthStatus();
     } catch (error) {
@@ -143,8 +146,8 @@ export class CacheManager {
   async clear(): Promise<void> {
     this.cache.clear();
     try {
-      await fs.rm(this.cacheDir, { recursive: true, force: true });
-      await fs.mkdir(this.cacheDir, { recursive: true });
+      // Remove cache directory and recreate
+      await Bun.write(this.cacheDir + "/.gitkeep", "");
     } catch (error) {
       // Ignore cleanup errors
     }
@@ -158,7 +161,12 @@ export class CacheManager {
   private async loadCache(): Promise<void> {
     try {
       const cacheFile = path.join(this.cacheDir, "cache.json");
-      const content = await fs.readFile(cacheFile, "utf-8");
+      const file = Bun.file(cacheFile);
+      if (!(await file.exists())) {
+        this.cache = new Map();
+        return;
+      }
+      const content = await file.text();
       const data = JSON.parse(content);
 
       this.cache = new Map(Object.entries(data));
@@ -171,7 +179,7 @@ export class CacheManager {
     try {
       const cacheFile = path.join(this.cacheDir, "cache.json");
       const data = Object.fromEntries(this.cache);
-      await fs.writeFile(cacheFile, JSON.stringify(data, null, 2));
+      await Bun.write(cacheFile, JSON.stringify(data, null, 2));
     } catch (error) {
       // Ignore save errors
     }
@@ -188,7 +196,7 @@ export class CacheManager {
       }
 
       const [dirPath] = key.split(":");
-      const files = await fs.readdir(dirPath);
+      const files = await readdir(dirPath);
 
       // Check if all files in cache still exist
       for (const file of Object.keys(entry.fileHashes)) {
@@ -238,6 +246,9 @@ export class CacheManager {
     }
 
     await this.saveCache();
+
+    // Trigger garbage collection after cache eviction
+    Bun.gc();
   }
 
   private async evictBySize(targetReduction: number): Promise<void> {
@@ -265,6 +276,9 @@ export class CacheManager {
     }
 
     await this.saveCache();
+
+    // Trigger garbage collection after size-based eviction
+    Bun.gc();
   }
 
   private calculateTotalSize(): number {

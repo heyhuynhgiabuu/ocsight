@@ -30,13 +30,20 @@ export class CostService {
         return session.cost_cents;
       }
 
-      // Distribute tokens (simplified - actual distribution should come from message data)
+      // Distribute tokens ensuring no loss due to Math.floor
+      const total = session.tokens_used || 0;
+      const input = Math.floor(total * 0.7);
+      const output = Math.floor(total * 0.2);
+      const reasoning = Math.floor(total * 0.05);
+      const cache_read = Math.floor(total * 0.02);
+      const cache_write = total - (input + output + reasoning + cache_read); // Remainder to prevent token loss
+
       const tokenDistribution = {
-        input: Math.floor((session.tokens_used || 0) * 0.7),
-        output: Math.floor((session.tokens_used || 0) * 0.2),
-        reasoning: Math.floor((session.tokens_used || 0) * 0.05),
-        cache_read: Math.floor((session.tokens_used || 0) * 0.02),
-        cache_write: Math.floor((session.tokens_used || 0) * 0.03),
+        input,
+        output,
+        reasoning,
+        cache_read,
+        cache_write: Math.max(0, cache_write), // Ensure non-negative
       };
 
       const costInDollars = calculateModelCost(modelData, tokenDistribution);

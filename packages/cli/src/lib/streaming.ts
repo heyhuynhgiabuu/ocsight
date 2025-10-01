@@ -1,7 +1,8 @@
-import { promises as fs } from "fs";
+import { readdir } from "fs/promises";
 import path from "path";
 import { ProgressManager } from "./progress";
 import { OpenCodeSession, OpenCodeMessage, ToolUsage } from "../types";
+import { performance } from "perf_hooks";
 
 export class StreamingProcessor {
   private progress: ProgressManager;
@@ -47,12 +48,12 @@ export class StreamingProcessor {
 
   private async getSessionFiles(dirPath: string): Promise<string[]> {
     try {
-      const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      const entries = await readdir(dirPath);
       const files: string[] = [];
 
       for (const entry of entries) {
-        if (entry.isFile() && entry.name.endsWith(".json")) {
-          files.push(entry.name);
+        if (entry.endsWith(".json")) {
+          files.push(entry);
         }
       }
 
@@ -80,7 +81,7 @@ export class StreamingProcessor {
     for (const file of files) {
       try {
         const filePath = path.join(dirPath, file);
-        const content = await fs.readFile(filePath, "utf-8");
+        const content = await Bun.file(filePath).text();
         const session = JSON.parse(content) as OpenCodeSession;
 
         this.processedSessions.push(session);
@@ -101,10 +102,26 @@ export class StreamingProcessor {
   }
 
   private getOptimalConcurrency(): number {
+    const start = performance.now();
     const availableMemoryMB =
       this.maxMemoryMB - process.memoryUsage().heapUsed / 1024 / 1024;
     const estimatedMemoryPerBatch = 10; // Estimate 10MB per batch
-    return Math.max(1, Math.floor(availableMemoryMB / estimatedMemoryPerBatch));
+    const concurrency = Math.max(
+      1,
+      Math.floor(availableMemoryMB / estimatedMemoryPerBatch),
+    );
+
+    // Trigger garbage collection if memory is high
+    if (availableMemoryMB < 50) {
+      Bun.gc();
+    }
+
+    const duration = performance.now() - start;
+    if (duration > 10) {
+      console.warn(`Slow concurrency calculation: ${duration.toFixed(2)}ms`);
+    }
+
+    return concurrency;
   }
 
   private chunkArray<T>(array: T[], size: number): T[][] {
@@ -121,7 +138,11 @@ export class StreamingProcessor {
   }
 
   private async throttle(): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, 100));
+    // Use Bun.sleep instead of setTimeout for better performance
+    await Bun.sleep(100);
+
+    // Trigger garbage collection during throttling
+    Bun.gc();
   }
 
   getStats(): {
@@ -129,13 +150,18 @@ export class StreamingProcessor {
     messageCount: number;
     toolCount: number;
     memoryUsageMB: number;
+    processingTimeMs: number;
   } {
+    const start = performance.now();
     const memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024;
+    const processingTime = performance.now() - start;
+
     return {
       sessionCount: this.processedSessions.length,
       messageCount: this.processedMessages.length,
       toolCount: this.processedTools.length,
       memoryUsageMB: Math.round(memoryUsage * 100) / 100,
+      processingTimeMs: Math.round(processingTime * 100) / 100,
     };
   }
 }

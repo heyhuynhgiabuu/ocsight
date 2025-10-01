@@ -1,0 +1,32 @@
+{
+  "ui": {
+    "table_style": "rich",
+    "colors": true,
+    "progress_bars": true,
+    "live_refresh_interval": 5
+  },
+  "export": {
+    "default_format": "csv",
+    "include_metadata": true,
+    "include_raw_data": false
+  },
+  "paths": {
+    "data_dir": "/Users/killerkidbo/.local/share/opencode/storage/message",
+    "export_dir": "./exports",
+    "cache_dir": "/Users/killerkidbo/.cache/ocsight"
+  },
+  "budget": {
+    "global_monthly_limit": 200,
+    "alert_thresholds": {
+      "warning": 70,
+      "critical": 90
+    },
+    "providers": {
+      "anthropic": {
+        "name": "Anthropic",
+        "monthly_limit": 100,
+        "enabled": true
+      }
+    }
+  }
+}

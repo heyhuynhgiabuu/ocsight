@@ -12,6 +12,11 @@ import {
   SESSION_START_TIME_HOURS_AGO,
   MAX_PERCENTAGE,
 } from "./constants.js";
+import {
+  BudgetHealth,
+  ProviderBudgetStatus,
+  BudgetAlert,
+} from "./budget-types.js";
 
 export interface LiveStatus {
   sessionId: string;
@@ -53,6 +58,9 @@ export interface LiveStatus {
     avgTokensPerSession: number;
     avgCostPerSession: number;
   };
+  budgetHealth?: BudgetHealth | null;
+  providerBudgets?: ProviderBudgetStatus[];
+  budgetAlerts?: BudgetAlert[];
 }
 
 export interface LiveOptions {
@@ -136,26 +144,124 @@ export class LiveMonitor {
 
     const sections: BoxedSection[] = [];
 
-    const elapsedTime = status.recentActivity
-      ? formatElapsedTime(
-          Date.now() - (Date.now() - status.recentActivity.timestamp.getTime()),
-        )
-      : formatElapsedTime();
+    const now = new Date();
+    const monthName = now.toLocaleString("default", { month: "long" });
+    const year = now.getFullYear();
+
+    if (status.budgetHealth) {
+      const health = status.budgetHealth;
+      const percent = Math.min(100, health.percentage);
+      const barLength = 40;
+      const filled = Math.floor((percent / 100) * barLength);
+      const bar = "█".repeat(filled) + "░".repeat(barLength - filled);
+
+      const statusColor =
+        health.status === "exceeded" || health.status === "critical"
+          ? chalk.red
+          : health.status === "warning"
+            ? chalk.yellow
+            : chalk.green;
+
+      const statusIcon =
+        health.status === "exceeded"
+          ? "🔴"
+          : health.status === "critical"
+            ? "🔴"
+            : health.status === "warning"
+              ? "🟡"
+              : "🟢";
+
+      const content: string[] = [
+        statusColor(bar) +
+          `  ${percent.toFixed(1)}%     (${formatCost(health.spent)} / ${formatCost(health.limit)})`,
+      ];
+
+      if (health.days_remaining !== null && health.days_remaining < 30) {
+        content.push(
+          statusIcon +
+            ` ${formatCost(health.remaining)} remaining • ${health.days_remaining.toFixed(1)} days at current rate`,
+        );
+      } else {
+        content.push(statusIcon + ` ${formatCost(health.remaining)} remaining`);
+      }
+
+      sections.push({
+        title: `BUDGET HEALTH (${monthName} ${year})`,
+        content,
+        color: statusColor,
+      });
+    }
+
+    if (status.providerBudgets && status.providerBudgets.length > 0) {
+      const content: string[] = [];
+
+      for (const provider of status.providerBudgets) {
+        const statusIcon =
+          provider.status === "exceeded"
+            ? "🔴"
+            : provider.status === "critical"
+              ? "🔴"
+              : provider.status === "warning"
+                ? "🟡"
+                : "🟢";
+
+        const percentage = Math.min(100, provider.percentage);
+
+        content.push(
+          `${statusIcon} ${chalk.white(provider.provider_name.padEnd(15))} ${formatCost(provider.spent).padEnd(8)}  (${percentage.toFixed(0)}%)  [${formatCost(provider.limit)} limit]`,
+        );
+      }
+
+      sections.push({
+        title: "PROVIDER BREAKDOWN",
+        content,
+        color: chalk.cyan,
+      });
+    }
+
+    if (status.budgetAlerts && status.budgetAlerts.length > 0) {
+      const content: string[] = status.budgetAlerts.map((alert) => {
+        const icon = alert.level === "critical" ? "🔴" : "🟡";
+        return `${icon} ${alert.message}`;
+      });
+
+      sections.push({
+        title: "ALERTS",
+        content,
+        color: chalk.yellow,
+      });
+    }
 
     const contextPercent = status.context
       ? (status.context.used / status.context.total) * MAX_PERCENTAGE
       : 0;
-
-    const burnRateInfo = formatBurnRate(status.burnRate || 0);
 
     const sessionStartTime = new Date();
     sessionStartTime.setHours(
       sessionStartTime.getHours() - SESSION_START_TIME_HOURS_AGO,
     );
 
-    // Get project info
     const projectInfo = await detectProjectInfo();
     const projectName = projectInfo?.name || "Unknown Project";
+
+    const modelInfo = status.currentModel
+      ? status.currentModel.split("/").slice(-1)[0]
+      : "unknown";
+
+    const timeSinceLastMessage = status.recentActivity?.timestamp
+      ? Math.floor(
+          (Date.now() - status.recentActivity.timestamp.getTime()) / 1000,
+        )
+      : null;
+
+    const lastActivityText =
+      timeSinceLastMessage !== null
+        ? timeSinceLastMessage < 60
+          ? `${timeSinceLastMessage}s ago`
+          : timeSinceLastMessage < 3600
+            ? `${Math.floor(timeSinceLastMessage / 60)}m ago`
+            : `${Math.floor(timeSinceLastMessage / 3600)}h ago`
+        : "Unknown";
 
     // SESSION section - basic session info with context usage
     sections.push({
@@ -165,10 +271,10 @@ export class LiveMonitor {
           chalk.cyan(projectName) +
           chalk.white("  ID: ") +
           chalk.cyan(status.sessionId) +
-          chalk.white("  Started: ") +
-          chalk.cyan(sessionStartTime.toLocaleTimeString()) +
-          chalk.white("  Elapsed: ") +
-          chalk.cyan(elapsedTime),
+          chalk.white("  Last: ") +
+          chalk.cyan(lastActivityText) +
+          chalk.white("  Model: ") +
+          chalk.cyan(modelInfo),
       ],
       progressBar: status.context
         ? {
@@ -185,30 +291,64 @@ export class LiveMonitor {
       color: chalk.cyan,
     });
 
-    // USAGE section - current session usage
-    const tokensText = formatTokens(status.totalTokens);
-    const costText = formatCost(status.estimatedCost);
-    const burnText =
-      burnRateInfo.status === "No activity"
-        ? "IDLE"
-        : `${burnRateInfo.status} ${burnRateInfo.text}`;
-    const modelInfo = status.currentModel
-      ? status.currentModel.split("/").slice(-1)[0]
-      : "unknown";
+    // ACTIVITY section (last 30 min rolling average)
+    const recentTokens = status.recentActivity?.tokens || 0;
+    const burnRatePerHour = status.burnRate || 0;
+    const costPer30Min = (burnRatePerHour / 60) * 30;
+    const tokensPerMin =
+      recentTokens > 0 ? Math.floor(recentTokens / 30 / 1000) : 0;
+
+    const isActive = timeSinceLastMessage !== null && timeSinceLastMessage < 60;
+    const isRecent =
+      timeSinceLastMessage !== null && timeSinceLastMessage < 300;
+
+    const statusText = isActive ? "ACTIVE" : isRecent ? "RECENT" : "IDLE";
+
+    const burnRateColor =
+      burnRatePerHour > 20
+        ? chalk.red
+        : burnRatePerHour > 10
+          ? chalk.yellow
+          : chalk.green;
+
+    const statusColor = isActive
+      ? chalk.bold.green
+      : isRecent
+        ? chalk.yellow
+        : chalk.dim;
 
     sections.push({
-      title: "USAGE",
+      title: `ACTIVITY (${statusText}) - 30min avg`,
+      content:
+        recentTokens > 0
+          ? [
+              statusColor("● ") +
+                chalk.white("Spending: ") +
+                burnRateColor.bold(`${formatCost(burnRatePerHour, 2)}/hour`) +
+                chalk.white("  Speed: ") +
+                chalk.cyan(`${tokensPerMin}K tok/min`) +
+                chalk.white("  Recent: ") +
+                chalk.green(`${formatCost(costPer30Min, 2)}`),
+            ]
+          : [chalk.dim("○ No activity in last 30 minutes")],
+      color: chalk.cyan,
+    });
+
+    // TOTALS section - session cumulative
+    const tokensText = formatTokens(status.totalTokens);
+    const costText = formatCost(status.estimatedCost);
+
+    sections.push({
+      title: "SESSION TOTALS",
       content: [
-        chalk.white("Model: ") +
-          chalk.cyan(modelInfo) +
+        chalk.white("Messages: ") +
+          chalk.cyan(status.interactions.toString()) +
           chalk.white("  Tokens: ") +
-          chalk.bold.cyan(tokensText) +
+          chalk.cyan(tokensText) +
           chalk.white("  Cost: ") +
-          chalk.bold.green(costText) +
-          chalk.white("  Burn: ") +
-          burnRateInfo.color(burnText),
+          chalk.cyan(costText),
       ],
-      color: chalk.green,
+      color: chalk.dim.white,
     });
 
     // TOTALS section - aggregate stats for this model

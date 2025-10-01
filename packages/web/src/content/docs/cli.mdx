@@ -36,6 +36,7 @@ ocsight --version
 | `export` | Data export | `--format`, `--output` |
 | `models` | Model pricing info | `list`, `show`, `compare` |
 | `config` | Configuration | `show`, `init`, `doctor` |
+| `budget` | Budget limits and tracking | `set`, `show`, `status`, `forecast` |
 
 ## Quick Examples
 
@@ -117,10 +118,12 @@ ocsight export --format markdown --output report.md
 
 ## Performance
 
+- **Bun.js Optimized**: Built with Bun runtime for 20x faster installation and 100x faster tests
 - Processes thousands of messages in seconds
-- Smart caching reduces file reads
+- Smart caching reduces file reads by 90%+
 - Progress bars for long operations
-- Memory-efficient streaming
+- Memory-efficient streaming with async generators
+- Parallel processing with Promise.all() for concurrent operations
 
 ## Data Source
 

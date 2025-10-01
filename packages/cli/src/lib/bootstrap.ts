@@ -7,30 +7,50 @@ const UIConfig = z.object({
   table_style: z.enum(["rich", "simple", "minimal"]).default("rich"),
   colors: z.boolean().default(true),
   progress_bars: z.boolean().default(true),
-  live_refresh_interval: z.number().int().min(1).max(60).default(5)
+  live_refresh_interval: z.number().int().min(1).max(60).default(5),
 });
 
 const ExportConfig = z.object({
   default_format: z.enum(["csv", "json", "markdown"]).default("csv"),
   include_metadata: z.boolean().default(true),
-  include_raw_data: z.boolean().default(false)
+  include_raw_data: z.boolean().default(false),
 });
 
 const PathsConfig = z.object({
   data_dir: z.string().default("~/.local/share/opencode/storage/message"),
   export_dir: z.string().default("./exports"),
-  cache_dir: z.string().default("~/.cache/ocsight")
+  cache_dir: z.string().default("~/.cache/ocsight"),
 });
+
+const ProviderBudgetConfig = z.object({
+  name: z.string(),
+  monthly_limit: z.number(),
+  enabled: z.boolean().default(true),
+});
+
+const BudgetConfig = z
+  .object({
+    global_monthly_limit: z.number().optional(),
+    alert_thresholds: z
+      .object({
+        warning: z.number().default(70),
+        critical: z.number().default(90),
+      })
+      .optional(),
+    providers: z.record(ProviderBudgetConfig).default({}),
+  })
+  .optional();
 
 const ConfigSchema = z.object({
   ui: UIConfig.default({}),
   export: ExportConfig.default({}),
-  paths: PathsConfig.default({})
+  paths: PathsConfig.default({}),
+  budget: BudgetConfig,
 });
 
 type Config = z.infer<typeof ConfigSchema>;
 
-const expandPath = (path: string): string => 
+const expandPath = (path: string): string =>
   path.replace(/^~(?=$|\/|\\)/, homedir());
 
 const findConfigFile = async (): Promise<string | null> => {
@@ -38,7 +58,7 @@ const findConfigFile = async (): Promise<string | null> => {
     "ocsight.config.json",
     join(process.cwd(), "ocsight.config.json"),
     join(homedir(), ".config", "ocsight", "config.json"),
-    join(homedir(), ".ocsight", "config.json")
+    join(homedir(), ".ocsight", "config.json"),
   ];
 
   for (const candidate of candidates) {
@@ -53,18 +73,18 @@ const findConfigFile = async (): Promise<string | null> => {
 };
 
 export const loadConfig = async (configPath?: string): Promise<Config> => {
-  const path = configPath || await findConfigFile();
-  
+  const path = configPath || (await findConfigFile());
+
   if (path) {
     try {
       const content = await readFile(path, "utf8");
       const raw = JSON.parse(content);
       return ConfigSchema.parse(raw);
-    } catch (error) {
-      console.warn(`Warning: Invalid config file at ${path}, using defaults`);
+    } catch {
+      return ConfigSchema.parse({});
     }
   }
-  
+
   return ConfigSchema.parse({});
 };
 
@@ -75,17 +95,16 @@ export type BootstrapContext = {
 };
 
 export const bootstrap = async (
-  configPath?: string, 
-  verbose = false, 
-  noColor = false
+  configPath?: string,
+  verbose = false,
+  noColor = false,
 ): Promise<BootstrapContext> => {
   const config = await loadConfig(configPath);
   const colors = !noColor && config.ui.colors;
-  
-  // Expand paths
+
   config.paths.data_dir = expandPath(config.paths.data_dir);
   config.paths.export_dir = expandPath(config.paths.export_dir);
   config.paths.cache_dir = expandPath(config.paths.cache_dir);
-  
+
   return { config, verbose, colors };
 };

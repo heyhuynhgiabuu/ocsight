@@ -1,0 +1,11 @@
+[install]
+linker = "isolated"
+auto = "auto"
+
+[test]
+coverage = true
+coverageThreshold = 0.8
+
+[run]
+shell = "bun"
+bun = true

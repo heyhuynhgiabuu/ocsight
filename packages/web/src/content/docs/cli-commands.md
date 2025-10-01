@@ -8,6 +8,7 @@ Complete reference for all available ocsight CLI commands.
 ## Core Commands
 
 ### summary
+
 Unified usage summary and analysis
 
 ```bash
@@ -18,6 +19,7 @@ ocsight summary --provider anthropic  # Filter by provider
 ```
 
 ### sessions
+
 Session management and exploration
 
 ```bash
@@ -29,6 +31,7 @@ ocsight sessions top --tokens   # Top sessions by tokens
 ```
 
 ### costs
+
 Cost analysis and spending tracking
 
 ```bash
@@ -40,6 +43,7 @@ ocsight costs --alert 100    # Alert if daily cost > $100
 ```
 
 ### live
+
 Real-time monitoring dashboard
 
 ```bash
@@ -49,6 +53,7 @@ ocsight live --refresh 5     # Custom refresh interval
 ```
 
 ### export
+
 Export data to various formats
 
 ```bash
@@ -60,6 +65,7 @@ ocsight export --output report.json  # Custom output file
 ```
 
 ### models
+
 Browse and compare AI model pricing
 
 ```bash
@@ -70,12 +76,25 @@ ocsight models providers     # List all providers
 ```
 
 ### config
+
 Configuration management
 
 ```bash
 ocsight config show          # Show current configuration
 ocsight config init          # Initialize configuration
 ocsight config doctor        # Validate configuration
+```
+
+### budget
+
+Budget limits and cost tracking
+
+```bash
+ocsight budget status        # Show current month budget status
+ocsight budget set 1000      # Set global monthly budget limit
+ocsight budget show          # Show configured budget limits
+ocsight budget add anthropic 500  # Add budget limit for provider
+ocsight budget forecast      # Project end-of-month costs
 ```
 
 ## Global Options

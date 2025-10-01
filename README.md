@@ -1,17 +1,17 @@
-# OCsight - OpenCode Observability
+# OCsight - OpenCode Cost Tracking
 
-Track OpenCode AI costs and usage. Real costs, real data. No estimates or projections.
+Track your OpenCode AI spending. Real costs from real data.
 
 ![Usage Summary](assets/summary.png)
 
 ## What It Does
 
-**ocsight** reads your OpenCode session files and shows you:
+ocsight reads your OpenCode sessions and shows you exactly what you're spending:
 
-- How much you're spending on AI models
-- Which providers and models you're using
-- Token usage and cost breakdowns
-- Real-time monitoring of active sessions
+- **Cost tracking** by provider and model
+- **Budget limits** with spending alerts
+- **Token usage** breakdowns
+- **Live monitoring** of active sessions
 
 ## Installation
 
@@ -29,13 +29,13 @@ curl -L https://github.com/heyhuynhgiabuu/ocsight/releases/latest/download/ocsig
 ## Quick Start
 
 ```bash
-# See what you've spent
+# See your spending
 ocsight summary
 
-# Track today's costs
-ocsight costs today
+# Set budget limits
+ocsight budget set --monthly 200
 
-# Monitor live session
+# Monitor live usage
 ocsight live
 ```
 
@@ -61,13 +61,27 @@ Browse, analyze, and drill into individual sessions:
 
 ### 🔴 Live Monitoring
 
-Real-time dashboard showing active session metrics:
+Real-time dashboard showing active session costs and tokens:
 
 ![Live Monitor](assets/live.png)
 
+### 💰 Budget Management
+
+Set spending limits and get alerts when approaching budgets:
+
+![Budget Status](assets/budget-status.png)
+
+Add budget limits and configure spending alerts:
+
+![Budget Add](assets/budget-add.png)
+
+View detailed budget information and settings:
+
+![Budget Show](assets/budget-show.png)
+
 ### 🤖 Model Database
 
-Browse and compare pricing across 500+ AI models:
+Browse pricing across 500+ AI models:
 
 ![Models Database](assets/models.png)
 
@@ -181,6 +195,16 @@ ocsight models providers           # List providers
 ocsight models show gpt-4o         # Model details
 ```
 
+### `budget` - Budget Management
+
+```bash
+ocsight budget set --monthly 200   # Set $200 monthly limit
+ocsight budget add                 # Add provider budget
+ocsight budget forecast            # Project month-end costs
+ocsight budget status              # Current budget usage
+ocsight budget show                # Show budget details
+```
+
 ## Example Terminal Output
 
 ```
@@ -216,32 +240,32 @@ Daily Activity (Last 7 Days)
 
 ### ✅ Accurate
 
-- **Real costs** from actual model pricing (models.dev)
-- **Exact tokens** from OpenCode sessions
-- **No estimates** or projections
+Real costs from actual model pricing, no estimates
 
 ### 🚀 Fast
 
-- Optimized caching for large datasets
-- Instant results after first run
-- Handles 10k+ sessions efficiently
+Optimized caching, handles 10k+ sessions instantly
 
-### 🎯 Focused
+### 💰 Smart Budgets
 
-- Does one thing well: track AI costs
-- No unnecessary features or complexity
-- Clean, readable output
+Set limits, get alerts, forecast spending with conservative projections
+
+### 🔴 Live Monitoring
+
+Watch costs accumulate in real-time
+
+### 📊 Comprehensive Analytics
+
+Detailed breakdowns by provider, model, and time period
 
 ### 🔒 Private
 
-- Runs entirely locally
-- Never sends data anywhere
-- Your usage stays on your machine
+Runs locally, never sends your data anywhere
 
 ## Requirements
 
-- Node.js 18+ or Bun
-- OpenCode installed and configured
+- Bun runtime (recommended) or Node.js 18+
+- OpenCode installed
 - Session data in `~/.local/share/opencode/storage/`
 
 ## Data Sources
@@ -257,36 +281,22 @@ ocsight reads from your local OpenCode storage:
 ## Development
 
 ```bash
-# Clone repository
 git clone https://github.com/heyhuynhgiabuu/ocsight
 cd ocsight
-
-# Install dependencies
 bun install
-
-# Build project
 bun run build
-
-# Run tests
 bun test
-
-# Run locally
-node index.js summary
+bun run src/index.ts summary
 ```
 
 ## Configuration
 
-ocsight works out of the box with sensible defaults. Optional config:
+ocsight works out of the box. Optional config:
 
 ```bash
-# Initialize config
-ocsight config init
-
-# View current config
-ocsight config show
-
-# Validate setup
-ocsight config doctor
+ocsight budget set --monthly 200    # Set budget
+ocsight config show                  # View config
+ocsight config doctor               # Validate setup
 ```
 
 ## Troubleshooting
@@ -343,4 +353,4 @@ MIT © heyhuynhgiabuu
 
 ---
 
-**v1.0.0** · Track your AI costs with confidence · Built with simplicity and accuracy in mind
+**v1.0.0** · Track your AI costs with confidence · Built with Bun.js for speed

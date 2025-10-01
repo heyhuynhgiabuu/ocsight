@@ -131,18 +131,28 @@ func buildNodeArgs(command string, options map[string]any) []string {
 }
 
 func runNodeCommand(args []string) {
-	cmd := exec.Command("node", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
+	// Try bun first, fallback to node
+	bunCmd := exec.Command("bun", args...)
+	bunCmd.Stdout = os.Stdout
+	bunCmd.Stderr = os.Stderr
+	bunCmd.Stdin = os.Stdin
 
-	err := cmd.Run()
+	err := bunCmd.Run()
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			os.Exit(exitErr.ExitCode())
+		// Fallback to node if bun is not available
+		nodeCmd := exec.Command("node", args...)
+		nodeCmd.Stdout = os.Stdout
+		nodeCmd.Stderr = os.Stderr
+		nodeCmd.Stdin = os.Stdin
+
+		err = nodeCmd.Run()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				os.Exit(exitErr.ExitCode())
+			}
+			fmt.Fprintf(os.Stderr, "Failed to execute command: %v\n", err)
+			os.Exit(1)
 		}
-		fmt.Fprintf(os.Stderr, "Failed to execute command: %v\n", err)
-		os.Exit(1)
 	}
 }
 

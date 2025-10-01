@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { writeFileSync } from "fs";
+
 import { createObjectCsvWriter } from "csv-writer";
 import { dataService } from "../services/data.js";
 import { costService } from "../services/cost.js";
@@ -129,7 +129,7 @@ async function exportToJson(
     })),
   };
 
-  writeFileSync(outputPath, JSON.stringify(exportData, null, 2));
+  await Bun.write(outputPath, JSON.stringify(exportData, null, 2));
 }
 
 async function exportToCsv(sessions: any[], outputPath: string): Promise<void> {
@@ -218,5 +218,5 @@ async function exportToMarkdown(
     markdown += `\n`;
   }
 
-  writeFileSync(outputPath, markdown);
+  await Bun.write(outputPath, markdown);
 }

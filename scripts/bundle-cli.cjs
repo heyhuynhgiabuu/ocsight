@@ -11,8 +11,8 @@ const version = mainPkg.version;
 
 console.log(`Bundling CLI with version ${version}...`);
 
-// Run esbuild with version injection
-const esbuildCmd = `cd ${__dirname}/.. && esbuild packages/cli/src/index.ts --bundle --platform=node --format=cjs --outfile=packages/cli/dist/index.cjs --external:@heyhuynhgiabuu/ocsight-cli --target=node18 --define:__PACKAGE_VERSION__='\"${version}\"'`;
+// Run esbuild with version injection for Bun runtime
+const esbuildCmd = `cd ${__dirname}/.. && esbuild packages/cli/src/index.ts --bundle --platform=node --format=cjs --outfile=packages/cli/dist/index.cjs --external:@heyhuynhgiabuu/ocsight-cli --external:bun --external:fs --external:path --external:os --external:crypto --external:url --external:readline --external:node:* --target=node18 --define:__PACKAGE_VERSION__='\"${version}\"'`;
 
 try {
   execSync(esbuildCmd, { stdio: "inherit" });

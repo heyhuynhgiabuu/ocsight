@@ -31,12 +31,12 @@ test("should process sessions within performance targets", async () => {
   const progress = new ProgressManager(sessionCount);
   const processor = new StreamingProcessor(progress, 20, 50);
 
-  const startTime = Date.now();
+  const startTime = performance.now();
   const startMemory = process.memoryUsage().heapUsed;
 
   const result = await processor.processDirectory(testDir);
 
-  const endTime = Date.now();
+  const endTime = performance.now();
   const endMemory = process.memoryUsage().heapUsed;
 
   const duration = endTime - startTime;
