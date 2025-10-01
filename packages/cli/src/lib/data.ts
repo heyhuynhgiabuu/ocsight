@@ -1,4 +1,4 @@
-import { readdir, mkdir } from "fs/promises";
+import { readdir, mkdir, readFile, writeFile, stat } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import { createHash } from "crypto";
@@ -15,7 +15,7 @@ export function getDefaultOpenCodePath(): string {
 
   if (platform === "win32") {
     return join(
-      Bun.env.USERPROFILE || homedir(),
+      process.env.USERPROFILE || homedir(),
       ".local",
       "share",
       "opencode",
@@ -32,11 +32,9 @@ export async function findOpenCodeDataDirectory(
   const basePath = customPath || getDefaultOpenCodePath();
 
   try {
-    const file = Bun.file(basePath);
-    if (!(await file.exists())) {
-      // Create directory structure if it doesn't exist
+    await stat(basePath).catch(async () => {
       await mkdir(basePath, { recursive: true });
-    }
+    });
     return basePath;
   } catch (error) {
     throw new Error(`OpenCode data directory not found: ${basePath}`);

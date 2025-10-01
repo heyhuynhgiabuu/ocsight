@@ -1,6 +1,7 @@
-import { Glob } from "bun";
+import { glob } from "glob";
 import { watch } from "fs/promises";
 import { join } from "path";
+import { readFile, stat } from "fs/promises";
 
 export interface SessionIndex {
   id: string;
@@ -71,20 +72,22 @@ export class SessionManager {
 
   private async buildIndex(quiet: boolean = false): Promise<void> {
     const sessionDir = join(this.dataDir, "storage", "session");
-    const glob = new Glob("**/ses_*.json");
 
     this.sessionIndex.clear();
 
-    for await (const filePath of glob.scan(sessionDir)) {
+    const files = await glob("**/ses_*.json", { cwd: sessionDir });
+
+    for (const filePath of files) {
       const fullPath = join(sessionDir, filePath);
-      const file = Bun.file(fullPath);
+      const stats = await stat(fullPath).catch(() => null);
+      if (!stats) continue;
 
       const id = this.extractSessionId(filePath);
 
       this.sessionIndex.set(id, {
         id,
-        mtime: file.lastModified || 0,
-        size: file.size,
+        mtime: stats.mtime.getTime(),
+        size: stats.size,
         filePath: fullPath,
       });
     }
@@ -155,15 +158,17 @@ export class SessionManager {
       sessionId.replace(/\u0000/g, ""),
     );
 
-    const glob = new Glob("msg_*.json");
     const messages: MessageSummary[] = [];
 
     try {
-      for await (const filePath of glob.scan(sessionMessageDir)) {
-        const fullPath = join(sessionMessageDir, filePath);
-        const file = Bun.file(fullPath);
+      const files = await glob("msg_*.json", { cwd: sessionMessageDir });
 
-        const message = await file.json().catch(() => null);
+      for (const filePath of files) {
+        const fullPath = join(sessionMessageDir, filePath);
+        const content = await readFile(fullPath, "utf-8").catch(() => null);
+        if (!content) continue;
+
+        const message = JSON.parse(content);
         if (!message) continue;
 
         const summary: MessageSummary = {

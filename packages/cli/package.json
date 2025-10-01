@@ -32,6 +32,7 @@
     "cli-table3": "^0.6.5",
     "commander": "^14.0.1",
     "csv-writer": "^1.6.0",
+    "glob": "^10.3.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 // Main entry point for ocsight
 // Use bundled CLI for standalone execution
-import("./lib/bundle.cjs");
+require("./lib/bundle.cjs");

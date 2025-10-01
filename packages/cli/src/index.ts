@@ -10,6 +10,7 @@ import { modelsCommand } from "./commands/models.js";
 import { budgetCommand } from "./commands/budget.js";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { readFile } from "fs/promises";
 
 // Declare the injected version variable for bundled builds
 declare const __PACKAGE_VERSION__: string;
@@ -25,7 +26,7 @@ const getVersion = async (): Promise<string> => {
   try {
     const moduleDir = dirname(fileURLToPath(import.meta.url));
     const packageJsonPath = join(moduleDir, "..", "package.json");
-    const packageJson = await Bun.file(packageJsonPath).json();
+    const packageJson = JSON.parse(await readFile(packageJsonPath, "utf-8"));
     return packageJson.version;
   } catch {
     // Keep the fallback version
@@ -58,7 +59,7 @@ const initializeProgram = async (): Promise<Command> => {
 };
 
 // Parse command line arguments only when not in test environment
-if (!Bun.env.NODE_ENV || Bun.env.NODE_ENV !== "test") {
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== "test") {
   initializeProgram().then((program) => program.parse());
 }
 
