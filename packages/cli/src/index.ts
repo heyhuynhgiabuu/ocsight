@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// IMPORTANT: Runtime compatibility polyfill must be imported FIRST
+// This polyfills Bun APIs for Node.js runtime when bundled
+import "./lib/runtime-compat.js";
+
 import { Command } from "commander";
 import { summaryCommand } from "./commands/summary.js";
 import { sessionsCommand } from "./commands/sessions.js";

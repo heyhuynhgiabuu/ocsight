@@ -3,6 +3,7 @@ import path from "path";
 import { ProgressManager } from "./progress";
 import { OpenCodeSession, OpenCodeMessage, ToolUsage } from "../types";
 import { performance } from "perf_hooks";
+import * as Runtime from "./runtime-compat.js";
 
 export class StreamingProcessor {
   private progress: ProgressManager;
@@ -81,7 +82,7 @@ export class StreamingProcessor {
     for (const file of files) {
       try {
         const filePath = path.join(dirPath, file);
-        const content = await Bun.file(filePath).text();
+        const content = await Runtime.file(filePath).text();
         const session = JSON.parse(content) as OpenCodeSession;
 
         this.processedSessions.push(session);
@@ -113,7 +114,7 @@ export class StreamingProcessor {
 
     // Trigger garbage collection if memory is high
     if (availableMemoryMB < 50) {
-      Bun.gc();
+      Runtime.gc();
     }
 
     const duration = performance.now() - start;
@@ -138,11 +139,11 @@ export class StreamingProcessor {
   }
 
   private async throttle(): Promise<void> {
-    // Use Bun.sleep instead of setTimeout for better performance
-    await Bun.sleep(100);
+    // Use Runtime.sleep instead of setTimeout for better performance
+    await Runtime.sleep(100);
 
     // Trigger garbage collection during throttling
-    Bun.gc();
+    Runtime.gc();
   }
 
   getStats(): {

@@ -33,11 +33,11 @@
     "README.md"
   ],
   "devDependencies": {
-    "@types/node": "^18.0.0",
+    "@types/node": "^18.19.130",
     "bun-types": "latest",
     "esbuild": "^0.25.10",
-    "turbo": "^2.0.0",
-    "typescript": "^5.0.0"
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "bun": ">=1.0.0"

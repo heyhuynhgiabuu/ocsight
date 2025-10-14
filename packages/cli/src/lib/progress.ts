@@ -1,5 +1,6 @@
 import { join } from "path";
 import { tmpdir } from "os";
+import * as Runtime from "./runtime-compat.js";
 
 interface ProgressState {
   processed: number;
@@ -79,14 +80,14 @@ export class ProgressManager {
   private async saveProgressState(): Promise<void> {
     try {
       const stateFile = join(tmpdir(), "ocsight-progress.json");
-      await Bun.write(stateFile, JSON.stringify(this.progressState));
+      await Runtime.write(stateFile, JSON.stringify(this.progressState));
     } catch {}
   }
 
   async resumeFromSavedState(): Promise<boolean> {
     try {
       const stateFile = join(tmpdir(), "ocsight-progress.json");
-      const file = Bun.file(stateFile);
+      const file = Runtime.file(stateFile);
       if (await file.exists()) {
         const savedState = await file.json();
         this.progressState = savedState;

@@ -6,6 +6,7 @@ import { costService } from "../services/cost.js";
 import { formatService } from "../services/format.js";
 import { getExportSummary } from "../lib/safe-export.js";
 import chalk from "chalk";
+import * as Runtime from "../lib/runtime-compat.js";
 
 interface ExportOptions {
   days?: number;
@@ -129,7 +130,7 @@ async function exportToJson(
     })),
   };
 
-  await Bun.write(outputPath, JSON.stringify(exportData, null, 2));
+  await Runtime.write(outputPath, JSON.stringify(exportData, null, 2));
 }
 
 async function exportToCsv(sessions: any[], outputPath: string): Promise<void> {
@@ -218,5 +219,5 @@ async function exportToMarkdown(
     markdown += `\n`;
   }
 
-  await Bun.write(outputPath, markdown);
+  await Runtime.write(outputPath, markdown);
 }

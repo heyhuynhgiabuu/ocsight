@@ -1,4 +1,4 @@
-import { readdir, mkdir, readFile, writeFile, stat } from "fs/promises";
+import { readdir, mkdir, stat } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import { createHash } from "crypto";
@@ -9,6 +9,7 @@ import {
   OpenCodeMessage,
   ToolUsage,
 } from "../types/index.js";
+import * as Runtime from "./runtime-compat.js";
 
 export function getDefaultOpenCodePath(): string {
   const platform = process.platform;
@@ -104,7 +105,7 @@ async function getCacheFilePath(dataDir: string): Promise<string> {
 async function loadCache(dataDir: string): Promise<CacheData | null> {
   try {
     const cacheFilePath = await getCacheFilePath(dataDir);
-    const file = Bun.file(cacheFilePath);
+    const file = Runtime.file(cacheFilePath);
     if (!(await file.exists())) {
       return null;
     }
@@ -127,7 +128,7 @@ async function loadCache(dataDir: string): Promise<CacheData | null> {
 async function saveCache(dataDir: string, cache: CacheData): Promise<void> {
   try {
     const cacheFilePath = await getCacheFilePath(dataDir);
-    await Bun.write(cacheFilePath, JSON.stringify(cache, null, 2));
+    await Runtime.write(cacheFilePath, JSON.stringify(cache, null, 2));
   } catch (error) {
     console.warn("Failed to save cache:", error);
   }
@@ -145,7 +146,7 @@ function calculateFileHash(content: string): string {
 async function getFileMetadata(
   filePath: string,
 ): Promise<{ mtime: number; size: number; hash: string }> {
-  const file = Bun.file(filePath);
+  const file = Runtime.file(filePath);
   const content = await file.text();
   const stats = await file.stat();
   return {
@@ -178,7 +179,7 @@ async function analyzeFile(
   metadata: { mtime: number; size: number; hash: string };
   content: string;
 }> {
-  const file = Bun.file(filePath);
+  const file = Runtime.file(filePath);
   const content = await file.text();
   const stats = await file.stat();
   const hash = calculateFileHash(content);
@@ -673,7 +674,7 @@ export async function loadOpenCodeData(options?: {
     const timeFilteredFiles: string[] = [];
     for (const file of messageFiles) {
       try {
-        const fileObj = Bun.file(file);
+        const fileObj = Runtime.file(file);
         const stats = await fileObj.stat();
         if (stats.mtimeMs >= cutoffTime) {
           timeFilteredFiles.push(file);
@@ -726,7 +727,7 @@ export async function loadOpenCodeData(options?: {
   const sessionPromises = sessionFiles.map(async (file) => {
     return await safeFileOperation(
       async () => {
-        const content = await Bun.file(file).text();
+        const content = await Runtime.file(file).text();
         const data = JSON.parse(content);
 
         if (!validateSessionData(data)) {
@@ -783,7 +784,7 @@ export async function loadOpenCodeData(options?: {
     const batchPromises = batch.map(async (file) => {
       return await safeFileOperation(
         async () => {
-          const content = await Bun.file(file).text();
+          const content = await Runtime.file(file).text();
           const data = JSON.parse(content);
 
           if (!validateMessageData(data)) {
@@ -869,7 +870,7 @@ export async function loadOpenCodeData(options?: {
     }
 
     // Trigger garbage collection after cache update
-    Bun.gc();
+    Runtime.gc();
   }
 
   // Use streaming approach to process sessions and reduce memory usage
@@ -894,7 +895,7 @@ export async function loadOpenCodeData(options?: {
   progressManager.finish();
 
   // Trigger garbage collection after processing all sessions
-  Bun.gc();
+  Runtime.gc();
 
   return { sessions };
 }

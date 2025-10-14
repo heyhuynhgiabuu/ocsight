@@ -3,6 +3,7 @@ import path from "path";
 import { promisify } from "util";
 import { gzip, unzip } from "zlib";
 import { OpenCodeSession } from "../types";
+import * as Runtime from "./runtime-compat.js";
 
 const gzipAsync = promisify(gzip);
 const unzipAsync = promisify(unzip);
@@ -56,9 +57,9 @@ export class CacheManager {
 
   async initialize(): Promise<void> {
     try {
-      const cacheDirFile = Bun.file(this.cacheDir);
+      const cacheDirFile = Runtime.file(this.cacheDir);
       if (!(await cacheDirFile.exists())) {
-        await Bun.write(this.cacheDir + "/.gitkeep", "");
+        await Runtime.write(this.cacheDir + "/.gitkeep", "");
       }
       await this.loadCache();
       this.updateHealthStatus();
@@ -147,7 +148,7 @@ export class CacheManager {
     this.cache.clear();
     try {
       // Remove cache directory and recreate
-      await Bun.write(this.cacheDir + "/.gitkeep", "");
+      await Runtime.write(this.cacheDir + "/.gitkeep", "");
     } catch (error) {
       // Ignore cleanup errors
     }
@@ -161,7 +162,7 @@ export class CacheManager {
   private async loadCache(): Promise<void> {
     try {
       const cacheFile = path.join(this.cacheDir, "cache.json");
-      const file = Bun.file(cacheFile);
+      const file = Runtime.file(cacheFile);
       if (!(await file.exists())) {
         this.cache = new Map();
         return;
@@ -179,7 +180,7 @@ export class CacheManager {
     try {
       const cacheFile = path.join(this.cacheDir, "cache.json");
       const data = Object.fromEntries(this.cache);
-      await Bun.write(cacheFile, JSON.stringify(data, null, 2));
+      await Runtime.write(cacheFile, JSON.stringify(data, null, 2));
     } catch (error) {
       // Ignore save errors
     }
@@ -248,7 +249,7 @@ export class CacheManager {
     await this.saveCache();
 
     // Trigger garbage collection after cache eviction
-    Bun.gc();
+    Runtime.gc();
   }
 
   private async evictBySize(targetReduction: number): Promise<void> {
@@ -278,7 +279,7 @@ export class CacheManager {
     await this.saveCache();
 
     // Trigger garbage collection after size-based eviction
-    Bun.gc();
+    Runtime.gc();
   }
 
   private calculateTotalSize(): number {
