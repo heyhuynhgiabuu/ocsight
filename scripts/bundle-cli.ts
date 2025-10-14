@@ -21,6 +21,9 @@ try {
     minify: false,
     sourcemap: "external",
     splitting: false,
+    naming: {
+      entry: "index.cjs",
+    },
     define: {
       __PACKAGE_VERSION__: JSON.stringify(version),
     },
