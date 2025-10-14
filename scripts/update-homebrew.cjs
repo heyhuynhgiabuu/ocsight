@@ -9,7 +9,7 @@ async function updateHomebrew(version) {
   console.log(`🍺 Updating Homebrew formula to v${version}...`);
 
   const projectRoot = process.cwd();
-  const homebrewPath = join(projectRoot, "homebrew-tap");
+  const homebrewPath = join(projectRoot, "packages/distribution/homebrew/homebrew-tap-files");
   const formulaPath = join(homebrewPath, "Formula", "ocsight.rb");
 
   // Download and calculate checksums for all platforms
