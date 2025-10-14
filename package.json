@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "bundle-cli": "turbo bundle-cli && mkdir -p lib && cp packages/cli/dist/index.cjs lib/bundle.cjs",
+    "bundle-cli": "bun run scripts/bundle-cli.ts && mkdir -p lib && cp packages/cli/dist/index.cjs lib/bundle.cjs",
     "test": "turbo test",
     "package": "turbo package",
     "clean": "turbo clean",
