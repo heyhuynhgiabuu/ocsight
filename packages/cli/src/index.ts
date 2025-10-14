@@ -19,28 +19,14 @@ import { readFile } from "fs/promises";
 // Declare the injected version variable for bundled builds
 declare const __PACKAGE_VERSION__: string;
 
-// Get version from multiple sources in order of preference
-const getVersion = async (): Promise<string> => {
-  // 1. Try injected version (for bundled version)
-  if (typeof __PACKAGE_VERSION__ !== "undefined") {
-    return __PACKAGE_VERSION__;
-  }
-
-  // 2. Try reading from installed package (for ESM/npm)
-  try {
-    const moduleDir = dirname(fileURLToPath(import.meta.url));
-    const packageJsonPath = join(moduleDir, "..", "package.json");
-    const packageJson = JSON.parse(await readFile(packageJsonPath, "utf-8"));
-    return packageJson.version;
-  } catch {
-    // Keep the fallback version
-    return "0.7.4";
-  }
+// Get version - uses injected version from build process
+const getVersion = (): string => {
+  return typeof __PACKAGE_VERSION__ !== "undefined" ? __PACKAGE_VERSION__ : "0.7.4";
 };
 
 const initializeProgram = async (): Promise<Command> => {
   const program = new Command();
-  const version = await getVersion();
+  const version = getVersion();
 
   program
     .name("ocsight")

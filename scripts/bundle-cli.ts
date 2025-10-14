@@ -12,12 +12,12 @@ const entrypoint = join(import.meta.dir, "..", "packages/cli/src/index.ts");
 const outdir = join(import.meta.dir, "..", "packages/cli/dist");
 
 try {
-  // Bundle for Node/Bun runtime
+  // Bundle for Node.js runtime with CommonJS format for maximum compatibility
   const result = await Bun.build({
     entrypoints: [entrypoint],
     outdir,
-    target: "bun",
-    format: "esm",
+    target: "node",
+    format: "cjs",
     minify: false,
     sourcemap: "external",
     splitting: false,

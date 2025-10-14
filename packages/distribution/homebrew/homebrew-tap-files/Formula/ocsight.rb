@@ -27,7 +27,11 @@ class Ocsight < Formula
 
   def install
     libexec.install Dir["*"]
-    bin.install_symlink libexec/"ocsight"
+    # Create executable wrapper for the bundled CLI
+    (bin/"ocsight").write <<~EOS
+      #!/bin/bash
+      exec node "#{libexec}/bundle.cjs" "$@"
+    EOS
   end
 
   test do
