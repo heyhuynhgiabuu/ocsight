@@ -7,7 +7,51 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
+  test-bun:
+    name: Test with Bun
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build project
+        run: bun run build
+
+      - name: Bundle CLI
+        run: bun run bundle-cli
+
+      - name: Run tests with Bun (concurrent)
+        run: bun test --concurrent --coverage
+
+      - name: Test CLI commands with Bun
+        run: |
+          chmod +x index.js
+          bun run index.js --version
+          bun run index.js --help
+          bun run index.js summary --help
+          bun run index.js sessions --help
+          bun run index.js costs --help
+          bun run index.js export --help
+          bun run index.js live --help
+          bun run index.js models --help
+
+      - name: Upload Bun coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+          flags: bun
+
+  test-node:
+    name: Test with Node.js
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,7 +66,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Setup Bun
+      - name: Setup Bun (for package manager)
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
@@ -34,12 +78,11 @@ jobs:
       - name: Bundle CLI
         run: bun run bundle-cli
 
-      - name: Run tests
+      - name: Run tests with Node.js
         run: bun test --coverage
 
-      - name: Test CLI commands
+      - name: Test CLI commands with Node.js
         run: |
-          # Ensure CLI is built and executable
           chmod +x index.js
           node index.js --version
           node index.js --help
@@ -50,8 +93,9 @@ jobs:
           node index.js live --help
           node index.js models --help
 
-      - name: Upload coverage reports
+      - name: Upload Node.js coverage reports
         uses: codecov/codecov-action@v4
         if: matrix.node-version == '20'
         with:
           file: ./coverage/lcov.info
+          flags: node

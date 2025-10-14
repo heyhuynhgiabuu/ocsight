@@ -1,12 +1,7 @@
 import { readdir } from "fs/promises";
 import path from "path";
-import { promisify } from "util";
-import { gzip, unzip } from "zlib";
 import { OpenCodeSession } from "../types";
-import * as Runtime from "./runtime-compat.js";
-
-const gzipAsync = promisify(gzip);
-const unzipAsync = promisify(unzip);
+import { runtime } from "./runtime-compat.js";
 
 interface CacheEntry {
   data: OpenCodeSession[];
@@ -17,6 +12,7 @@ interface CacheEntry {
   compressed: boolean;
   originalSize: number;
   compressedSize: number;
+  compressedBuffer?: Uint8Array;
 }
 
 interface CacheHealth {
@@ -57,9 +53,9 @@ export class CacheManager {
 
   async initialize(): Promise<void> {
     try {
-      const cacheDirFile = Runtime.file(this.cacheDir);
+      const cacheDirFile = runtime.file(this.cacheDir);
       if (!(await cacheDirFile.exists())) {
-        await Runtime.write(this.cacheDir + "/.gitkeep", "");
+        await runtime.write(this.cacheDir + "/.gitkeep", "");
       }
       await this.loadCache();
       this.updateHealthStatus();
@@ -100,16 +96,15 @@ export class CacheManager {
     data: OpenCodeSession[],
     fileHashes: Record<string, string>,
   ): Promise<void> {
-    const originalSize = JSON.stringify(data).length;
-    let compressedData = data;
+    const dataString = JSON.stringify(data);
+    const originalSize = dataString.length;
     let compressed = false;
     let compressedSize = originalSize;
+    let compressedBuffer: Uint8Array | undefined;
 
     if (this.compressionEnabled && originalSize > 1024) {
       try {
-        const compressedBuffer = await gzipAsync(JSON.stringify(data));
-        // Store compressed data as base64 string
-        compressedData = JSON.parse(JSON.stringify(data)); // Keep original data structure
+        compressedBuffer = await runtime.compress(dataString);
         compressed = true;
         compressedSize = compressedBuffer.length;
       } catch (error) {
@@ -119,7 +114,7 @@ export class CacheManager {
     }
 
     const entry: CacheEntry = {
-      data: compressedData,
+      data,
       timestamp: Date.now(),
       fileHashes,
       accessCount: 0,
@@ -127,6 +122,7 @@ export class CacheManager {
       compressed,
       originalSize,
       compressedSize,
+      compressedBuffer,
     };
 
     this.cache.set(key, entry);
@@ -148,7 +144,7 @@ export class CacheManager {
     this.cache.clear();
     try {
       // Remove cache directory and recreate
-      await Runtime.write(this.cacheDir + "/.gitkeep", "");
+      await runtime.write(this.cacheDir + "/.gitkeep", "");
     } catch (error) {
       // Ignore cleanup errors
     }
@@ -162,7 +158,7 @@ export class CacheManager {
   private async loadCache(): Promise<void> {
     try {
       const cacheFile = path.join(this.cacheDir, "cache.json");
-      const file = Runtime.file(cacheFile);
+      const file = runtime.file(cacheFile);
       if (!(await file.exists())) {
         this.cache = new Map();
         return;
@@ -180,7 +176,7 @@ export class CacheManager {
     try {
       const cacheFile = path.join(this.cacheDir, "cache.json");
       const data = Object.fromEntries(this.cache);
-      await Runtime.write(cacheFile, JSON.stringify(data, null, 2));
+      await runtime.write(cacheFile, JSON.stringify(data, null, 2));
     } catch (error) {
       // Ignore save errors
     }
@@ -249,7 +245,7 @@ export class CacheManager {
     await this.saveCache();
 
     // Trigger garbage collection after cache eviction
-    Runtime.gc();
+    runtime.gc();
   }
 
   private async evictBySize(targetReduction: number): Promise<void> {
@@ -279,7 +275,7 @@ export class CacheManager {
     await this.saveCache();
 
     // Trigger garbage collection after size-based eviction
-    Runtime.gc();
+    runtime.gc();
   }
 
   private calculateTotalSize(): number {

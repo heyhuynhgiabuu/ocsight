@@ -1,0 +1,77 @@
+# Bun runtime configuration for OCSight
+# https://bun.sh/docs/runtime/bunfig
+
+[install]
+# Use isolated installs for better dependency management
+linker = "isolated"
+
+# Enable auto-install for missing dependencies during development
+auto = "auto"
+
+# Use exact versions for reproducible builds
+exact = true
+
+# Registry configuration
+registry = "https://registry.npmjs.org"
+
+[install.cache]
+# Enable shared cache for faster installs
+dir = "~/.bun/install/cache"
+
+[test]
+# Enable coverage reporting
+coverage = true
+
+# Set coverage threshold (80%)
+coverageThreshold = 0.8
+
+# Enable concurrent test execution
+concurrent = true
+
+# Test file patterns
+preload = []
+
+# Timeout for tests (30 seconds)
+timeout = 30000
+
+[run]
+# Use Bun shell for cross-platform compatibility
+shell = "bun"
+
+# Auto-alias node to bun for better compatibility
+bun = true
+
+# Enable hot reloading for development
+hot = false
+
+# Environment variables
+[env]
+# Default to development mode
+NODE_ENV = "development"
+
+# Performance optimizations
+[performance]
+# Enable Just-In-Time compilation
+jit = true
+
+# Enable SIMD optimizations
+simd = true
+
+# Build configuration
+[build]
+# Target Bun runtime by default
+target = "bun"
+
+# Enable source maps
+sourcemap = "external"
+
+# Minification (disabled for development)
+minify = false
+
+# Security settings
+[security]
+# Enable dependency auditing
+audit = true
+
+# Strict SSL certificate validation
+strictSSL = true

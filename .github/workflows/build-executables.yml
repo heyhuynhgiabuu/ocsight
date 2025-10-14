@@ -1,0 +1,125 @@
+name: Build Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-executables:
+    name: Build ${{ matrix.platform }} executable
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x64
+            target: linux-x64-baseline
+          - os: macos-latest
+            platform: darwin-x64
+            target: darwin-x64-baseline
+          - os: macos-latest
+            platform: darwin-arm64
+            target: darwin-arm64
+          - os: windows-latest
+            platform: win32-x64
+            target: windows-x64-baseline
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build TypeScript
+        run: bun run build
+
+      - name: Compile executable with Bun
+        run: |
+          cd packages/cli
+          bun build src/index.ts \
+            --compile \
+            --target=bun-${{ matrix.target }} \
+            --outfile=ocsight-${{ matrix.platform }}
+
+      - name: Sign macOS executable
+        if: matrix.os == 'macos-latest'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        run: |
+          # Import certificate if available
+          if [ -n "$MACOS_CERTIFICATE" ]; then
+            echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
+            security create-keychain -p actions build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p actions build.keychain
+            security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions build.keychain
+            
+            # Sign the executable
+            /usr/bin/codesign --force -s "Developer ID Application" packages/cli/ocsight-${{ matrix.platform }} -v
+            
+            # Cleanup
+            security delete-keychain build.keychain
+            rm certificate.p12
+          else
+            echo "No certificate found, skipping code signing"
+          fi
+
+      - name: Test executable
+        run: |
+          cd packages/cli
+          chmod +x ocsight-${{ matrix.platform }}
+          ./ocsight-${{ matrix.platform }} --version
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocsight-${{ matrix.platform }}
+          path: packages/cli/ocsight-${{ matrix.platform }}
+          retention-days: 30
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-executables
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create checksums
+        run: |
+          cd dist
+          for dir in */; do
+            cd "$dir"
+            for file in *; do
+              sha256sum "$file" > "$file.sha256"
+            done
+            cd ..
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

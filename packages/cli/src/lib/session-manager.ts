@@ -2,7 +2,7 @@ import { glob } from "glob";
 import { watch } from "fs/promises";
 import { join } from "path";
 import { readFile, stat } from "fs/promises";
-import * as Runtime from "./runtime-compat.js";
+import { runtime } from "./runtime-compat.js";
 
 export interface SessionIndex {
   id: string;
@@ -114,7 +114,7 @@ export class SessionManager {
       return this.activeSession.data;
     }
 
-    const file = Runtime.file(index.filePath);
+    const file = runtime.file(index.filePath);
 
     try {
       const sessionMeta = await file.json();

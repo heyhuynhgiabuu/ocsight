@@ -4,11 +4,20 @@
   "description": "OpenCode ecosystem observability CLI",
   "type": "module",
   "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "bun": "./dist/index.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "bundle-cli": "node ../../scripts/bundle-cli.cjs",
+    "bundle-cli": "bun run ../../scripts/bundle-cli.ts",
     "dev": "bun run src/index.ts",
-    "test": "bun test",
+    "test": "bun test --coverage",
+    "test:concurrent": "bun test --concurrent",
+    "test:watch": "bun test --watch",
     "clean": "rm -rf dist"
   },
   "keywords": [

@@ -1,5 +1,5 @@
 import { findModel } from "./models-db.js";
-import * as Runtime from "./runtime-compat.js";
+import { runtime } from "./runtime-compat.js";
 
 export interface QuotaConfig {
   amount: number;
@@ -152,8 +152,8 @@ export function loadQuotaConfig(options: QuotaConfigOptions = {}): QuotaConfig {
   };
 
   // Environment variables
-  const envAmount = Runtime.env.OCSIGHT_QUOTA_AMOUNT;
-  const envPeriod = Runtime.env.OCSIGHT_QUOTA_PERIOD as "daily" | "monthly";
+  const envAmount = runtime.env.OCSIGHT_QUOTA_AMOUNT;
+  const envPeriod = runtime.env.OCSIGHT_QUOTA_PERIOD as "daily" | "monthly";
 
   if (envAmount && !isNaN(Number(envAmount))) {
     config.amount = Number(envAmount);

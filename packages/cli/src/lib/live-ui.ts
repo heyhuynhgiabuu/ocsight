@@ -6,6 +6,7 @@ import {
   MS_PER_MINUTE,
   MS_PER_HOUR,
 } from "./constants.js";
+import { runtime } from "./runtime-compat.js";
 
 const BURN_RATE_NORMAL_THRESHOLD = 20000;
 const SESSION_START_TIME = Date.now();
@@ -22,7 +23,7 @@ export interface BoxedSection {
 }
 
 export function stripAnsi(str: string): string {
-  return str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, "");
+  return runtime.stripAnsi(str);
 }
 
 export function createBox(
