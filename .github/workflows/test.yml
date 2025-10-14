@@ -14,9 +14,6 @@ jobs:
         node-version: [18, 20]
 
     steps:
-      - name: Configure Git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Checkout repository
         uses: actions/checkout@v4
 

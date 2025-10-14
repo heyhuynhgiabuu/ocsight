@@ -21,28 +21,25 @@ test("program has all required commands", async () => {
   expect(commands).toContain("budget");
 });
 
-test("analyze command has correct configuration", async () => {
+test("summary command has correct configuration", async () => {
   const program = await initializeProgram();
-  const analyzeCmd = program.commands.find((cmd) => cmd.name() === "analyze");
-  expect(analyzeCmd.description()).toBe("Analyze OpenCode usage data");
-  expect(analyzeCmd.options.length).toBeGreaterThan(0);
+  const summaryCmd = program.commands.find((cmd) => cmd.name() === "summary");
+  expect(summaryCmd).toBeDefined();
+  expect(summaryCmd.description()).toBe("Unified usage summary and analysis");
+  expect(summaryCmd.options.length).toBeGreaterThan(0);
 });
 
-test("stats command has correct configuration", async () => {
+test("sessions command has correct configuration", async () => {
   const program = await initializeProgram();
-  const statsCmd = program.commands.find((cmd) => cmd.name() === "stats");
-  expect(statsCmd.description()).toBe(
-    "Display statistics about OpenCode usage",
-  );
-  expect(statsCmd.options.length).toBeGreaterThan(0);
+  const sessionsCmd = program.commands.find((cmd) => cmd.name() === "sessions");
+  expect(sessionsCmd).toBeDefined();
+  expect(sessionsCmd.description()).toBe("Session management and exploration");
 });
 
 test("export command has correct configuration", async () => {
   const program = await initializeProgram();
   const exportCmd = program.commands.find((cmd) => cmd.name() === "export");
-  expect(exportCmd.description()).toBe(
-    "Export OpenCode data to various formats",
-  );
+  expect(exportCmd.description()).toBe("Export OpenCode usage data");
   expect(exportCmd.options.length).toBeGreaterThan(0);
 
   const formatOption = exportCmd.options.find(
@@ -52,13 +49,12 @@ test("export command has correct configuration", async () => {
   expect(formatOption?.flags).toBe("-f, --format <format>");
 });
 
-test("analyze command has required options", async () => {
+test("costs command has correct configuration", async () => {
   const program = await initializeProgram();
-  const analyzeCmd = program.commands.find((cmd) => cmd.name() === "analyze");
-  const optionNames = analyzeCmd.options.map((opt) => opt.flags);
-
-  expect(optionNames).toContain("--provider <provider>");
-  expect(optionNames).toContain("--project <project>");
+  const costsCmd = program.commands.find((cmd) => cmd.name() === "costs");
+  expect(costsCmd).toBeDefined();
+  expect(costsCmd.description()).toBe("Cost analysis and spending tracking");
+  expect(costsCmd.options.length).toBeGreaterThan(0);
 });
 
 test("export command has format option", async () => {
@@ -73,11 +69,11 @@ test("export command has format option", async () => {
 
 test("all commands have action handlers", async () => {
   const program = await initializeProgram();
-  const analyzeCmd = program.commands.find((cmd) => cmd.name() === "analyze");
-  const statsCmd = program.commands.find((cmd) => cmd.name() === "stats");
+  const summaryCmd = program.commands.find((cmd) => cmd.name() === "summary");
+  const sessionsCmd = program.commands.find((cmd) => cmd.name() === "sessions");
   const exportCmd = program.commands.find((cmd) => cmd.name() === "export");
 
-  expect(analyzeCmd._actionHandler).toBeDefined();
-  expect(statsCmd._actionHandler).toBeDefined();
+  expect(summaryCmd._actionHandler).toBeDefined();
+  expect(sessionsCmd._actionHandler).toBeDefined();
   expect(exportCmd._actionHandler).toBeDefined();
 });
