@@ -28,9 +28,6 @@ coverageThreshold = 0.8
 # Enable concurrent test execution
 concurrent = true
 
-# Test file patterns
-preload = []
-
 # Timeout for tests (30 seconds)
 timeout = 30000
 
