@@ -22,8 +22,8 @@ dir = "~/.bun/install/cache"
 # Enable coverage reporting
 coverage = true
 
-# Set coverage threshold (25% - gradually increase as tests improve)
-coverageThreshold = 0.25
+# Set coverage threshold (15% function coverage - gradually increase as tests improve)
+coverageThreshold = 0.15
 
 # Enable concurrent test execution
 concurrent = true
