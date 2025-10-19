@@ -245,6 +245,7 @@ Real costs from actual model pricing, no estimates
 ### 🚀 Fast
 
 Built with Bun for maximum performance:
+
 - Zstd compression (faster/smaller than gzip)
 - SIMD-accelerated ANSI processing
 - Native TypeScript execution
@@ -407,5 +408,4 @@ MIT © heyhuynhgiabuu
 
 ---
 
-**v1.0.0** · Track your AI costs with confidence · Built with Bun.js for speed
-# ockit
+Track your AI costs with confidence · Built with Bun.js for speed
