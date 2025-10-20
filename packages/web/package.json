@@ -35,7 +35,7 @@
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@tailwindcss/typography": "^0.5.19",
     "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
+    "@types/react-dom": "^19.2.2",
     "astro": "^5.14.1",
     "astro-compress": "^2.3.8",
     "astro-htmx": "^1.0.6",
